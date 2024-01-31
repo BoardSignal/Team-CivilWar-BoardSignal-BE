@@ -1,0 +1,22 @@
+dependencies {
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    //테스트 픽쳐에서 사용할 의존성
+    testFixturesImplementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testFixturesImplementation "org.testcontainers:testcontainers:1.19.3"
+    testFixturesImplementation "org.testcontainers:mysql:1.19.3"
+    testFixturesCompileOnly 'org.projectlombok:lombok'
+    testFixturesAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+bootJar { enabled = false }
+jar { enabled = true }
