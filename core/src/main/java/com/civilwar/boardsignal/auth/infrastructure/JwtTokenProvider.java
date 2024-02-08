@@ -5,7 +5,7 @@ import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
 import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.common.exception.ValidationException;
-import com.civilwar.boardsignal.user.domain.entity.Role;
+import com.civilwar.boardsignal.user.domain.constants.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;

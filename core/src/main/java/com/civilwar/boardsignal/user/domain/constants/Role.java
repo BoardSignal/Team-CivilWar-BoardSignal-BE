@@ -1,4 +1,4 @@
-package com.civilwar.boardsignal.user.domain.entity;
+package com.civilwar.boardsignal.user.domain.constants;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
