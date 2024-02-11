@@ -41,21 +41,19 @@ public class UserCategory {
     private Category category;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private UserCategory(Category category) {
+    private UserCategory(User user, Category category) {
         Assert.notNull(category, getNotNullMessage(USER_CATEGORY, "category"));
 
         this.category = category;
     }
 
     public static UserCategory of(
+        User user,
         Category category
     ) {
         return UserCategory.builder()
+            .user(user)
             .category(category)
             .build();
-    }
-
-    public void insertUser(User user) {
-        this.user = user;
     }
 }

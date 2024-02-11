@@ -5,6 +5,7 @@ import static com.civilwar.boardsignal.common.exception.CommonValidationError.ge
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -90,7 +91,7 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        List<UserCategory> categories,
+        List<Category> categories,
         String line,
         String station,
         String profileImageUrl,
@@ -115,7 +116,10 @@ public class User implements UserDetails {
         this.provider = provider;
         this.providerId = providerId;
         this.role = Role.USER;
-        this.userCategories = new ArrayList<>(categories);
+        categories.forEach(category -> {
+            UserCategory userCategory = UserCategory.of(this, category);
+            this.userCategories.add(userCategory);
+        });
         this.line = line;
         this.station = station;
         this.profileImageUrl = profileImageUrl;
@@ -131,7 +135,7 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        List<UserCategory> categories,
+        List<Category> categories,
         String line,
         String station,
         String profileImageUrl,
@@ -188,10 +192,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public void updateCategories(List<UserCategory> userCategories) {
-        this.userCategories.addAll(userCategories);
-        this.userCategories.forEach(userCategory -> userCategory.insertUser(this));
     }
 }
