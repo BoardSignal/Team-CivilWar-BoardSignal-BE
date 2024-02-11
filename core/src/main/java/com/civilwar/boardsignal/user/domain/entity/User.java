@@ -2,8 +2,9 @@ package com.civilwar.boardsignal.user.domain.entity;
 
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotEmptyMessage;
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.REMOVE;
 
-import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -12,9 +13,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,16 +59,19 @@ public class User implements UserDetails {
     @Column(name = "USER_ROLE")
     private Role role;
 
-    @Column(name = "USER_PREFER_CATEGORY")
-    private Category preferCategory;
+    @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
+    private List<UserCategory> userCategories = new ArrayList<>();
 
-    @Column(name = "USER_ADDRESS")
-    private String address;
+    @Column(name = "USER_LINE")
+    private String line;
+
+    @Column(name = "USER_STATION")
+    private String station;
 
     @Column(name = "USER_PROFILE_IMAMGE_URL")
     private String profileImageUrl;
 
-    @Column(name = "USER_PROFILE_IMAMGE_URL")
+    @Column(name = "USER_BIRTH")
     private int birth;
 
     @Column(name = "USER_AGE_GROUP")
@@ -83,9 +90,9 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        Role role,
-        Category preferCategory,
-        String address,
+        List<UserCategory> categories,
+        String line,
+        String station,
         String profileImageUrl,
         int birth,
         AgeGroup ageGroup,
@@ -96,9 +103,9 @@ public class User implements UserDetails {
         Assert.hasText(nickname, getNotEmptyMessage(USER, "nickname"));
         Assert.hasText(provider, getNotEmptyMessage(USER, "provider"));
         Assert.hasText(providerId, getNotEmptyMessage(USER, "providerId"));
-        Assert.notNull(role, getNotNullMessage(USER, "role"));
-        Assert.notNull(preferCategory, getNotNullMessage(USER, "preferCategory"));
-        Assert.hasText(address, getNotEmptyMessage(USER, "address"));
+        Assert.notNull(categories, getNotNullMessage(USER, "preferCategory"));
+        Assert.hasText(line, getNotEmptyMessage(USER, "line"));
+        Assert.hasText(station, getNotEmptyMessage(USER, "station"));
         Assert.hasText(profileImageUrl, getNotEmptyMessage(USER, "profileImageUrl"));
         Assert.notNull(ageGroup, getNotNullMessage(USER, "ageGroup"));
         Assert.notNull(gender, getNotNullMessage(USER, "gender"));
@@ -107,9 +114,10 @@ public class User implements UserDetails {
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
-        this.role = role;
-        this.preferCategory = preferCategory;
-        this.address = address;
+        this.role = Role.USER;
+        this.userCategories = new ArrayList<>(categories);
+        this.line = line;
+        this.station = station;
         this.profileImageUrl = profileImageUrl;
         this.birth = birth;
         this.ageGroup = ageGroup;
@@ -123,9 +131,9 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        Role role,
-        Category preferCategory,
-        String address,
+        List<UserCategory> categories,
+        String line,
+        String station,
         String profileImageUrl,
         int birth,
         AgeGroup ageGroup,
@@ -137,9 +145,9 @@ public class User implements UserDetails {
             .nickname(nickname)
             .provider(provider)
             .providerId(providerId)
-            .role(role)
-            .preferCategory(preferCategory)
-            .address(address)
+            .categories(categories)
+            .line(line)
+            .station(station)
             .profileImageUrl(profileImageUrl)
             .birth(birth)
             .ageGroup(ageGroup)
@@ -180,5 +188,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void updateCategories(List<UserCategory> userCategories) {
+        this.userCategories.addAll(userCategories);
+        this.userCategories.forEach(userCategory -> userCategory.insertUser(this));
     }
 }
