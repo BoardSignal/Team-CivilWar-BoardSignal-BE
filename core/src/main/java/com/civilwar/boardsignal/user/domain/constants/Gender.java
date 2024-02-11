@@ -1,8 +1,8 @@
 package com.civilwar.boardsignal.user.domain.constants;
 
-import static com.civilwar.boardsignal.common.exception.ValidationErrorCode.TYPE_VALIDATED;
+import static com.civilwar.boardsignal.user.exception.UserErrorCode.NOT_FOUND_GENDER;
 
-import com.civilwar.boardsignal.common.exception.ValidationException;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,10 @@ public enum Gender {
         return Arrays.stream(values())
             .filter(gender -> gender.isEqual(input))
             .findAny()
-            .orElseThrow(() -> new ValidationException(TYPE_VALIDATED));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
     }
 
     private boolean isEqual(String input) {
-        return input.equals(this.type);
+        return input.equalsIgnoreCase(this.type);
     }
 }
