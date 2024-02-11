@@ -1,7 +1,7 @@
 package com.civilwar.boardsignal.user.domain.entity;
 
-import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotEmptyMessage;
-import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.REMOVE;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
@@ -12,17 +12,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.Assert;
 
 @Entity
 @NoArgsConstructor
@@ -55,16 +58,13 @@ public class User implements UserDetails {
     @Column(name = "USER_ROLE")
     private Role role;
 
-    @Column(name = "USER_PREFER_CATEGORY")
-    private Category preferCategory;
-
     @Column(name = "USER_ADDRESS")
     private String address;
 
     @Column(name = "USER_PROFILE_IMAMGE_URL")
     private String profileImageUrl;
 
-    @Column(name = "USER_PROFILE_IMAMGE_URL")
+    @Column(name = "USER_BIRTH")
     private int birth;
 
     @Column(name = "USER_AGE_GROUP")
@@ -76,45 +76,44 @@ public class User implements UserDetails {
     @Column(name = "USER_MANNER_SCORE")
     private double mannerScore;
 
+    @Column(name = "USER_SIGNAL")
+    private int signal;
+
+    @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
+    private final List<UserCategory> categories = new ArrayList<>();
+
     @Builder(access = AccessLevel.PRIVATE)
     private User(
-        String email,
-        String name,
-        String nickname,
-        String provider,
-        String providerId,
-        Role role,
-        Category preferCategory,
-        String address,
-        String profileImageUrl,
+        @NonNull String email,
+        @NonNull String name,
+        @NonNull String nickname,
+        @NonNull String provider,
+        @NonNull String providerId,
+        @NonNull Role role,
+        @NonNull List<Category> preferCategories,
+        @NonNull String address,
+        @NonNull String profileImageUrl,
         int birth,
-        AgeGroup ageGroup,
-        Gender gender
+        @NonNull AgeGroup ageGroup,
+        @NonNull Gender gender
     ) {
-        Assert.hasText(email, getNotEmptyMessage(USER, "email"));
-        Assert.hasText(name, getNotEmptyMessage(USER, "name"));
-        Assert.hasText(nickname, getNotEmptyMessage(USER, "nickname"));
-        Assert.hasText(provider, getNotEmptyMessage(USER, "provider"));
-        Assert.hasText(providerId, getNotEmptyMessage(USER, "providerId"));
-        Assert.notNull(role, getNotNullMessage(USER, "role"));
-        Assert.notNull(preferCategory, getNotNullMessage(USER, "preferCategory"));
-        Assert.hasText(address, getNotEmptyMessage(USER, "address"));
-        Assert.hasText(profileImageUrl, getNotEmptyMessage(USER, "profileImageUrl"));
-        Assert.notNull(ageGroup, getNotNullMessage(USER, "ageGroup"));
-        Assert.notNull(gender, getNotNullMessage(USER, "gender"));
         this.email = email;
         this.name = name;
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
         this.role = role;
-        this.preferCategory = preferCategory;
         this.address = address;
         this.profileImageUrl = profileImageUrl;
         this.birth = birth;
         this.ageGroup = ageGroup;
         this.gender = gender;
         this.mannerScore = 36.5;
+        this.signal = 0;
+        preferCategories.forEach(category -> {
+            UserCategory userCategory = UserCategory.of(this, category);
+            this.categories.add(userCategory);
+        });
     }
 
     public static User of(
@@ -123,8 +122,7 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        Role role,
-        Category preferCategory,
+        List<Category> preferCategories,
         String address,
         String profileImageUrl,
         int birth,
@@ -137,8 +135,8 @@ public class User implements UserDetails {
             .nickname(nickname)
             .provider(provider)
             .providerId(providerId)
-            .role(role)
-            .preferCategory(preferCategory)
+            .role(Role.USER)
+            .preferCategories(preferCategories)
             .address(address)
             .profileImageUrl(profileImageUrl)
             .birth(birth)
