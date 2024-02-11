@@ -7,11 +7,13 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserJoinRequest;
 import com.civilwar.boardsignal.user.dto.request.UserJoinRequest;
 import java.util.List;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor(access = PRIVATE)
 public class UserApiMapper {
 
-    public static UserJoinRequest of(ApiUserJoinRequest apiUserJoinRequest) {
+    public static UserJoinRequest toUserJoinRequest(ApiUserJoinRequest apiUserJoinRequest,
+        MultipartFile image) {
 
         List<Category> userCategories = apiUserJoinRequest.categories()
             .stream()
@@ -27,6 +29,7 @@ public class UserApiMapper {
             userCategories,
             apiUserJoinRequest.line(),
             apiUserJoinRequest.station(),
+            image,
             apiUserJoinRequest.birth(),
             apiUserJoinRequest.ageGroup(),
             apiUserJoinRequest.gender()

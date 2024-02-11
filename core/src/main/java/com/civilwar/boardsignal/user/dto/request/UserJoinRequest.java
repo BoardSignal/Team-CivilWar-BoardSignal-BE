@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.user.dto.request;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public record UserJoinRequest(
 
@@ -13,6 +14,7 @@ public record UserJoinRequest(
     List<Category> categories,
     String line,
     String station,
+    MultipartFile image,
     int birth,
     String ageGroup,
     String gender
