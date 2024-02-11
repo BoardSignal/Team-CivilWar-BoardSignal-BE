@@ -35,7 +35,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private Authentication getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(token)) {
-            TokenPayload payLoad = tokenProvider.getPayLoad(token);
+            String accessToken = token.split(" ")[1];
+            TokenPayload payLoad = tokenProvider.getPayLoad(accessToken);
 
             List<SimpleGrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority(payLoad.role().name())
