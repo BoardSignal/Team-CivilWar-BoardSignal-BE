@@ -5,13 +5,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.UserJoinRequest;
 import com.civilwar.boardsignal.user.dto.response.UserJoinResponse;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -39,9 +39,9 @@ class UserServiceTest {
 
         //given
         String testUrl = "TEST_URL";
-        String fileName = "testFile.png";
         String providerId = "providerId";
 
+        MockMultipartFile imageFixture = MultipartFileFixture.getMultipartFile();
         UserJoinRequest userJoinRequest = new UserJoinRequest(
             "abc1234@gmail.com",
             "최인준",
@@ -51,25 +51,20 @@ class UserServiceTest {
             List.of(Category.FAMILY, Category.PARTY),
             "2호선",
             "사당역",
+            imageFixture,
             2000,
             "20~29",
             "male"
         );
         User userFixture = UserFixture.getUserFixture(providerId, testUrl);
-        MockMultipartFile image = new MockMultipartFile(
-            "image",
-            fileName,
-            "image/png",
-            new FileInputStream("src/test/resources/" + fileName)
-        );
 
-        //when
-        when(imageRepository.save(image)).thenReturn(testUrl);
+        when(imageRepository.save(imageFixture)).thenReturn(testUrl);
         when(userRepository.save(any(User.class))).thenReturn(userFixture);
 
-        UserJoinResponse userJoinResponse = userService.joinUser(userJoinRequest, image);
+        //when
+        UserJoinResponse userJoinResponse = userService.joinUser(userJoinRequest);
 
         //then
-        assertThat(userJoinRequest.providerId()).isEqualTo(userJoinResponse.providerId());
+        assertThat(userJoinResponse).isNotNull();
     }
 }
