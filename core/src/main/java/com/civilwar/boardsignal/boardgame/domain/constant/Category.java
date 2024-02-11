@@ -1,8 +1,8 @@
 package com.civilwar.boardsignal.boardgame.domain.constant;
 
-import static com.civilwar.boardsignal.common.exception.ValidationErrorCode.TYPE_VALIDATED;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
 
-import com.civilwar.boardsignal.common.exception.ValidationException;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +26,10 @@ public enum Category {
         return Arrays.stream(values())
             .filter(category -> category.isEqual(input))
             .findAny()
-            .orElseThrow(() -> new ValidationException(TYPE_VALIDATED));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
     }
 
     private boolean isEqual(String input) {
-        return input.equals(this.type);
+        return input.equalsIgnoreCase(this.type);
     }
 }
