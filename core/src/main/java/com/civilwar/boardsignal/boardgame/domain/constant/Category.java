@@ -1,5 +1,9 @@
 package com.civilwar.boardsignal.boardgame.domain.constant;
 
+import static com.civilwar.boardsignal.common.exception.ValidationErrorCode.TYPE_VALIDATED;
+
+import com.civilwar.boardsignal.common.exception.ValidationException;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,5 +20,16 @@ public enum Category {
     CHILDREN("어린이게임"),
     CUSTOMIZABLE("컬렉터블게임");
 
-    private final String description;
+    private final String type;
+
+    public static Category of(String input) {
+        return Arrays.stream(values())
+            .filter(category -> category.isEqual(input))
+            .findAny()
+            .orElseThrow(() -> new ValidationException(TYPE_VALIDATED));
+    }
+
+    private boolean isEqual(String input) {
+        return input.equals(this.type);
+    }
 }
