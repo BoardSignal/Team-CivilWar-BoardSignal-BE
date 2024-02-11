@@ -23,6 +23,9 @@ public enum AgeGroup {
     EIGHTY("80~89", "80대"),
     NINETY("90~", "90이상");
 
+    private final String type;
+    private final String description;
+
     public static AgeGroup of(String input) {
         return Arrays.stream(values())
             .filter(ageGroup -> ageGroup.isEqual(input))
@@ -33,7 +36,4 @@ public enum AgeGroup {
     private boolean isEqual(String input) {
         return input.equalsIgnoreCase(this.type);
     }
-
-    private final String type;
-    private final String description;
 }
