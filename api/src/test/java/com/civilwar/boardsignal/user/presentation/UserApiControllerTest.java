@@ -5,18 +5,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.ApiUserJoinRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 @DisplayName("[UserController 테스트]")
-class UserControllerTest extends ApiTestSupport {
+class UserApiControllerTest extends ApiTestSupport {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("[사용자는 회원가입 할 수 있다]")
@@ -60,6 +65,10 @@ class UserControllerTest extends ApiTestSupport {
                     .contentType(MediaType.MULTIPART_FORM_DATA)
             )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.providerId").value(apiUserJoinRequest.providerId()));
+            .andExpect(jsonPath("$.id").value(
+                userRepository.findByProviderId(apiUserJoinRequest.providerId())
+                    .orElseThrow()
+                    .getId()
+            ));
     }
 }
