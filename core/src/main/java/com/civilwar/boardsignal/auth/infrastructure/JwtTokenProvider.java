@@ -31,9 +31,9 @@ public class JwtTokenProvider implements TokenProvider {
 
 
     public JwtTokenProvider(
-        @Value("${}") String clientSecret,
-        @Value("${}") int accessExpiryTime,
-        @Value("${}") int refreshExpiryTime
+        @Value("${jwt.client-secret}") String clientSecret,
+        @Value("${jwt.access-expiry-time}") int accessExpiryTime,
+        @Value("${jwt.refresh-expiry-time}") int refreshExpiryTime
     ) {
         this.accessExpiryTime = accessExpiryTime;
         this.refreshExpiryTime = refreshExpiryTime;
@@ -51,7 +51,7 @@ public class JwtTokenProvider implements TokenProvider {
         Date expireDate = new Date(now.getTime() + expireTime);
 
         Claims claims = Jwts.claims().setSubject(String.valueOf(id));
-        claims.put(JWT_ROLE, role.getRole());
+        claims.put(JWT_ROLE, role);
 
         return Jwts.builder()
             .setClaims(claims)
@@ -91,7 +91,8 @@ public class JwtTokenProvider implements TokenProvider {
     public TokenPayload getPayLoad(String token) {
         Jws<Claims> claims = getClaims(token);
         Long userId = Long.parseLong(claims.getBody().getSubject());
-        Role role = (Role) claims.getBody().get(JWT_ROLE);
+        String name = claims.getBody().get(JWT_ROLE).toString();
+        Role role = Role.valueOf(name);
 
         return new TokenPayload(userId, role);
     }
