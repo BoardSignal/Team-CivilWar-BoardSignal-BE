@@ -40,7 +40,8 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .anonymous(AbstractHttpConfigurer::disable)
             .cors(configurer -> configurer.configurationSource(request -> {
                     CorsConfiguration cors = new CorsConfiguration();
@@ -52,6 +53,7 @@ public class SecurityConfig {
                 }
             ))
             .authorizeHttpRequests(registry -> registry
+                .requestMatchers("/api/v1/board-games").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
