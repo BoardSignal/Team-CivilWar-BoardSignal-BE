@@ -64,7 +64,7 @@ public class User implements UserDetails {
     @Column(name = "USER_PROFILE_IMAMGE_URL")
     private String profileImageUrl;
 
-    @Column(name = "USER_PROFILE_IMAMGE_URL")
+    @Column(name = "USER_BIRTH")
     private int birth;
 
     @Column(name = "USER_AGE_GROUP")
