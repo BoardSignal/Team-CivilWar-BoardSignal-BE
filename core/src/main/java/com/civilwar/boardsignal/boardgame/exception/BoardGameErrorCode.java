@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BoardGameErrorCode implements ErrorCode {
 
+
     NOT_FOUND_BOARD_GAME("존재하지 않는 보드게임입니다", "B_001"),
     NOT_FOUND_DIFFICULTY("존재하지 않는 난이도입니다.", "B_002");
 
