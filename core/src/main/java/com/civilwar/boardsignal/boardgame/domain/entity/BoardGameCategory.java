@@ -13,8 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -32,4 +35,23 @@ public class BoardGameCategory {
     private BoardGame boardGame;
 
     private Category category;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private BoardGameCategory(
+        @NonNull Category category
+    ) {
+        this.category = category;
+    }
+
+    public static BoardGameCategory of(
+        Category category
+    ){
+        return BoardGameCategory.builder()
+            .category(category)
+            .build();
+    }
+
+    public void connectBoardGame(BoardGame boardGame) {
+        this.boardGame = boardGame;
+    }
 }
