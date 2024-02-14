@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,8 +16,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "PARTICIPANT_TABLE")
 public class Participant {
-
-    private static final String PARTICIPANT = "participant";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +27,24 @@ public class Participant {
 
     @Column(name = "PARTICIPANT_ROOM_ID")
     private Long roomId;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Participant(
+        Long userId,
+        Long roomId
+    ) {
+        this.userId = userId;
+        this.roomId = roomId;
+    }
+
+    public static Participant of(
+        Long userId,
+        Long roomId
+    )
+    {
+        return Participant.builder()
+            .userId(userId)
+            .roomId(roomId)
+            .build();
+    }
 }
