@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
 import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
+import com.civilwar.boardsignal.auth.properties.JwtProperty;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import io.jsonwebtoken.Claims;
@@ -16,31 +17,18 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
-import java.security.Key;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider implements TokenProvider {
 
     private static final String JWT_ROLE = "JWT_ROLE";
-    private final long accessExpiryTime;
-    private final long refreshExpiryTime;
-    private final Key key;
-
-
-    public JwtTokenProvider(
-        @Value("${jwt.client-secret}") String clientSecret,
-        @Value("${jwt.access-expiry-time}") int accessExpiryTime,
-        @Value("${jwt.refresh-expiry-time}") int refreshExpiryTime
-    ) {
-        this.accessExpiryTime = accessExpiryTime;
-        this.refreshExpiryTime = refreshExpiryTime;
-
-        byte[] keyBytes = Decoders.BASE64.decode(clientSecret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+    private final JwtProperty jwtProperty;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private String generateToken(
         Long id,
@@ -49,6 +37,7 @@ public class JwtTokenProvider implements TokenProvider {
     ) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + expireTime);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperty.getClientSecret());
 
         Claims claims = Jwts.claims().setSubject(String.valueOf(id));
         claims.put(JWT_ROLE, role);
@@ -57,14 +46,16 @@ public class JwtTokenProvider implements TokenProvider {
             .setClaims(claims)
             .setIssuedAt(now)
             .setExpiration(expireDate)
-            .signWith(key, SignatureAlgorithm.HS256)
+            .signWith(Keys.hmacShaKeyFor(keyBytes), SignatureAlgorithm.HS256)
             .compact();
     }
 
     private Jws<Claims> getClaims(String token) {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperty.getClientSecret());
+
         try {
             return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(Keys.hmacShaKeyFor(keyBytes))
                 .build()
                 .parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
@@ -81,10 +72,33 @@ public class JwtTokenProvider implements TokenProvider {
 
     @Override
     public Token createToken(Long id, Role role) {
-        String accessToken = generateToken(id, role, accessExpiryTime);
-        String refreshToken = generateToken(id, role, refreshExpiryTime);
 
-        return new Token(accessToken, refreshToken, role);
+        long accessExpiryMinute = jwtProperty.getAccessExpiryTime() * 1000 * 60;
+        long refreshExpiryMinute = jwtProperty.getRefreshExpiryTime() * 1000 * 60;
+
+        String accessToken = generateToken(id, role, accessExpiryMinute);
+        String refreshToken = generateToken(id, role, refreshExpiryMinute);
+
+        //로그인 할 때마다 RefreshToken 갱신
+        String uuid = UUID.randomUUID().toString();
+        refreshTokenRepository.save(uuid, refreshToken, jwtProperty.getRefreshExpiryTime());
+
+        return new Token(accessToken, uuid, role);
+    }
+
+    @Override
+    public String issueAccessToken(String refreshTokenId) {
+
+        //refreshToken 조회
+        String refreshToken = refreshTokenRepository.findById(refreshTokenId)
+            .orElseThrow(() -> new ValidationException(AuthErrorCode.AUTH_TOKEN_EXPIRED));
+
+        //refreshToken을 통해 유저 정보 조회
+        TokenPayload payLoad = getPayLoad(refreshToken);
+
+        //accessToken 재발급
+        long accessExpiryMinute = jwtProperty.getAccessExpiryTime() * 1000 * 60;
+        return generateToken(payLoad.userId(), payLoad.role(), accessExpiryMinute);
     }
 
     @Override
