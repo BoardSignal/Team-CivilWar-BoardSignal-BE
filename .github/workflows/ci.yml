@@ -11,11 +11,15 @@ jobs:
   # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
   build-docker-image:
     runs-on: ubuntu-latest
+
+
     services:
       redis:
         image: redis:latest
         ports:
           - "6379:6379"
+      steps:
+        - uses: actions/checkout@v3
 
     steps:
       - uses: actions/checkout@v3
@@ -38,14 +42,14 @@ jobs:
         with:
           arguments: clean test
 
-#      # 테스트 결과 PR 코멘트에 등록
-#      - name: Register the test results as PR comments
-#        uses: EnricoMi/publish-unit-test-result-action@v2
-#        if: always()
-#        with:
-#          files: |
-#            **/api/build/test-results/test/TEST-*.xml
-#            **/core/build/test-results/test/TEST-*.xml
+      # 테스트 결과 PR 코멘트에 등록
+      - name: Register the test results as PR comments
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            **/api/build/test-results/test/TEST-*.xml
+            **/core/build/test-results/test/TEST-*.xml
 
 
       # 테스트 실패시 코드 라인에 대한 체크 추가
