@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.auth.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.civilwar.boardsignal.auth.domain.RefreshTokenRepository;
 import com.civilwar.boardsignal.support.TestContainerSupport;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 @SpringBootTest
 @DisplayName("[RefreshTokenRepository 테스트]")
-class RefreshTokenRepositoryTest extends TestContainerSupport {
+class RefreshTokenRedisRepositoryTest extends TestContainerSupport {
 
     Long userId = 1L;
     String uuid = UUID.randomUUID().toString();

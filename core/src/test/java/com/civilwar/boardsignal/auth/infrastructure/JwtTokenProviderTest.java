@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import com.civilwar.boardsignal.auth.domain.RefreshTokenRepository;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
 import com.civilwar.boardsignal.auth.exception.AuthErrorCode;

@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.auth.infrastructure;
 
+import com.civilwar.boardsignal.auth.domain.RefreshTokenRepository;
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;

@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
-import com.civilwar.boardsignal.auth.infrastructure.RefreshTokenRepository;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -21,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 class AuthApiControllerTest extends ApiTestSupport {
 
     private final String BEARER = "Bearer ";
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
