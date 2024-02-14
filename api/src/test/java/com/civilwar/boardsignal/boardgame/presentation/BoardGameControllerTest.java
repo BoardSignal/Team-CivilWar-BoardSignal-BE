@@ -1,14 +1,11 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.civilwar.boardsignal.boardgame.application.BoardGameService;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
-import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameRepository;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
@@ -17,18 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 @DisplayName("[BoardGameController 테스트]")
 class BoardGameControllerTest extends ApiTestSupport {
-
-    @Autowired
-    private BoardGameQueryRepository boardGameQueryRepository;
 
     @Autowired
     private BoardGameRepository boardGameRepository;
@@ -40,9 +31,12 @@ class BoardGameControllerTest extends ApiTestSupport {
     void setUp(){
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(Category.WAR);
         BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(Category.PARTY);
+        BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(
+            Category.FAMILY
+        );
 
         boardGame1 = BoardGameFixture.getBoardGame(List.of(warGame, partyGame)); // 난이도 -> 보통
-        boardGame2 = BoardGameFixture.getBoardGame2(List.of(warGame)); // 난이도 -> 어려움
+        boardGame2 = BoardGameFixture.getBoardGame2(List.of(warGame, familyGame)); // 난이도 -> 어려움
 
         boardGameRepository.saveAll(List.of(boardGame1, boardGame2));
     }
@@ -54,6 +48,7 @@ class BoardGameControllerTest extends ApiTestSupport {
         params.add("size", "10");
         params.add("pageNumber", "0");
         params.add("difficulty", "어려움");
+        params.put("categories", List.of("워게임", "가족게임"));
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/board-games")
             .params(params))
             .andExpect(status().isOk())

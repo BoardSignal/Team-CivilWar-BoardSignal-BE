@@ -5,6 +5,7 @@ import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
@@ -45,7 +46,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
     void findAllWithDifficulty() {
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             "보통",
-            List.of(),
+            null,
             null
         );
 
@@ -64,7 +65,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
     void findAllWithPlayTime() {
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             null,
-            List.of(),
+            null,
             30
         );
 
@@ -81,11 +82,31 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
     }
 
     @Test
+    @DisplayName("[특정 카테고리를 포함하는 보드게임을 다 조회할 수 있다.]")
+    void findAllWithCategories() {
+        BoardGameSearchCondition condition = new BoardGameSearchCondition(
+            null,
+            List.of("워게임"),
+            null
+        ); // playTime 조건은 충족하지만 난이도 조건이 충족되지 않은 상황
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Page<BoardGame> all = boardGameQueryAdaptor.findAll(condition, pageRequest);
+        BoardGame findBoardGame = all.getContent().get(0);
+
+        List<Category> categories = findBoardGame.getCategories().stream()
+            .map(BoardGameCategory::getCategory)
+            .toList();
+
+        assertThat(categories).contains(WAR);
+    }
+
+    @Test
     @DisplayName("[조건을 하나라도 만족 못할 시 조회하지 못한다.]")
     void findAllWithNothingResult() {
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             "어려움",
-            List.of(),
+            null,
             30
         ); // playTime 조건은 충족하지만 난이도 조건이 충족되지 않은 상황
 
@@ -94,5 +115,4 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
 
         assertThat(all.getTotalElements()).isZero();
     }
-
 }

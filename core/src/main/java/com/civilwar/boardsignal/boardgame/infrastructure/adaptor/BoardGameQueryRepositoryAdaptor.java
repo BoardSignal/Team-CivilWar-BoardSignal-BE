@@ -1,8 +1,10 @@
 package com.civilwar.boardsignal.boardgame.infrastructure.adaptor;
 
 import static com.civilwar.boardsignal.boardgame.domain.entity.QBoardGame.boardGame;
+import static com.civilwar.boardsignal.boardgame.domain.entity.QBoardGameCategory.boardGameCategory;
 import static org.springframework.util.StringUtils.hasText;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.constant.Difficulty;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
@@ -43,6 +45,17 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
         return isLower.and(isGreater);
     }
 
+    private BooleanExpression containsCategory(List<String> categories) {
+        if (categories == null || categories.isEmpty()) {
+            return null;
+        }
+
+        List<Category> categoryList = categories.stream()
+            .map(Category::of)
+            .toList();
+        return boardGameCategory.category.in(categoryList);
+    }
+
     @Override
     public Optional<BoardGame> findById(Long id) {
         return boardGameJpaRepository.findById(id);
@@ -51,11 +64,14 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
     @Override
     public Page<BoardGame> findAll(BoardGameSearchCondition condition, Pageable pageable) {
         List<BoardGame> boardGames = jpaQueryFactory
-            .selectFrom(boardGame)
+            .select(boardGame)
             .where(
                 equalDifficulty(condition.difficulty()),
-                checkRangePlayTime(condition.playTime())
+                checkRangePlayTime(condition.playTime()),
+                containsCategory(condition.categories())
             )
+            .from(boardGame)
+            .join(boardGame.categories, boardGameCategory).fetchJoin()
             .orderBy(boardGame.wishCount.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
