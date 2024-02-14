@@ -11,15 +11,11 @@ jobs:
   # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
   build-docker-image:
     runs-on: ubuntu-latest
-
-
     services:
       redis:
         image: redis:latest
         ports:
           - "6379:6379"
-      steps:
-        - uses: actions/checkout@v3
 
     steps:
       - uses: actions/checkout@v3
