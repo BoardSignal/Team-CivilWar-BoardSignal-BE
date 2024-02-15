@@ -25,4 +25,9 @@ public class RefreshTokenRedisRepository implements RefreshTokenRepository {
             .get(id));
     }
 
+    @Override
+    public Boolean delete(String id) {
+        return redisTemplate.delete(id);
+    }
+
 }

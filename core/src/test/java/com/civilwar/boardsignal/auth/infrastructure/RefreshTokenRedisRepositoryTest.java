@@ -54,4 +54,19 @@ class RefreshTokenRedisRepositoryTest extends TestContainerSupport {
         //then
         assertThat(optional).contains(refreshToken);
     }
+
+    @Test
+    @DisplayName("[RefreshToken을 삭제한다]")
+    void deleteTest() {
+        //given
+        refreshTokenRepository.save(uuid, refreshToken, refreshExpiryTime);
+
+        //when
+        Boolean trueResult = refreshTokenRepository.delete(uuid);
+        Boolean falseResult = refreshTokenRepository.delete("NotSaveId");
+
+        //then
+        assertThat(trueResult).isTrue();
+        assertThat(falseResult).isFalse();
+    }
 }
