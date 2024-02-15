@@ -2,10 +2,12 @@ package com.civilwar.boardsignal.user.domain.entity;
 
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
+import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -38,6 +40,7 @@ public class UserCategory {
     private User user;
 
     @Column(name = "USER_CATEGORY_CATEGORY")
+    @Enumerated(STRING)
     private Category category;
 
     @Builder(access = AccessLevel.PRIVATE)
