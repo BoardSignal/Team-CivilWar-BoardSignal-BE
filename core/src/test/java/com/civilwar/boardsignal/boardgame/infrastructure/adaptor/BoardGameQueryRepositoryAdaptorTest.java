@@ -1,8 +1,10 @@
 package com.civilwar.boardsignal.boardgame.infrastructure.adaptor;
 
+import static com.civilwar.boardsignal.boardgame.domain.constant.Category.*;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.FAMILY;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.COMPLETABLE_FUTURE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
@@ -86,7 +88,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
     void findAllWithCategories() {
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             null,
-            List.of("워게임"),
+            List.of("워게임", "가족게임"),
             null
         ); // playTime 조건은 충족하지만 난이도 조건이 충족되지 않은 상황
 
