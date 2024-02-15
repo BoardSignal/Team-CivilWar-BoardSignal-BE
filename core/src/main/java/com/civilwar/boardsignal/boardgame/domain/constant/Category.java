@@ -20,7 +20,8 @@ public enum Category {
     CHILDREN("어린이게임"),
     CUSTOMIZABLE("컬렉터블게임");
 
-    private final String type;
+
+    private final String description;
 
     public static Category of(String input) {
         return Arrays.stream(values())
@@ -30,6 +31,6 @@ public enum Category {
     }
 
     private boolean isEqual(String input) {
-        return input.equalsIgnoreCase(this.type);
+        return input.equalsIgnoreCase(this.description);
     }
 }
