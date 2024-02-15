@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RoomApiMapper {
 
-    public static CreateRoomRequest toCreateRoomRequest(ApiCreateRoomRequest request){
+    public static CreateRoomRequest toCreateRoomRequest(ApiCreateRoomRequest request) {
         return new CreateRoomRequest(
             request.time(),
             request.description(),

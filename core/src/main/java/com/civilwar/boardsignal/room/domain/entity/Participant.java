@@ -40,8 +40,7 @@ public class Participant {
     public static Participant of(
         Long userId,
         Long roomId
-    )
-    {
+    ) {
         return Participant.builder()
             .userId(userId)
             .roomId(roomId)

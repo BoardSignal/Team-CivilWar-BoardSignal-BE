@@ -1,25 +1,20 @@
 package com.civilwar.boardsignal.room.presentation;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
-import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @DisplayName("[RoomController 테스트]")
 class RoomControllerTest extends ApiTestSupport {
@@ -45,7 +40,6 @@ class RoomControllerTest extends ApiTestSupport {
             "레드버튼 사당점",
             List.of("가족게임", "컬렉터블게임")
         );
-
 
         ResultActions resultActions = mockMvc.perform(post("/api/v1/rooms")
                 .contentType(MediaType.APPLICATION_JSON)

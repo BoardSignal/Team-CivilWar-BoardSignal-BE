@@ -2,7 +2,6 @@ package com.civilwar.boardsignal.room.domain.constants;
 
 import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
 
-import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
 import lombok.Getter;
