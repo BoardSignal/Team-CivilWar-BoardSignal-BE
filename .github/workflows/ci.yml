@@ -8,8 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
-  build-docker-image:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,13 +19,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       # 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: api:build -x test
 
-      # 빌드
+      # 테스트
       - name: test CI
         uses: gradle/gradle-build-action@v2
         with:
@@ -37,11 +39,16 @@ jobs:
 #        uses: EnricoMi/publish-unit-test-result-action@v2
 #        if: always()
 #        with:
-#          files: '**/build/test-results/test/TEST-*.xml'
+#          files: |
+#            **/api/build/test-results/test/TEST-*.xml
+#            **/core/build/test-results/test/TEST-*.xml
+#
 #
 #      # 테스트 실패시 코드 라인에 대한 체크 추가
 #      - name: If test fail, add check comment on failed code line
 #        uses: mikepenz/action-junit-report@v3
 #        if: always()
 #        with:
-#          report_paths: '**/build/test-results/test/TEST-*.html'
+#          report_paths: |
+#            **/api/build/test-results/test/TEST-*.xml
+#            **/core/build/test-results/test/TEST-*.xml
