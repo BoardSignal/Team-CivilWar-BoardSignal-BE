@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,4 +35,23 @@ public class RoomCategory {
 
     @Column(name = "ROOM_CATEGORY_CATEGORY")
     private Category category;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private RoomCategory(
+        Room room,
+        Category category
+    ) {
+        this.room = room;
+        this.category = category;
+    }
+
+    public static RoomCategory of(
+        Room room,
+        Category category
+    ){
+        return RoomCategory.builder()
+            .room(room)
+            .category(category)
+            .build();
+    }
 }
