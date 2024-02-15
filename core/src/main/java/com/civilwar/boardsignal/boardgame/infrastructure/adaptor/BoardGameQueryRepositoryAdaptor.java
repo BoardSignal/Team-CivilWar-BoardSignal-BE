@@ -72,7 +72,6 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
             )
             .from(boardGame)
             .join(boardGame.categories, boardGameCategory).fetchJoin()
-            .groupBy(boardGame.id)
             .orderBy(boardGame.wishCount.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
