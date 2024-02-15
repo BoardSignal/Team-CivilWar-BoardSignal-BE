@@ -2,8 +2,12 @@ package com.civilwar.boardsignal.auth.presentation;
 
 import com.civilwar.boardsignal.auth.application.AuthService;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
+import com.civilwar.boardsignal.auth.dto.response.UserLogoutResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -42,11 +46,27 @@ public class AuthApiController {
     }
 
     @Operation(summary = "AccessToken 재발급 API", description = "Cookie에 RefreshToken Id 필요")
+    @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/reissue")
     public ResponseEntity<IssueTokenResponse> issueAccessToken(
         @CookieValue(name = "RefreshTokenId") String refreshTokenId
     ) {
         return ResponseEntity.ok(authService.issueAccessToken(refreshTokenId));
+    }
+
+    @Operation(summary = "AccessToken 재발급 API", description = "Cookie에 RefreshToken Id 필요")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/logout")
+    public ResponseEntity<UserLogoutResponse> logout(
+        @CookieValue(name = "RefreshTokenId") String refreshTokenId,
+        HttpServletResponse response
+    ) {
+        //쿠키 제거
+        Cookie cookie = new Cookie("RefreshTokenId", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        //로그아웃 성공 시 true 반환
+        return ResponseEntity.ok(authService.logout(refreshTokenId));
     }
 
 }
