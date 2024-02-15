@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.user.dto.response;
 
-public record UserJoinResponse(
+public record UserModifyResponse(
     Long id
 ) {
 
