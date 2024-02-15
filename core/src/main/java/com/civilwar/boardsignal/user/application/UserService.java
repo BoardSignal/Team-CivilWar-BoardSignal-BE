@@ -32,13 +32,10 @@ public class UserService {
             userJoinRequest.nickName(),
             userJoinRequest.provider(),
             userJoinRequest.providerId(),
-            userJoinRequest.categories(),
-            userJoinRequest.line(),
-            userJoinRequest.station(),
             profileImageUrl,
             userJoinRequest.birth(),
-            AgeGroup.of(userJoinRequest.ageGroup()),
-            Gender.of(userJoinRequest.gender())
+            AgeGroup.of(userJoinRequest.ageGroup(), userJoinRequest.provider()),
+            Gender.of(userJoinRequest.gender(), userJoinRequest.provider())
         );
 
         userRepository.save(user);

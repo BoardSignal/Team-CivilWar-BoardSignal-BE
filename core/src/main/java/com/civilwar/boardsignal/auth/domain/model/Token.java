@@ -4,7 +4,7 @@ import com.civilwar.boardsignal.user.domain.constants.Role;
 
 public record Token(
     String accessToken,
-    String refreshToken,
+    String refreshTokenId,
     Role role
 ) {
 

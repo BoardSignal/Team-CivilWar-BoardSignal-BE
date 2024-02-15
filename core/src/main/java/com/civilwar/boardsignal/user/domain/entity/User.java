@@ -4,13 +4,14 @@ import static com.civilwar.boardsignal.common.exception.CommonValidationError.ge
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
+import static jakarta.persistence.EnumType.*;
 
-import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -76,13 +77,18 @@ public class User implements UserDetails {
     private int birth;
 
     @Column(name = "USER_AGE_GROUP")
+    @Enumerated(STRING)
     private AgeGroup ageGroup;
 
     @Column(name = "USER_GENDER")
+    @Enumerated(STRING)
     private Gender gender;
 
     @Column(name = "USER_MANNER_SCORE")
     private double mannerScore;
+
+    @Column(name = "USER_IS_JOINED")
+    private Boolean isJoined;
 
     @Builder(access = AccessLevel.PRIVATE)
     private User(
@@ -91,9 +97,6 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        List<Category> categories,
-        String line,
-        String station,
         String profileImageUrl,
         int birth,
         AgeGroup ageGroup,
@@ -104,9 +107,6 @@ public class User implements UserDetails {
         Assert.hasText(nickname, getNotEmptyMessage(USER, "nickname"));
         Assert.hasText(provider, getNotEmptyMessage(USER, "provider"));
         Assert.hasText(providerId, getNotEmptyMessage(USER, "providerId"));
-        Assert.notNull(categories, getNotNullMessage(USER, "preferCategory"));
-        Assert.hasText(line, getNotEmptyMessage(USER, "line"));
-        Assert.hasText(station, getNotEmptyMessage(USER, "station"));
         Assert.hasText(profileImageUrl, getNotEmptyMessage(USER, "profileImageUrl"));
         Assert.notNull(ageGroup, getNotNullMessage(USER, "ageGroup"));
         Assert.notNull(gender, getNotNullMessage(USER, "gender"));
@@ -116,17 +116,12 @@ public class User implements UserDetails {
         this.provider = provider;
         this.providerId = providerId;
         this.role = Role.USER;
-        categories.forEach(category -> {
-            UserCategory userCategory = UserCategory.of(this, category);
-            this.userCategories.add(userCategory);
-        });
-        this.line = line;
-        this.station = station;
         this.profileImageUrl = profileImageUrl;
         this.birth = birth;
         this.ageGroup = ageGroup;
         this.gender = gender;
         this.mannerScore = 36.5;
+        this.isJoined = Boolean.FALSE;
     }
 
     public static User of(
@@ -135,9 +130,6 @@ public class User implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        List<Category> categories,
-        String line,
-        String station,
         String profileImageUrl,
         int birth,
         AgeGroup ageGroup,
@@ -149,9 +141,6 @@ public class User implements UserDetails {
             .nickname(nickname)
             .provider(provider)
             .providerId(providerId)
-            .categories(categories)
-            .line(line)
-            .station(station)
             .profileImageUrl(profileImageUrl)
             .birth(birth)
             .ageGroup(ageGroup)

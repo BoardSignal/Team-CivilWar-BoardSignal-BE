@@ -11,19 +11,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Gender {
 
-    MALE("male"),
-    FEMALE("female");
+    MALE("male", "M", "남성"),
+    FEMALE("female", "F", "여성");
 
-    private final String type;
+    private final String kakaoType;
+    private final String naverType;
+    private final String description;
 
-    public static Gender of(String input) {
+    public static Gender of(String input, String provider) {
         return Arrays.stream(values())
-            .filter(gender -> gender.isEqual(input))
+            .filter(gender -> gender.isEqual(input, provider))
             .findAny()
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
     }
 
-    private boolean isEqual(String input) {
-        return input.equalsIgnoreCase(this.type);
+    private boolean isEqual(String input, String provider) {
+        if (provider.equals(OAuthProvider.KAKAO.getType())) {
+            return input.equalsIgnoreCase(this.kakaoType);
+        } else {
+            return input.equalsIgnoreCase(this.naverType);
+        }
     }
 }
