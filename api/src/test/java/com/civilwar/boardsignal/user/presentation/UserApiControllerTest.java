@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.user.presentation;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +17,7 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,5 +77,13 @@ class UserApiControllerTest extends ApiTestSupport {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(userId));
+
+        User findUser = userRepository.findById(userId)
+            .orElseThrow();
+
+        assertThat(findUser.getIsJoined()).isTrue();
+        assertThat(findUser.getNickname()).isEqualTo(apiUserModifyRequest.nickName());
+        assertThat(findUser.getLine()).isEqualTo(apiUserModifyRequest.line());
+        assertThat(findUser.getStation()).isEqualTo(apiUserModifyRequest.station());
     }
 }
