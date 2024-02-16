@@ -6,7 +6,7 @@ import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BoardGameMapper {
@@ -31,11 +31,11 @@ public class BoardGameMapper {
         );
     }
 
-    public static <T> BoardGamePageResponse<T> toBoardGamePageRepsonse(Page<T> page) {
+    public static <T> BoardGamePageResponse<T> toBoardGamePageRepsonse(Slice<T> page) {
         return new BoardGamePageResponse<>(
             page.getContent(),
             page.getSize(),
-            page.getNumber()
+            page.hasNext()
         );
     }
 
