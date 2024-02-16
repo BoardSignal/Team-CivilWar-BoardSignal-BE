@@ -4,7 +4,7 @@ import static com.civilwar.boardsignal.common.exception.CommonValidationError.ge
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
-import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;

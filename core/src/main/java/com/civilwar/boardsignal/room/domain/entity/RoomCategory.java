@@ -48,7 +48,7 @@ public class RoomCategory {
     public static RoomCategory of(
         Room room,
         Category category
-    ){
+    ) {
         return RoomCategory.builder()
             .room(room)
             .category(category)

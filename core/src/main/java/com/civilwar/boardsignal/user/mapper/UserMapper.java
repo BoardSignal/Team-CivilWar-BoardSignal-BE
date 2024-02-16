@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.user.mapper;
 
-import static lombok.AccessLevel.*;
+import static lombok.AccessLevel.PRIVATE;
 
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.dto.response.UserJoinResponse;
