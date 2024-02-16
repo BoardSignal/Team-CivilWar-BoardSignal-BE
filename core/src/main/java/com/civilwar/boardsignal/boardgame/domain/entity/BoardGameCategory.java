@@ -45,7 +45,7 @@ public class BoardGameCategory {
 
     public static BoardGameCategory of(
         Category category
-    ){
+    ) {
         return BoardGameCategory.builder()
             .category(category)
             .build();

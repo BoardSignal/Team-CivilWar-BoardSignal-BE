@@ -99,7 +99,7 @@ public class BoardGame {
         String youtubeUrl,
         String mainImageUrl,
         List<BoardGameCategory> categories
-    ){
+    ) {
         return BoardGame.builder()
             .title(title)
             .description(description)

@@ -2,8 +2,8 @@ package com.civilwar.boardsignal.boardgame.application;
 
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.FAMILY;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
@@ -14,7 +14,6 @@ import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,25 +22,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @DisplayName("[BoardGameService 테스트]")
 @ExtendWith(MockitoExtension.class)
 class BoardGameServiceTest {
 
+    private final int PAGE_NUMBER = 0;
+    private final int PAGE_SIZE = 5;
     @Mock
     private BoardGameQueryRepository boardGameQueryRepository;
-
     @InjectMocks
     private BoardGameService boardGameService;
 
-    private final int PAGE_NUMBER = 0;
-
-    private final int PAGE_SIZE = 5;
-
     @Test
     @DisplayName("[조건에 맞는 보드게임들을 조회할 수 있다.]")
-    void findAll(){
+    void findAll() {
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
         BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
@@ -65,9 +60,12 @@ class BoardGameServiceTest {
         assertAll(
             () -> assertThat(findBoardGame.name()).isEqualTo(boardGame.getTitle()),
             () -> assertThat(findBoardGame.categories()).hasSameSizeAs(boardGame.getCategories()),
-            () -> assertThat(findBoardGame.difficulty()).isEqualTo(boardGame.getDifficulty().getDescription()),
-            () -> assertThat(findBoardGame.minParticipants()).isEqualTo(boardGame.getMinParticipants()),
-            () -> assertThat(findBoardGame.maxParticipants()).isEqualTo(boardGame.getMaxParticipants()),
+            () -> assertThat(findBoardGame.difficulty()).isEqualTo(
+                boardGame.getDifficulty().getDescription()),
+            () -> assertThat(findBoardGame.minParticipants()).isEqualTo(
+                boardGame.getMinParticipants()),
+            () -> assertThat(findBoardGame.maxParticipants()).isEqualTo(
+                boardGame.getMaxParticipants()),
             () -> assertThat(findBoardGame.fromPlayTime()).isEqualTo(boardGame.getFromPlayTime()),
             () -> assertThat(findBoardGame.toPlayTime()).isEqualTo(boardGame.getToPlayTime()),
             () -> assertThat(findBoardGame.wishCount()).isEqualTo(boardGame.getWishCount()),
@@ -77,7 +75,7 @@ class BoardGameServiceTest {
 
     @Test
     @DisplayName("[조건을 만족하지 못하는 보드게임은 조회되지 않는다]")
-    void findAllWithWrongCondition(){
+    void findAllWithWrongCondition() {
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
         BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));

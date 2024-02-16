@@ -43,6 +43,7 @@ public abstract class TestContainerSupport {
         registry.add("spring.datasource.password", MYSQL::getPassword);
 
         registry.add("spring.data.redis.host", REDIS::getHost);
-        registry.add("spring.data.redis.port", () -> String.valueOf(REDIS.getMappedPort(REDIS_PORT)));
+        registry.add("spring.data.redis.port",
+            () -> String.valueOf(REDIS.getMappedPort(REDIS_PORT)));
     }
 }

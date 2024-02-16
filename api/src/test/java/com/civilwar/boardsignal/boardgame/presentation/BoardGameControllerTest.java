@@ -28,7 +28,7 @@ class BoardGameControllerTest extends ApiTestSupport {
     private BoardGame boardGame2;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(Category.WAR);
         BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(Category.PARTY);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(
@@ -43,24 +43,31 @@ class BoardGameControllerTest extends ApiTestSupport {
 
     @Test
     @DisplayName("[조건에 맞는 보드게임을 전체 조회할 수 있다.]")
-    void findAll() throws Exception{
+    void findAll() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("size", "10");
         params.add("pageNumber", "0");
         params.add("difficulty", "어려움");
         params.put("categories", List.of("워게임", "가족게임"));
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/board-games")
-            .params(params))
+                .params(params))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.boardGamesInfos[0].name").value(boardGame2.getTitle()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].categories[0]").value(Category.WAR.getDescription()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].difficulty").value(boardGame2.getDifficulty().getDescription()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].minParticipants").value(boardGame2.getMinParticipants()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].maxParticipants").value(boardGame2.getMaxParticipants()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].fromPlayTime").value(boardGame2.getFromPlayTime()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].toPlayTime").value(boardGame2.getToPlayTime()))
+            .andExpect(
+                jsonPath("$.boardGamesInfos[0].categories[0]").value(Category.WAR.getDescription()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].difficulty").value(
+                boardGame2.getDifficulty().getDescription()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].minParticipants").value(
+                boardGame2.getMinParticipants()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].maxParticipants").value(
+                boardGame2.getMaxParticipants()))
+            .andExpect(
+                jsonPath("$.boardGamesInfos[0].fromPlayTime").value(boardGame2.getFromPlayTime()))
+            .andExpect(
+                jsonPath("$.boardGamesInfos[0].toPlayTime").value(boardGame2.getToPlayTime()))
             .andExpect(jsonPath("$.boardGamesInfos[0].wishCount").value(boardGame2.getWishCount()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].imageUrl").value(boardGame2.getMainImageUrl()))
+            .andExpect(
+                jsonPath("$.boardGamesInfos[0].imageUrl").value(boardGame2.getMainImageUrl()))
             .andExpect(jsonPath("$.size").value(1))
             .andExpect(jsonPath("$.currentPage").value(0));
     }

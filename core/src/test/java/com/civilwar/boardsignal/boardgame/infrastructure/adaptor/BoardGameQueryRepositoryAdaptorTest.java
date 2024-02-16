@@ -1,10 +1,8 @@
 package com.civilwar.boardsignal.boardgame.infrastructure.adaptor;
 
-import static com.civilwar.boardsignal.boardgame.domain.constant.Category.*;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.FAMILY;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.COMPLETABLE_FUTURE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
@@ -24,14 +22,12 @@ import org.springframework.data.domain.PageRequest;
 @DisplayName("[BoardGameQueryRepositoryAdaptor 테스트]")
 class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
 
-    @Autowired
-    private BoardGameQueryRepositoryAdaptor boardGameQueryAdaptor;
-
-    @Autowired
-    private BoardGameRepositoryAdaptor boardGameAdaptor;
-
     private final int PAGE_NUMBER = 0;
     private final int PAGE_SIZE = 5;
+    @Autowired
+    private BoardGameQueryRepositoryAdaptor boardGameQueryAdaptor;
+    @Autowired
+    private BoardGameRepositoryAdaptor boardGameAdaptor;
 
     @BeforeEach
     void setUp() {

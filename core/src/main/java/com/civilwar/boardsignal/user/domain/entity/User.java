@@ -4,8 +4,9 @@ import static com.civilwar.boardsignal.common.exception.CommonValidationError.ge
 import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
-import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.EnumType.STRING;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -146,6 +147,26 @@ public class User implements UserDetails {
             .ageGroup(ageGroup)
             .gender(gender)
             .build();
+    }
+
+    public void updateUser(
+        String nickname,
+        List<Category> categories,
+        String line,
+        String station,
+        String profileImageUrl
+    ) {
+        this.nickname = nickname;
+        this.line = line;
+        this.station = station;
+        this.userCategories.clear();
+        categories.stream()
+            .map(category -> UserCategory.of(this, category))
+            .forEach(userCategory -> this.userCategories.add(userCategory));
+        this.profileImageUrl = profileImageUrl;
+
+        //필요한 정보를 모두 등록했으므로, 회원가입 여부 참으로 변경
+        this.isJoined = true;
     }
 
     @Override
