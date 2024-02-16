@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.auth.mapper;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
+import com.civilwar.boardsignal.auth.dto.response.UserLogoutResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,10 @@ public class AuthMapper {
 
     public static IssueTokenResponse toIssueTokenResponse(String accessToken) {
         return new IssueTokenResponse(accessToken);
+    }
+
+    public static UserLogoutResponse toUserLogoutResponse(Boolean logoutResult) {
+        return new UserLogoutResponse(logoutResult);
     }
 
 }

@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.auth.presentation;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.civilwar.boardsignal.auth.domain.model.Token;
@@ -42,5 +43,43 @@ class AuthApiControllerTest extends ApiTestSupport {
                     .header(AUTHORIZATION, BEARER + token.accessToken())
             )
             .andExpect(jsonPath("$.accessToken").exists());
+    }
+
+    @Test
+    @DisplayName("[회원은 로그아웃 할 수 있다]")
+    void logoutTest1() throws Exception {
+        //given
+        User userFixture = UserFixture.getUserFixture("232345", "testURL");
+        userRepository.save(userFixture);
+
+        Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
+        Cookie cookie = new Cookie("RefreshTokenId", token.refreshTokenId());
+
+        //then
+        mockMvc.perform(
+                post("/api/v1/auth/logout"
+                ).cookie(cookie)
+                    .header(AUTHORIZATION, BEARER + token.accessToken())
+            )
+            .andExpect(jsonPath("$.logoutResult").value(true));
+    }
+
+    @Test
+    @DisplayName("[잘못된 refreshTokenId를 갖고있다면 로그아웃에 실패한다]")
+    void logoutTest2() throws Exception {
+        //given
+        User userFixture = UserFixture.getUserFixture("232345", "testURL");
+        userRepository.save(userFixture);
+
+        Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
+        Cookie cookie = new Cookie("RefreshTokenId", "fakeId");
+
+        //then
+        mockMvc.perform(
+                post("/api/v1/auth/logout"
+                ).cookie(cookie)
+                    .header(AUTHORIZATION, BEARER + token.accessToken())
+            )
+            .andExpect(jsonPath("$.logoutResult").value(false));
     }
 }

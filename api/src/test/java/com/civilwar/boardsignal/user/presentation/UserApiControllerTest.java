@@ -1,18 +1,27 @@
 package com.civilwar.boardsignal.user.presentation;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.civilwar.boardsignal.auth.domain.TokenProvider;
+import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
+import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.OAuthProvider;
+import com.civilwar.boardsignal.user.domain.constants.Role;
+import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
-import com.civilwar.boardsignal.user.dto.request.ApiUserJoinRequest;
+import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -22,24 +31,25 @@ class UserApiControllerTest extends ApiTestSupport {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @Test
-    @DisplayName("[사용자는 회원가입 할 수 있다]")
+    @DisplayName("[회원은 정보를 수정 할 수 있다]")
     void joinUserTest() throws Exception {
 
         //given
-        ApiUserJoinRequest apiUserJoinRequest = new ApiUserJoinRequest(
-            "abc1234@gmail.com",
-            "최인준",
+        User userFixture = UserFixture.getUserFixture(OAuthProvider.KAKAO.getType(), "testURL");
+        userRepository.save(userFixture);
+
+        Long userId = userFixture.getId();
+        Token token = tokenProvider.createToken(userId, Role.USER);
+
+        ApiUserModifyRequest apiUserModifyRequest = new ApiUserModifyRequest(
             "injuning",
-            "kakao",
-            "providerId",
-            List.of("가족게임", "파티게임"),
             "2호선",
             "사당역",
-            2000,
-            "20~29",
-            "male"
+            List.of("가족게임", "파티게임")
         );
 
         String fileName = "testFile.png";
@@ -47,7 +57,7 @@ class UserApiControllerTest extends ApiTestSupport {
             "data",
             null,
             "application/json",
-            toJson(apiUserJoinRequest).getBytes(StandardCharsets.UTF_8)
+            toJson(apiUserModifyRequest).getBytes(StandardCharsets.UTF_8)
         );
         MockMultipartFile image = new MockMultipartFile(
             "image",
@@ -63,12 +73,17 @@ class UserApiControllerTest extends ApiTestSupport {
                     .file(data)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token.accessToken())
             )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(
-                userRepository.findByProviderId(apiUserJoinRequest.providerId())
-                    .orElseThrow()
-                    .getId()
-            ));
+            .andExpect(jsonPath("$.id").value(userId));
+
+        User findUser = userRepository.findById(userId)
+            .orElseThrow();
+
+        assertThat(findUser.getIsJoined()).isTrue();
+        assertThat(findUser.getNickname()).isEqualTo(apiUserModifyRequest.nickName());
+        assertThat(findUser.getLine()).isEqualTo(apiUserModifyRequest.line());
+        assertThat(findUser.getStation()).isEqualTo(apiUserModifyRequest.station());
     }
 }

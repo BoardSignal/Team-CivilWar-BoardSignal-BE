@@ -1,9 +1,10 @@
 package com.civilwar.boardsignal.user.presentation;
 
 import com.civilwar.boardsignal.user.application.UserService;
-import com.civilwar.boardsignal.user.dto.request.ApiUserJoinRequest;
-import com.civilwar.boardsignal.user.dto.request.UserJoinRequest;
-import com.civilwar.boardsignal.user.dto.response.UserJoinResponse;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
+import com.civilwar.boardsignal.user.dto.request.UserModifyRequest;
+import com.civilwar.boardsignal.user.dto.response.UserModifyResponse;
 import com.civilwar.boardsignal.user.mapper.UserApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -25,19 +27,21 @@ public class UserApiController {
 
     private final UserService userService;
 
-    @Operation(summary = "회원가입 API")
+    @Operation(summary = "사용자 정보 수정 API")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping
-    public ResponseEntity<UserJoinResponse> joinUser(
-        @Valid @RequestPart(value = "data") ApiUserJoinRequest apiUserJoinRequest,
-        @RequestPart(value = "image", required = false) MultipartFile image
+    public ResponseEntity<UserModifyResponse> modifyUser(
+        @Valid @RequestPart(value = "data") ApiUserModifyRequest apiUserModifyRequest,
+        @RequestPart(value = "image", required = false) MultipartFile image,
+        @AuthenticationPrincipal User user
     ) {
-        UserJoinRequest userJoinRequest = UserApiMapper.toUserJoinRequest(apiUserJoinRequest,
+        UserModifyRequest userModifyRequest = UserApiMapper.toUserModifyRequest(user.getId(),
+            apiUserModifyRequest,
             image);
 
-        UserJoinResponse userJoinResponse = userService.joinUser(userJoinRequest);
+        UserModifyResponse userModifyResponse = userService.modifyUser(userModifyRequest);
 
-        return ResponseEntity.ok(userJoinResponse);
+        return ResponseEntity.ok(userModifyResponse);
     }
 
 }

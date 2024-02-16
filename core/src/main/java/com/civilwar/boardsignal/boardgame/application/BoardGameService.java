@@ -19,9 +19,10 @@ public class BoardGameService {
 
     public BoardGamePageResponse<GetAllBoardGamesResponse> getAllBoardGames(
         BoardGameSearchCondition condition, Pageable pageable) {
+
         Slice<BoardGame> boardGames = boardGameQueryRepository.findAll(condition, pageable);
-        Slice<GetAllBoardGamesResponse> findBoardGames = boardGames.map(
-            BoardGameMapper::toGetAllBoardGamesResponse); // 응답 dto 형식으로 변환
+        Slice<GetAllBoardGamesResponse> findBoardGames = boardGames.map(BoardGameMapper::toGetAllBoardGamesResponse); // 응답 dto 형식으로 변환
+      
         return BoardGameMapper.toBoardGamePageRepsonse(findBoardGames); // 커스텀 페이징 응답 dto에 담음
     }
 }
