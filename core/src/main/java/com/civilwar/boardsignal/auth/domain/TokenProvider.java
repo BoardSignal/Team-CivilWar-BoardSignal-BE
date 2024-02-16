@@ -13,4 +13,6 @@ public interface TokenProvider {
     TokenPayload getPayLoad(String token);
 
     void validateToken(String token);
+
+    Boolean deleteRefreshToken(String refreshTokenId);
 }

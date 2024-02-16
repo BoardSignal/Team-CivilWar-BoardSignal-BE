@@ -5,6 +5,7 @@ import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.dto.request.UserLoginRequest;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
+import com.civilwar.boardsignal.auth.dto.response.UserLogoutResponse;
 import com.civilwar.boardsignal.auth.mapper.AuthMapper;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
@@ -60,6 +61,12 @@ public class AuthService {
         //refreshTokenId를 통해 AccessToken 재발급
         String accessToken = tokenProvider.issueAccessToken(refreshTokenId);
         return AuthMapper.toIssueTokenResponse(accessToken);
+    }
+
+    public UserLogoutResponse logout(String refreshTokenId) {
+
+        //refreshToken 삭제 후, boolean 응답
+        return AuthMapper.toUserLogoutResponse(tokenProvider.deleteRefreshToken(refreshTokenId));
     }
 
 }

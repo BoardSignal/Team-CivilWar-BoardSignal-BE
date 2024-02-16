@@ -116,4 +116,9 @@ public class JwtTokenProvider implements TokenProvider {
     public void validateToken(String token) {
         getClaims(token);
     }
+
+    @Override
+    public Boolean deleteRefreshToken(String refreshTokenId) {
+        return refreshTokenRepository.delete(refreshTokenId);
+    }
 }

@@ -8,4 +8,6 @@ public interface RefreshTokenRepository {
 
     Optional<String> findById(String id);
 
+    Boolean delete(String id);
+
 }
