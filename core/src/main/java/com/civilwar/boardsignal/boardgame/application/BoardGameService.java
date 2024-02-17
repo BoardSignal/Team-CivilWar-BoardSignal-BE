@@ -7,8 +7,8 @@ import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,9 +19,10 @@ public class BoardGameService {
 
     public BoardGamePageResponse<GetAllBoardGamesResponse> getAllBoardGames(
         BoardGameSearchCondition condition, Pageable pageable) {
-        Page<BoardGame> boardGames = boardGameQueryRepository.findAll(condition, pageable);
-        Page<GetAllBoardGamesResponse> findBoardGames = boardGames.map(
-            BoardGameMapper::toGetAllBoardGamesResponse); // 응답 dto 형식으로 변환
+
+        Slice<BoardGame> boardGames = boardGameQueryRepository.findAll(condition, pageable);
+        Slice<GetAllBoardGamesResponse> findBoardGames = boardGames.map(BoardGameMapper::toGetAllBoardGamesResponse); // 응답 dto 형식으로 변환
+      
         return BoardGameMapper.toBoardGamePageRepsonse(findBoardGames); // 커스텀 페이징 응답 dto에 담음
     }
 }

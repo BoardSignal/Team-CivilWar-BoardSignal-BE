@@ -6,6 +6,8 @@ import static jakarta.persistence.CascadeType.REMOVE;
 import com.civilwar.boardsignal.boardgame.domain.constant.Difficulty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -47,6 +49,7 @@ public class BoardGame {
     @Column(name = "BOARD_GAME_TO_PLAY_TIME")
     private int toPlayTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "BOARD_GAME_DIFFICULTY")
     private Difficulty difficulty;
 

@@ -5,6 +5,8 @@ import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +36,7 @@ public class BoardGameCategory {
     @ManyToOne(fetch = FetchType.LAZY)
     private BoardGame boardGame;
 
+    @Enumerated(EnumType.STRING)
     private Category category;
 
     @Builder(access = AccessLevel.PRIVATE)
