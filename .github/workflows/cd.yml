@@ -1,14 +1,15 @@
 name: CD
 
 on:
+  pull_request:
+    branches: [ "main", "dev" ]
   push:
-    branches: [ "cd-test" ]
+    branches: [ "main", "dev" ]
 
 permissions:
   contents: read
 
 jobs:
-  # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +34,7 @@ jobs:
           echo "${{ secrets.APPLICATION_CORE_YML }}" > ./core/src/main/resources/application-core.yml
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25
+        uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: api:build -x test
 
@@ -44,7 +45,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: docker image build
-        run: docker build -f Dockerfile-server -t ${{ secrets.DOCKERHUB_USERNAME }}/boardsignal:server .
+        run: docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/boardsignal:server .
 
       - name: docker Hub push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/boardsignal:server
