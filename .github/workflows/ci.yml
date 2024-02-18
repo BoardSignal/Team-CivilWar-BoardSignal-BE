@@ -32,17 +32,17 @@ jobs:
         with:
           arguments: clean test
 
-      # 테스트 결과 PR 코멘트에 등록
-      - name: Register the test results as PR comments
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: '**/build/test-results/test/TEST-*.xml'
-
-      # 테스트 실패시 코드 라인에 대한 체크 추가
-      - name: If test fail, add check comment on failed code line
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.html'
+#      # 테스트 결과 PR 코멘트에 등록
+#      - name: Register the test results as PR comments
+#        uses: EnricoMi/publish-unit-test-result-action@v2
+#        if: always()
+#        with:
+#          files: '**/build/test-results/test/TEST-*.xml'
+#
+#      # 테스트 실패시 코드 라인에 대한 체크 추가
+#      - name: If test fail, add check comment on failed code line
+#        uses: mikepenz/action-junit-report@v3
+#        if: always()
+#        with:
+#          report_paths: '**/build/test-results/test/TEST-*.html'
 
