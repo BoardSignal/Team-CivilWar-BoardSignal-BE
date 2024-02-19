@@ -116,4 +116,12 @@ public class BoardGame {
             .categories(categories)
             .build();
     }
+
+    public void increaseWishCount() {
+        this.wishCount += 1;
+    }
+
+    public void decreaseWishCount() {
+        this.wishCount -= 1;
+    }
 }
