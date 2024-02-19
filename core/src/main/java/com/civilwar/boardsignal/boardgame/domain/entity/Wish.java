@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -28,8 +29,8 @@ public class Wish {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Wish(
-        Long userId,
-        Long boardGameId
+        @NonNull Long userId,
+        @NonNull Long boardGameId
     ) {
         this.userId = userId;
         this.boardGameId = boardGameId;
