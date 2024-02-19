@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.user.presentation;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -24,6 +24,7 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,7 @@ class UserApiControllerTest extends ApiTestSupport {
         assertThat(findUser.getLine()).isEqualTo(apiUserModifyRequest.line());
         assertThat(findUser.getStation()).isEqualTo(apiUserModifyRequest.station());
     }
+
 
     @Test
     @DisplayName("유저의 프로필을 조회할 수 있다.")

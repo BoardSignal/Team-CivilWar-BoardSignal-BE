@@ -3,17 +3,28 @@ package com.civilwar.boardsignal.boardgame.application;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.FAMILY;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
+import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
+import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.entity.User;
 import java.util.List;
+import java.util.Optional;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @DisplayName("[BoardGameService 테스트]")
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +43,10 @@ class BoardGameServiceTest {
     private final int PAGE_SIZE = 5;
     @Mock
     private BoardGameQueryRepository boardGameQueryRepository;
+
+    @Mock
+    private WishRepository wishRepository;
+
     @InjectMocks
     private BoardGameService boardGameService;
 
@@ -97,6 +113,79 @@ class BoardGameServiceTest {
         );
 
         assertThat(boardGames.size()).isZero();
+    }
+
+    @Test
+    @DisplayName("[사용자는 보드게임을 찜할 수 있다.")
+    void wishBoardGame() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        int prevWishCount = boardGame.getWishCount();
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
+
+        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.of(boardGame));
+        given(
+            wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
+            Optional.empty());
+        given(wishRepository.save(any(Wish.class))).willReturn(wish);
+
+        WishBoardGameResponse response = boardGameService.wishBoardGame(
+            user,
+            boardGame.getId()
+        );
+
+        assertThat(boardGame.getWishCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("[이미 찜했던 게임에 대해 찜 등록 요청을 하면 찜이 취소된다]")
+    void cancelWish() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        int prevWishCount = boardGame.getWishCount();
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
+
+        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.of(boardGame));
+        given(
+            wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
+            Optional.of(wish));
+
+        WishBoardGameResponse response = boardGameService.wishBoardGame(user, boardGame.getId());
+
+        assertThat(response.wishCount()).isEqualTo(prevWishCount - 1);
+    }
+
+    @Test
+    @DisplayName("[보드게임을 찜할 때 존재하지 않는 보드게임이면 예외가 발생한다]")
+    void wishBoardGameWithException() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
+
+        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.empty());
+
+        ThrowingCallable when = () -> boardGameService.wishBoardGame(user, boardGame.getId());
+        assertThatThrownBy(when)
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(BoardGameErrorCode.NOT_FOUND_BOARD_GAME.getMessage());
     }
 
 }

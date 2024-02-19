@@ -15,13 +15,15 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository {
 
     private final BoardGameJpaRepository boardGameJpaRepository;
@@ -62,7 +64,9 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
     }
 
     @Override
-    public Page<BoardGame> findAll(BoardGameSearchCondition condition, Pageable pageable) {
+    public Slice<BoardGame> findAll(BoardGameSearchCondition condition, Pageable pageable) {
+        boolean hasNext = false;
+
         List<BoardGame> boardGames = jpaQueryFactory
             .select(boardGame)
             .where(
@@ -71,12 +75,16 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
                 containsCategory(condition.categories())
             )
             .from(boardGame)
-            .join(boardGame.categories, boardGameCategory).fetchJoin()
+            .join(boardGame.categories, boardGameCategory)
+            .groupBy(boardGame)
             .orderBy(boardGame.wishCount.desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
+            .limit(pageable.getPageSize() + 1L)
             .fetch();
 
-        return new PageImpl<>(boardGames);
+        if (boardGames.size() > pageable.getPageSize()) {
+            hasNext = true;
+            boardGames.remove(boardGames.size() - 1); // 요청한 사이즈보다 하나 더 있는거 확인했으므로 리턴할 때는 마지막꺼 제거
+        }
+        return new SliceImpl<>(boardGames, pageable, hasNext);
     }
 }

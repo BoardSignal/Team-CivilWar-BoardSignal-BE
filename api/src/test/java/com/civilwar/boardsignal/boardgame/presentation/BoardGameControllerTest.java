@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,8 +46,7 @@ class BoardGameControllerTest extends ApiTestSupport {
     @DisplayName("[조건에 맞는 보드게임을 전체 조회할 수 있다.]")
     void findAll() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("size", "10");
-        params.add("pageNumber", "0");
+        params.add("size", "1");
         params.add("difficulty", "어려움");
         params.put("categories", List.of("워게임", "가족게임"));
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/board-games")
@@ -69,7 +69,25 @@ class BoardGameControllerTest extends ApiTestSupport {
             .andExpect(
                 jsonPath("$.boardGamesInfos[0].imageUrl").value(boardGame2.getMainImageUrl()))
             .andExpect(jsonPath("$.size").value(1))
-            .andExpect(jsonPath("$.currentPage").value(0));
+            .andExpect(jsonPath("$.hasNext").value(false));
+    }
+
+    @Test
+    @DisplayName("[특정 보드게임을 찜 등록을 하거나 취소할 수 있다.]")
+    void wishBoardGame() throws Exception {
+        int prevWishCount = boardGame1.getWishCount();
+        //찜 등록
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
+                    boardGame1.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.wishCount").value(prevWishCount + 1));
+        //찜 취소
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
+                    boardGame1.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.wishCount").value(prevWishCount));
     }
 
 }
