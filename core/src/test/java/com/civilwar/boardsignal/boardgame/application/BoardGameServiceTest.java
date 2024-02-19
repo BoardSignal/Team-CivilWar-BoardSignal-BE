@@ -10,15 +10,20 @@ import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
+import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
+import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
+import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -43,6 +48,9 @@ class BoardGameServiceTest {
     private final int PAGE_SIZE = 5;
     @Mock
     private BoardGameQueryRepository boardGameQueryRepository;
+
+    @Mock
+    private TipRepository tipRepository;
 
     @Mock
     private WishRepository wishRepository;
@@ -186,6 +194,50 @@ class BoardGameServiceTest {
         assertThatThrownBy(when)
             .isInstanceOf(NotFoundException.class)
             .hasMessageContaining(BoardGameErrorCode.NOT_FOUND_BOARD_GAME.getMessage());
+    }
+
+    @Test
+    @DisplayName("[사용자는 보드게임에 공략을 추가할 수 있다]")
+    void addTip() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        AddTipRequest request = new AddTipRequest("개꿀팁 공유합니다~");
+        Tip tip = BoardGameFixture.getTip(user.getId(), boardGame.getId(), request.content());
+
+        given(tipRepository.findByUserId(user.getId())).willReturn(Optional.empty());
+        given(tipRepository.save(any(Tip.class))).willReturn(tip);
+
+        AddTipResposne response = boardGameService.addTip(user, boardGame.getId(), request);
+
+        assertThat(response.content()).isEqualTo(request.content());
+    }
+
+    @Test
+    @DisplayName("[이미 등록한 공략이 있는 보드게임이라면 예외가 발생한다.]")
+    void addTipAlreadyAdded() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        AddTipRequest request = new AddTipRequest("개꿀팁 공유합니다~");
+        Tip tip = BoardGameFixture.getTip(user.getId(), boardGame.getId(), request.content());
+
+        given(tipRepository.findByUserId(user.getId())).willReturn(Optional.of(tip));
+
+        ThrowingCallable when = () -> boardGameService.addTip(user, boardGame.getId(), request);
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(BoardGameErrorCode.AlREADY_TIP_ADDED.getMessage());
     }
 
 }

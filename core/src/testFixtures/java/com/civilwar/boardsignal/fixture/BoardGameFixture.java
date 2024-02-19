@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.constant.Difficulty;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
+import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import java.util.List;
 import lombok.AccessLevel;
@@ -48,5 +49,9 @@ public class BoardGameFixture {
 
     public static Wish getWish(Long userId, Long boardGameId) {
         return Wish.of(userId, boardGameId);
+    }
+
+    public static Tip getTip(Long userId, Long boardGameId, String content) {
+        return Tip.of(userId, boardGameId, content);
     }
 }
