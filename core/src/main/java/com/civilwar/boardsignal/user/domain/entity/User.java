@@ -1,7 +1,5 @@
 package com.civilwar.boardsignal.user.domain.entity;
 
-import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotEmptyMessage;
-import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.EnumType.STRING;
@@ -26,10 +24,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.Assert;
 
 @Entity
 @NoArgsConstructor
@@ -38,6 +37,10 @@ import org.springframework.util.Assert;
 public class User implements UserDetails {
 
     private static final String USER = "user";
+
+    @BatchSize(size = 8)
+    @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
+    private final List<UserCategory> userCategories = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,9 +64,6 @@ public class User implements UserDetails {
 
     @Column(name = "USER_ROLE")
     private Role role;
-
-    @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
-    private List<UserCategory> userCategories = new ArrayList<>();
 
     @Column(name = "USER_LINE")
     private String line;
@@ -91,26 +91,21 @@ public class User implements UserDetails {
     @Column(name = "USER_IS_JOINED")
     private Boolean isJoined;
 
+    @Column(name = "USER_SIGNAL")
+    private int signal;
+
     @Builder(access = AccessLevel.PRIVATE)
     private User(
-        String email,
-        String name,
-        String nickname,
-        String provider,
-        String providerId,
-        String profileImageUrl,
-        int birth,
-        AgeGroup ageGroup,
-        Gender gender
+        @NonNull String email,
+        @NonNull String name,
+        @NonNull String nickname,
+        @NonNull String provider,
+        @NonNull String providerId,
+        @NonNull String profileImageUrl,
+        @NonNull int birth,
+        @NonNull AgeGroup ageGroup,
+        @NonNull Gender gender
     ) {
-        Assert.hasText(email, getNotEmptyMessage(USER, "email"));
-        Assert.hasText(name, getNotEmptyMessage(USER, "name"));
-        Assert.hasText(nickname, getNotEmptyMessage(USER, "nickname"));
-        Assert.hasText(provider, getNotEmptyMessage(USER, "provider"));
-        Assert.hasText(providerId, getNotEmptyMessage(USER, "providerId"));
-        Assert.hasText(profileImageUrl, getNotEmptyMessage(USER, "profileImageUrl"));
-        Assert.notNull(ageGroup, getNotNullMessage(USER, "ageGroup"));
-        Assert.notNull(gender, getNotNullMessage(USER, "gender"));
         this.email = email;
         this.name = name;
         this.nickname = nickname;
@@ -123,6 +118,7 @@ public class User implements UserDetails {
         this.gender = gender;
         this.mannerScore = 36.5;
         this.isJoined = Boolean.FALSE;
+        this.signal = 0;
     }
 
     public static User of(
@@ -162,7 +158,7 @@ public class User implements UserDetails {
         this.userCategories.clear();
         categories.stream()
             .map(category -> UserCategory.of(this, category))
-            .forEach(userCategory -> this.userCategories.add(userCategory));
+            .forEach(this.userCategories::add);
         this.profileImageUrl = profileImageUrl;
 
         //필요한 정보를 모두 등록했으므로, 회원가입 여부 참으로 변경
