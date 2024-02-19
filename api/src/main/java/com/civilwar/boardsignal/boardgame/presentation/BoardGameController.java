@@ -1,7 +1,11 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
 import com.civilwar.boardsignal.boardgame.application.BoardGameService;
+import com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper;
+import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
+import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
+import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
@@ -17,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,4 +55,16 @@ public class BoardGameController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "보드게임 공략 등록 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/tip/{boardGameId}")
+    public ResponseEntity<AddTipResposne> addTip(
+        @AuthenticationPrincipal User user,
+        @PathVariable("boardGameId") Long boardGameId,
+        @RequestBody ApiAddTipRequest request
+    ) {
+        AddTipRequest addTipRequest = BoardGameApiMapper.toAddTipRequest(request);
+        AddTipResposne response = boardGameService.addTip(user, boardGameId, addTipRequest);
+        return ResponseEntity.ok(response);
+    }
 }
