@@ -1,5 +1,8 @@
 package com.civilwar.boardsignal.boardgame.application;
 
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.AlREADY_TIP_ADDED;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
+
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
@@ -13,7 +16,6 @@ import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
-import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -34,7 +36,7 @@ public class BoardGameService {
     private void validateTipExists(User user) { // 이미 공략을 등록한 적이 있는 지 검증
         tipRepository.findByUserId(user.getId())
             .ifPresent(tip -> {
-                throw new ValidationException(BoardGameErrorCode.AlREADY_TIP_ADDED);
+                throw new ValidationException(AlREADY_TIP_ADDED);
             });
     }
 
@@ -52,7 +54,7 @@ public class BoardGameService {
     public WishBoardGameResponse wishBoardGame(User user, Long boardGameId) {
         BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
             .orElseThrow(
-                () -> new NotFoundException(BoardGameErrorCode.NOT_FOUND_BOARD_GAME)
+                () -> new NotFoundException(NOT_FOUND_BOARD_GAME)
             );
 
         wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGameId)
