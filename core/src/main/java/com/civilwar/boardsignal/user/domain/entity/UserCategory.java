@@ -1,6 +1,5 @@
 package com.civilwar.boardsignal.user.domain.entity;
 
-import static com.civilwar.boardsignal.common.exception.CommonValidationError.getNotNullMessage;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static jakarta.persistence.EnumType.STRING;
 
@@ -20,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.Assert;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -44,9 +43,11 @@ public class UserCategory {
     private Category category;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private UserCategory(User user, Category category) {
-        Assert.notNull(category, getNotNullMessage(USER_CATEGORY, "category"));
-
+    private UserCategory(
+        @NonNull User user,
+        @NonNull Category category
+    ) {
+        this.user = user;
         this.category = category;
     }
 
