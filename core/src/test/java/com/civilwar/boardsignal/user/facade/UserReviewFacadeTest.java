@@ -52,6 +52,6 @@ class UserReviewFacadeTest {
         assertThat(userReviews).hasSize(3);
         assertThat(timeCommitmentReview.score()).isEqualTo(3);
         assertThat(goodMannerReview.score()).isZero();
-        assertThat(fastResponseReview.score()).isEqualTo(-3);
+        assertThat(fastResponseReview.score()).isZero();
     }
 }

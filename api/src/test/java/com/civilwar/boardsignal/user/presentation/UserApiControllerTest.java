@@ -121,6 +121,10 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.reviews[1].content").value(
                 ReviewContent.GOOD_MANNER.getDescription()))
             .andExpect(jsonPath("$.reviews[1].score").value(
+                0))
+            .andExpect(jsonPath("$.reviews[2].content").value(
+                ReviewContent.FAST_RESPONSE.getDescription()))
+            .andExpect(jsonPath("$.reviews[2].score").value(
                 0));
 
     }

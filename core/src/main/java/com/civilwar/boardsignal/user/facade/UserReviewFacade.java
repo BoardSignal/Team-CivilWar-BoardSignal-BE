@@ -34,13 +34,14 @@ public class UserReviewFacade {
         ReviewContent[] allContents = ReviewContent.values();
         for (ReviewContent content : allContents) {
 
-            //4. 유저에 대한 각 항목의 좋아요 & 싫어요 합계 계산
+            //4. 유저에 대한 각 항목의 좋아요 합계 계산
             int totalScore = userEvaluations.stream()
                 .filter(evaluation -> evaluation.getContent().equals(content))
                 .mapToInt(ReviewEvaluation::getIsRecommended)
+                .filter(isRecommended -> isRecommended==1)
                 .sum();
 
-            //. 정리된 리뷰 & 데이터 저장
+            //5. 정리된 리뷰 & 데이터 저장
             result.add(new UserReviewResponse(content.getDescription(), totalScore));
         }
 
