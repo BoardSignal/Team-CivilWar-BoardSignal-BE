@@ -38,7 +38,7 @@ public class UserReviewFacade {
             int totalScore = userEvaluations.stream()
                 .filter(evaluation -> evaluation.getContent().equals(content))
                 .mapToInt(ReviewEvaluation::getIsRecommended)
-                .filter(isRecommended -> isRecommended==1)
+                .filter(isRecommended -> isRecommended == 1)
                 .sum();
 
             //5. 정리된 리뷰 & 데이터 저장
