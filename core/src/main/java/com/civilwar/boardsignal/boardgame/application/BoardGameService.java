@@ -107,10 +107,10 @@ public class BoardGameService {
         List<User> users = userRepository.findAllInIds(userIds);
 
         List<GetTipResposne> tipResponse = tips.stream()
-                .flatMap(tip -> users.stream()
-                    .filter(user -> Objects.equals(tip.getUserId(), user.getId()))
-                    .map(user -> BoardGameMapper.toGetTipResponse(user, tip)))
-                .toList();
+            .flatMap(tip -> users.stream()
+                .filter(user -> Objects.equals(tip.getUserId(), user.getId()))
+                .map(user -> BoardGameMapper.toGetTipResponse(user, tip)))
+            .toList();
 
         return BoardGameMapper.toGetBoardGameResponse(boardGame, tipResponse);
     }

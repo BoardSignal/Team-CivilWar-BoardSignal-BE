@@ -1,14 +1,12 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
 import static com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper.toAddTipRequest;
-import static com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper.toApiGetBoardGameResponse;
 
 import com.civilwar.boardsignal.boardgame.application.BoardGameService;
 import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
-import com.civilwar.boardsignal.boardgame.dto.response.ApiGetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
