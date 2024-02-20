@@ -29,7 +29,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 @DisplayName("[BoardGameController 테스트]")
-@Slf4j
 class BoardGameControllerTest extends ApiTestSupport {
 
     @Autowired

@@ -49,7 +49,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @DisplayName("[BoardGameService 테스트]")
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class BoardGameServiceTest {
 
     private final int PAGE_NUMBER = 0;
