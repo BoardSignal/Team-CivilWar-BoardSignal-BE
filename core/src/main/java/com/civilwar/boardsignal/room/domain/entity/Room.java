@@ -77,6 +77,9 @@ public class Room {
     @Column(name = "ROOM_MAX_AGE")
     private int maxAge;
 
+    @Column(name = "ROOM_IMAGE_URL")
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_MEETING_INFO_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private MeetingInfo meetingInfo;
@@ -98,6 +101,7 @@ public class Room {
         @NonNull String startTime,
         int minAge,
         int maxAge,
+        @NonNull String imageUrl,
         @NonNull List<Category> roomCategories
     ) {
         this.title = title;
@@ -113,6 +117,7 @@ public class Room {
         this.startTime = startTime;
         this.minAge = minAge;
         this.maxAge = maxAge;
+        this.imageUrl = imageUrl;
         roomCategories.forEach(category -> {
             RoomCategory roomCategory = RoomCategory.of(this, category);
             this.roomCategories.add(roomCategory);
@@ -132,6 +137,7 @@ public class Room {
         String startTime,
         int minAge,
         int maxAge,
+        String imageUrl,
         List<Category> roomCategories
     ) {
         return Room.builder()
@@ -147,6 +153,7 @@ public class Room {
             .startTime(startTime)
             .minAge(minAge)
             .maxAge(maxAge)
+            .imageUrl(imageUrl)
             .roomCategories(roomCategories)
             .build();
     }
