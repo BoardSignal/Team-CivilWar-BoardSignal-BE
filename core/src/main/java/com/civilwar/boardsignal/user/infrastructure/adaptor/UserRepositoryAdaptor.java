@@ -44,4 +44,9 @@ public class UserRepositoryAdaptor implements UserRepository {
     public boolean existsUserByProviderId(String providerId) {
         return userJpaRepository.existsUserByProviderId(providerId);
     }
+
+    @Override
+    public List<User> findAllInIds(List<Long> ids) {
+        return userJpaRepository.findAllInIds(ids);
+    }
 }
