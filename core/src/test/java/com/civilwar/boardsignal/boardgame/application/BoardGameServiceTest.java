@@ -69,6 +69,7 @@ class BoardGameServiceTest {
             "보통",
             List.of(),
             null
+            , null
         );
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -108,6 +109,7 @@ class BoardGameServiceTest {
             "어려움",
             List.of(),
             null
+            , null
         );
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -239,5 +241,53 @@ class BoardGameServiceTest {
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining(BoardGameErrorCode.AlREADY_TIP_ADDED.getMessage());
     }
+
+    @Test
+    @DisplayName("[사용자는 검색 키워드를 통해 보드게임을 검색할 수 있다.]")
+    void searchWithKeyword() {
+        BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
+        BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
+        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
+
+        BoardGameSearchCondition condition = new BoardGameSearchCondition(
+            null,
+            null,
+            null
+            , String.valueOf(boardGame.getTitle().charAt(0))
+        );
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+
+        given(boardGameQueryRepository.findAll(condition, pageRequest))
+            .willReturn(new PageImpl<>(List.of(boardGame)));
+
+        BoardGamePageResponse<GetAllBoardGamesResponse> boardGames = boardGameService.getAllBoardGames(
+            condition,
+            pageRequest
+        );
+        GetAllBoardGamesResponse findBoardGame = boardGames.boardGamesInfos().get(0);
+
+        assertAll(
+            () -> assertThat(findBoardGame.name())
+                .isEqualTo(boardGame.getTitle()),
+            () -> assertThat(findBoardGame.categories())
+                .hasSameSizeAs(boardGame.getCategories()),
+            () -> assertThat(findBoardGame.difficulty())
+                .isEqualTo(boardGame.getDifficulty().getDescription()),
+            () -> assertThat(findBoardGame.minParticipants())
+                .isEqualTo(boardGame.getMinParticipants()),
+            () -> assertThat(findBoardGame.maxParticipants())
+                .isEqualTo(boardGame.getMaxParticipants()),
+            () -> assertThat(findBoardGame.fromPlayTime())
+                .isEqualTo(boardGame.getFromPlayTime()),
+            () -> assertThat(findBoardGame.toPlayTime())
+                .isEqualTo(boardGame.getToPlayTime()),
+            () -> assertThat(findBoardGame.wishCount())
+                .isEqualTo(boardGame.getWishCount()),
+            () -> assertThat(findBoardGame.imageUrl())
+                .isEqualTo(boardGame.getMainImageUrl())
+        );
+    }
+
 
 }
