@@ -1,7 +1,11 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
 import com.civilwar.boardsignal.boardgame.application.BoardGameService;
+import com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper;
+import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
+import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
+import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
@@ -17,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,10 +33,11 @@ public class BoardGameController {
 
     private final BoardGameService boardGameService;
 
+    @Operation(summary = "보드게임 목록 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping
     public ResponseEntity<BoardGamePageResponse<GetAllBoardGamesResponse>> getAllBoardGames(
-        @Parameter(hidden = true) BoardGameSearchCondition condition,
+        BoardGameSearchCondition condition,
         Pageable pageable
     ) {
         BoardGamePageResponse<GetAllBoardGamesResponse> boardGames = boardGameService.getAllBoardGames(
@@ -43,6 +49,7 @@ public class BoardGameController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/wish/{boardGameId}")
     public ResponseEntity<WishBoardGameResponse> wishBoardGame(
+        @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
         @PathVariable("boardGameId") Long boardGameId
     ) {
@@ -50,4 +57,17 @@ public class BoardGameController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "보드게임 공략 등록 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/tip/{boardGameId}")
+    public ResponseEntity<AddTipResposne> addTip(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("boardGameId") Long boardGameId,
+        @RequestBody ApiAddTipRequest request
+    ) {
+        AddTipRequest addTipRequest = BoardGameApiMapper.toAddTipRequest(request);
+        AddTipResposne response = boardGameService.addTip(user, boardGameId, addTipRequest);
+        return ResponseEntity.ok(response);
+    }
 }

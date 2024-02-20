@@ -1,21 +1,29 @@
 package com.civilwar.boardsignal.boardgame.application;
 
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.AlREADY_TIP_ADDED;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
+
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
+import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.dto.BoardGameMapper;
+import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
+import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
-import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +31,14 @@ public class BoardGameService {
 
     private final BoardGameQueryRepository boardGameQueryRepository;
     private final WishRepository wishRepository;
+    private final TipRepository tipRepository;
+
+    private void validateTipExists(User user) { // 이미 공략을 등록한 적이 있는 지 검증
+        tipRepository.findByUserId(user.getId())
+            .ifPresent(tip -> {
+                throw new ValidationException(AlREADY_TIP_ADDED);
+            });
+    }
 
     public BoardGamePageResponse<GetAllBoardGamesResponse> getAllBoardGames(
         BoardGameSearchCondition condition, Pageable pageable) {
@@ -34,10 +50,11 @@ public class BoardGameService {
         return BoardGameMapper.toBoardGamePageRepsonse(findBoardGames); // 커스텀 페이징 응답 dto에 담음
     }
 
+    @Transactional
     public WishBoardGameResponse wishBoardGame(User user, Long boardGameId) {
         BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
             .orElseThrow(
-                () -> new NotFoundException(BoardGameErrorCode.NOT_FOUND_BOARD_GAME)
+                () -> new NotFoundException(NOT_FOUND_BOARD_GAME)
             );
 
         wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGameId)
@@ -53,5 +70,20 @@ public class BoardGameService {
                 }
             );
         return new WishBoardGameResponse(boardGame.getWishCount());
+    }
+
+    @Transactional
+    public AddTipResposne addTip(
+        User user,
+        Long boardGameId,
+        AddTipRequest request
+    ) {
+        validateTipExists(user);
+
+        Tip tip = Tip.of(boardGameId, user.getId(), request.content());
+
+        Tip savedTip = tipRepository.save(tip);
+
+        return new AddTipResposne(savedTip.getContent());
     }
 }

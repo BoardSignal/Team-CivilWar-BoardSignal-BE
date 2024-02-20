@@ -6,8 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -25,4 +28,27 @@ public class Tip {
     private Long userId;
 
     private String content;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Tip(
+        @NonNull Long boardGameId,
+        @NonNull Long userId,
+        @NonNull String content
+    ) {
+        this.boardGameId = boardGameId;
+        this.userId = userId;
+        this.content = content;
+    }
+
+    public static Tip of(
+        Long boardGameId,
+        Long userId,
+        String content
+    ) {
+        return Tip.builder()
+            .boardGameId(boardGameId)
+            .userId(userId)
+            .content(content)
+            .build();
+    }
 }

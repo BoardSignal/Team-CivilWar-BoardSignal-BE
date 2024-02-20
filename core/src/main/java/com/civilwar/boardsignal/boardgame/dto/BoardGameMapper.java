@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Slice;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class BoardGameMapper {
+public final class BoardGameMapper {
 
     public static GetAllBoardGamesResponse toGetAllBoardGamesResponse(BoardGame boardGame) {
         List<String> boardGameCategories = boardGame.getCategories().stream()

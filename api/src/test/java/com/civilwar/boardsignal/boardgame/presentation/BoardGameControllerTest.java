@@ -8,6 +8,7 @@ import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameRepository;
+import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -88,6 +90,20 @@ class BoardGameControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount));
+    }
+
+    @Test
+    @DisplayName("[사용자는 보드게임에 공략을 추가할 수 있다.]")
+    void addTip() throws Exception {
+        ApiAddTipRequest request = new ApiAddTipRequest("꿀팁입니다.");
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+                    "/api/v1/board-games/tip/{boardGameId}", boardGame1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request))
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").value(request.content()));
     }
 
 }
