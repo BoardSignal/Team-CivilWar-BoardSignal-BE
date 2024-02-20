@@ -78,12 +78,10 @@ public class BoardGameController {
     @Operation(summary = "보드게임 상세정보 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/{boardGameId}")
-    public ResponseEntity<ApiGetBoardGameResponse> getBoard(
+    public ResponseEntity<GetBoardGameResponse> getBoard(
         @PathVariable("boardGameId") Long boardGameId
     ) {
-        GetBoardGameResponse boardGame = boardGameService.getBoardGame(boardGameId);
-        // 서비스 응답 dto -> api 응답 dto 변환
-        ApiGetBoardGameResponse response = toApiGetBoardGameResponse(boardGame);
+        GetBoardGameResponse response = boardGameService.getBoardGame(boardGameId);
         return ResponseEntity.ok(response);
     }
 }
