@@ -58,6 +58,14 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
         return boardGameCategory.category.in(categoryList);
     }
 
+    private BooleanExpression containsKeyword(String searchKeyword) {
+        if (!hasText(searchKeyword)) {
+            return null;
+        }
+        return boardGame.title.contains(searchKeyword)
+            .or(boardGame.description.contains(searchKeyword));
+    }
+
     @Override
     public Optional<BoardGame> findById(Long id) {
         return boardGameJpaRepository.findById(id);
@@ -72,7 +80,8 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
             .where(
                 equalDifficulty(condition.difficulty()),
                 checkRangePlayTime(condition.playTime()),
-                containsCategory(condition.categories())
+                containsCategory(condition.categories()),
+                containsKeyword(condition.searchKeyword())
             )
             .from(boardGame)
             .join(boardGame.categories, boardGameCategory)
