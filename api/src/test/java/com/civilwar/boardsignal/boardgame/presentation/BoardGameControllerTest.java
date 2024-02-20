@@ -1,23 +1,29 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
+import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
+import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -27,19 +33,32 @@ class BoardGameControllerTest extends ApiTestSupport {
     @Autowired
     private BoardGameRepository boardGameRepository;
 
+    @Autowired
+    private TipRepository tipRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private BoardGame boardGame1;
+
     private BoardGame boardGame2;
+
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = UserFixture.getUserFixture("provider", "https~");
+        userRepository.save(user);
+
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(Category.WAR);
+        BoardGameCategory wargame2 = BoardGameFixture.getBoardGameCategory(Category.WAR);
         BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(Category.PARTY);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(
             Category.FAMILY
         );
 
         boardGame1 = BoardGameFixture.getBoardGame(List.of(warGame, partyGame)); // 난이도 -> 보통
-        boardGame2 = BoardGameFixture.getBoardGame2(List.of(warGame, familyGame)); // 난이도 -> 어려움
+        boardGame2 = BoardGameFixture.getBoardGame2(List.of(wargame2, familyGame)); // 난이도 -> 어려움
 
         boardGameRepository.saveAll(List.of(boardGame1, boardGame2));
     }
@@ -51,7 +70,7 @@ class BoardGameControllerTest extends ApiTestSupport {
         params.add("size", "1");
         params.add("difficulty", "어려움");
         params.put("categories", List.of("워게임", "가족게임"));
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/board-games")
+        mockMvc.perform(get("/api/v1/board-games")
                 .params(params))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.boardGamesInfos[0].name").value(boardGame2.getTitle()))
@@ -79,14 +98,14 @@ class BoardGameControllerTest extends ApiTestSupport {
     void wishBoardGame() throws Exception {
         int prevWishCount = boardGame1.getWishCount();
         //찜 등록
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
-                    boardGame1.getId())
+        mockMvc.perform(post("/api/v1/board-games/wish/{boardGameId}",
+                boardGame1.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount + 1));
         //찜 취소
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
-                    boardGame1.getId())
+        mockMvc.perform(post("/api/v1/board-games/wish/{boardGameId}",
+                boardGame1.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount));
@@ -97,13 +116,57 @@ class BoardGameControllerTest extends ApiTestSupport {
     void addTip() throws Exception {
         ApiAddTipRequest request = new ApiAddTipRequest("꿀팁입니다.");
 
-        mockMvc.perform(MockMvcRequestBuilders.post(
-                    "/api/v1/board-games/tip/{boardGameId}", boardGame1.getId())
+        mockMvc.perform(post(
+                "/api/v1/board-games/tip/{boardGameId}", boardGame1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(request))
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content").value(request.content()));
     }
+
+    @Test
+    @DisplayName("[사용자는 보드게임 상세정보를 조회할 수 있다]")
+    void getBoardGame() throws Exception {
+        //given
+        Tip tip = Tip.of(boardGame1.getId(), user.getId(), "꿀팁입니다");
+        tipRepository.save(tip);
+
+        //then
+        mockMvc.perform(
+                get("/api/v1/board-games/{boardGameId}", boardGame1.getId()))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.boardGameId")
+                    .value(boardGame1.getId()),
+                jsonPath("$.name")
+                    .value(boardGame1.getTitle()),
+                jsonPath("$.description")
+                    .value(boardGame1.getDescription()),
+                jsonPath("$.categories[0]")
+                    .value(boardGame1.getCategories().get(0).getCategory().getDescription()),
+                jsonPath("$.difficulty")
+                    .value(boardGame1.getDifficulty().getDescription()),
+                jsonPath("$.minParticipants")
+                    .value(boardGame1.getMinParticipants()),
+                jsonPath("$.maxParticipants")
+                    .value(boardGame1.getMaxParticipants()),
+                jsonPath("$.fromPlayTime")
+                    .value(boardGame1.getFromPlayTime()),
+                jsonPath("$.toPlayTime")
+                    .value(boardGame1.getToPlayTime()),
+                jsonPath("$.wishCount")
+                    .value(boardGame1.getWishCount()),
+                jsonPath("$.imageUrl")
+                    .value(boardGame1.getMainImageUrl()),
+                jsonPath("$.tips[0].nickname")
+                    .value(user.getNickname()),
+                jsonPath("$.tips[0].profileImageUrl")
+                    .value(user.getProfileImageUrl()),
+                jsonPath("$.tips[0].content")
+                    .value(tip.getContent())
+            );
+    }
+
 
 }

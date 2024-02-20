@@ -27,4 +27,20 @@ public class UserFixture {
         );
     }
 
+    public static User getUserFixture2(String providerId, String imageUrl) {
+
+        String provider = OAuthProvider.KAKAO.getType();
+        return User.of(
+            "abc12345678@naver.com",
+            "김강훈",
+            "macbook",
+            OAuthProvider.KAKAO.getType(),
+            providerId,
+            imageUrl,
+            2000,
+            AgeGroup.of("20~29", provider),
+            Gender.of("male", provider)
+        );
+    }
+
 }

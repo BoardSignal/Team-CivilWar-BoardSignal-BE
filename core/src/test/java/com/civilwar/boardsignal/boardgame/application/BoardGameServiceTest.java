@@ -1,11 +1,15 @@
 package com.civilwar.boardsignal.boardgame.application;
 
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.FAMILY;
+import static com.civilwar.boardsignal.boardgame.domain.constant.Category.PARTY;
 import static com.civilwar.boardsignal.boardgame.domain.constant.Category.WAR;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.AlREADY_TIP_ADDED;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
@@ -20,13 +24,15 @@ import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
-import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -51,6 +57,9 @@ class BoardGameServiceTest {
 
     @Mock
     private TipRepository tipRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private WishRepository wishRepository;
@@ -193,7 +202,7 @@ class BoardGameServiceTest {
         ThrowingCallable when = () -> boardGameService.wishBoardGame(user, boardGame.getId());
         assertThatThrownBy(when)
             .isInstanceOf(NotFoundException.class)
-            .hasMessageContaining(BoardGameErrorCode.NOT_FOUND_BOARD_GAME.getMessage());
+            .hasMessageContaining(NOT_FOUND_BOARD_GAME.getMessage());
     }
 
     @Test
@@ -237,7 +246,83 @@ class BoardGameServiceTest {
         ThrowingCallable when = () -> boardGameService.addTip(user, boardGame.getId(), request);
         assertThatThrownBy(when)
             .isInstanceOf(ValidationException.class)
-            .hasMessageContaining(BoardGameErrorCode.AlREADY_TIP_ADDED.getMessage());
+            .hasMessageContaining(AlREADY_TIP_ADDED.getMessage());
+    }
+
+    @Test
+    @DisplayName("[보드게임 상세정보를 조회할 수 있다.]")
+    void getBoardGame() {
+        /**
+         * 두명의 회원이 한 보드게임에 공략을 남긴 상황
+         * 보드게임 상세조회 시 공략 두개까지 조회되어야함
+         */
+        //given
+        User user1 = UserFixture.getUserFixture("provider", "hhtps~");
+        User user2 = UserFixture.getUserFixture2("provider2", "https2~");
+        ReflectionTestUtils.setField(user1, "id", 1L);
+        ReflectionTestUtils.setField(user2, "id", 2L);
+
+        BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
+        BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(PARTY);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, partyGame));
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Tip tip1 = Tip.of(boardGame.getId(), 1L, "꿀팁1");
+        Tip tip2 = Tip.of(boardGame.getId(), 2L, "꿀팁2");
+        ReflectionTestUtils.setField(
+            tip1,
+            "createdAt",
+            LocalDateTime.of(2024, 1, 1, 15, 30)
+        );
+        ReflectionTestUtils.setField(
+            tip2,
+            "createdAt",
+            LocalDateTime.of(2024, 1, 1, 16, 30)
+        );
+
+        given(boardGameQueryRepository.findById(boardGame.getId()))
+            .willReturn(Optional.of(boardGame));
+        given(tipRepository.findAllByBoardGameId(boardGame.getId()))
+            .willReturn(List.of(tip1, tip2));
+        given(userRepository.findAllInIds(List.of(1L, 2L)))
+            .willReturn(List.of(user1, user2));
+
+        //when
+        GetBoardGameResponse resposne = boardGameService.getBoardGame(boardGame.getId());
+        String firstTip = resposne.tips().get(0).content();
+        String secondTip = resposne.tips().get(1).content();
+
+        //then
+        assertAll(
+            () -> assertThat(resposne.name()).isEqualTo(boardGame.getTitle()),
+            () -> assertThat(resposne.categories()).hasSize(2),
+            () -> assertThat(resposne.categories()).contains(
+                warGame.getCategory().getDescription()),
+            () -> assertThat(resposne.categories()).contains(
+                partyGame.getCategory().getDescription()),
+            () -> assertThat(resposne.tips()).hasSize(2),
+            () -> assertThat(firstTip).isEqualTo(tip1.getContent()),
+            () -> assertThat(secondTip).isEqualTo(tip2.getContent()),
+            () -> assertThat(resposne.tips().get(0).nickname()).isEqualTo(user1.getNickname()),
+            () -> assertThat(resposne.tips().get(1).nickname()).isEqualTo(user2.getNickname())
+        );
+    }
+
+    @Test
+    @DisplayName("[존재하지 않는 보드게임을 조회하려하면 예외가 발생한다]")
+    void getBoardGameNotExist() {
+        //given
+        given(boardGameQueryRepository.findById(anyLong()))
+            .willReturn(Optional.empty());
+
+        //when
+        ThrowingCallable when = () -> boardGameService.getBoardGame(1L);
+
+        //then
+        assertThatThrownBy(when)
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(NOT_FOUND_BOARD_GAME.getMessage());
     }
 
 }

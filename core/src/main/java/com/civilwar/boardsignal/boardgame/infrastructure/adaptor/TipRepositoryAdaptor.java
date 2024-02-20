@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.infrastructure.repository.TipJpaRepository;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,5 +28,10 @@ public class TipRepositoryAdaptor implements TipRepository {
     @Override
     public void saveAll(Collection<Tip> tips) {
         tipJpaRepository.saveAll(tips);
+    }
+
+    @Override
+    public List<Tip> findAllByBoardGameId(Long boardGameId) {
+        return tipJpaRepository.findAllByBoardGameId(boardGameId);
     }
 }

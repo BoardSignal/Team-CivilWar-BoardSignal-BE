@@ -52,6 +52,6 @@ public class BoardGameFixture {
     }
 
     public static Tip getTip(Long userId, Long boardGameId, String content) {
-        return Tip.of(userId, boardGameId, content);
+        return Tip.of(boardGameId, userId, content);
     }
 }
