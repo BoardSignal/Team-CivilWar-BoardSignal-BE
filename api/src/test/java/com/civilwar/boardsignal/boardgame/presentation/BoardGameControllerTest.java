@@ -137,36 +137,37 @@ class BoardGameControllerTest extends ApiTestSupport {
         //then
         mockMvc.perform(
                 get("/api/v1/board-games/{boardGameId}", boardGame1.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.boardGameId")
-                .value(boardGame1.getId()))
-            .andExpect(jsonPath("$.name")
-                .value(boardGame1.getTitle()))
-            .andExpect(jsonPath("$.description")
-                .value(boardGame1.getDescription()))
-            .andExpect(jsonPath("$.categories[0]")
-                .value(boardGame1.getCategories().get(0).getCategory().getDescription()))
-            .andExpect(jsonPath("$.difficulty")
-                .value(boardGame1.getDifficulty().getDescription()))
-            .andExpect(jsonPath("$.minParticipants")
-                .value(boardGame1.getMinParticipants()))
-            .andExpect(jsonPath("$.maxParticipants")
-                .value(boardGame1.getMaxParticipants()))
-            .andExpect(jsonPath("$.fromPlayTime")
-                .value(boardGame1.getFromPlayTime()))
-            .andExpect(jsonPath("$.toPlayTime")
-                .value(boardGame1.getToPlayTime()))
-            .andExpect(jsonPath("$.wishCount")
-                .value(boardGame1.getWishCount()))
-            .andExpect(jsonPath("$.imageUrl")
-                .value(boardGame1.getMainImageUrl()))
-            .andExpect(jsonPath("$.tips[0].nickname")
-                .value(user.getNickname()))
-            .andExpect(jsonPath("$.tips[0].profileImageUrl")
-                .value(user.getProfileImageUrl()))
-            .andExpect(jsonPath("$.tips[0].content")
-                .value(tip.getContent()));
-
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.boardGameId")
+                    .value(boardGame1.getId()),
+                jsonPath("$.name")
+                    .value(boardGame1.getTitle()),
+                jsonPath("$.description")
+                    .value(boardGame1.getDescription()),
+                jsonPath("$.categories[0]")
+                    .value(boardGame1.getCategories().get(0).getCategory().getDescription()),
+                jsonPath("$.difficulty")
+                    .value(boardGame1.getDifficulty().getDescription()),
+                jsonPath("$.minParticipants")
+                    .value(boardGame1.getMinParticipants()),
+                jsonPath("$.maxParticipants")
+                    .value(boardGame1.getMaxParticipants()),
+                jsonPath("$.fromPlayTime")
+                    .value(boardGame1.getFromPlayTime()),
+                jsonPath("$.toPlayTime")
+                    .value(boardGame1.getToPlayTime()),
+                jsonPath("$.wishCount")
+                    .value(boardGame1.getWishCount()),
+                jsonPath("$.imageUrl")
+                    .value(boardGame1.getMainImageUrl()),
+                jsonPath("$.tips[0].nickname")
+                    .value(user.getNickname()),
+                jsonPath("$.tips[0].profileImageUrl")
+                    .value(user.getProfileImageUrl()),
+                jsonPath("$.tips[0].content")
+                    .value(tip.getContent())
+            );
     }
 
 
