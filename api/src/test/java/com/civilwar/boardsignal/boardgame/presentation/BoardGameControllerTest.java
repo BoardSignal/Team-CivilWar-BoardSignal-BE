@@ -1,6 +1,8 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,7 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -33,13 +34,14 @@ class BoardGameControllerTest extends ApiTestSupport {
     @BeforeEach
     void setUp() {
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(Category.WAR);
+        BoardGameCategory wargame2 = BoardGameFixture.getBoardGameCategory(Category.WAR);
         BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(Category.PARTY);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(
             Category.FAMILY
         );
 
         boardGame1 = BoardGameFixture.getBoardGame(List.of(warGame, partyGame)); // 난이도 -> 보통
-        boardGame2 = BoardGameFixture.getBoardGame2(List.of(warGame, familyGame)); // 난이도 -> 어려움
+        boardGame2 = BoardGameFixture.getBoardGame2(List.of(wargame2, familyGame)); // 난이도 -> 어려움
 
         boardGameRepository.saveAll(List.of(boardGame1, boardGame2));
     }
@@ -51,7 +53,7 @@ class BoardGameControllerTest extends ApiTestSupport {
         params.add("size", "1");
         params.add("difficulty", "어려움");
         params.put("categories", List.of("워게임", "가족게임"));
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/board-games")
+        mockMvc.perform(get("/api/v1/board-games")
                 .params(params))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.boardGamesInfos[0].name").value(boardGame2.getTitle()))
@@ -79,14 +81,14 @@ class BoardGameControllerTest extends ApiTestSupport {
     void wishBoardGame() throws Exception {
         int prevWishCount = boardGame1.getWishCount();
         //찜 등록
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
-                    boardGame1.getId())
+        mockMvc.perform(post("/api/v1/board-games/wish/{boardGameId}",
+                boardGame1.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount + 1));
         //찜 취소
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/wish/{boardGameId}",
-                    boardGame1.getId())
+        mockMvc.perform(post("/api/v1/board-games/wish/{boardGameId}",
+                boardGame1.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount));
@@ -97,8 +99,8 @@ class BoardGameControllerTest extends ApiTestSupport {
     void addTip() throws Exception {
         ApiAddTipRequest request = new ApiAddTipRequest("꿀팁입니다.");
 
-        mockMvc.perform(MockMvcRequestBuilders.post(
-                    "/api/v1/board-games/tip/{boardGameId}", boardGame1.getId())
+        mockMvc.perform(post(
+                "/api/v1/board-games/tip/{boardGameId}", boardGame1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(request))
                 .header(AUTHORIZATION, accessToken))
@@ -106,4 +108,34 @@ class BoardGameControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.content").value(request.content()));
     }
 
+    @Test
+    @DisplayName("[사용자는 검색 키워드를 통해 원하는 보드게임 목록을 조회할 수 있다.]")
+    void searchByKeyword() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("size", "1");
+        params.add("searchKeyword", boardGame1.getTitle().substring(0, 1));
+        mockMvc.perform(get("/api/v1/board-games")
+                .params(params))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.boardGamesInfos[0].name")
+                .value(boardGame1.getTitle()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].categories[0]")
+                .value(boardGame2.getCategories().get(0).getCategory().getDescription()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].difficulty")
+                .value(boardGame1.getDifficulty().getDescription()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].minParticipants")
+                .value(boardGame1.getMinParticipants()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].maxParticipants")
+                .value(boardGame1.getMaxParticipants()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].fromPlayTime")
+                .value(boardGame1.getFromPlayTime()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].toPlayTime")
+                .value(boardGame1.getToPlayTime()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].wishCount")
+                .value(boardGame1.getWishCount()))
+            .andExpect(jsonPath("$.boardGamesInfos[0].imageUrl")
+                .value(boardGame1.getMainImageUrl()))
+            .andExpect(jsonPath("$.size").value(1))
+            .andExpect(jsonPath("$.hasNext").value(false));
+    }
 }
