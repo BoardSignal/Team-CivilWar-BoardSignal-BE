@@ -1,13 +1,17 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
+import static com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper.toAddTipRequest;
+import static com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper.toApiGetBoardGameResponse;
+
 import com.civilwar.boardsignal.boardgame.application.BoardGameService;
-import com.civilwar.boardsignal.boardgame.dto.mapper.BoardGameApiMapper;
 import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
+import com.civilwar.boardsignal.boardgame.dto.response.ApiGetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,8 +70,20 @@ public class BoardGameController {
         @PathVariable("boardGameId") Long boardGameId,
         @RequestBody ApiAddTipRequest request
     ) {
-        AddTipRequest addTipRequest = BoardGameApiMapper.toAddTipRequest(request);
+        AddTipRequest addTipRequest = toAddTipRequest(request);
         AddTipResposne response = boardGameService.addTip(user, boardGameId, addTipRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "보드게임 상세정보 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/{boardGameId}")
+    public ResponseEntity<ApiGetBoardGameResponse> getBoard(
+        @PathVariable("boardGameId") Long boardGameId
+    ) {
+        GetBoardGameResponse boardGame = boardGameService.getBoardGame(boardGameId);
+        // 서비스 응답 dto -> api 응답 dto 변환
+        ApiGetBoardGameResponse response = toApiGetBoardGameResponse(boardGame);
         return ResponseEntity.ok(response);
     }
 }
