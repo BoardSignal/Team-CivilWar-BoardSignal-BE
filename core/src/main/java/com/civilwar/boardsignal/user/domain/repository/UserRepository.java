@@ -18,4 +18,6 @@ public interface UserRepository {
     Optional<User> findByProviderId(String providerId);
 
     boolean existsUserByProviderId(String providerId);
+
+    List<User> findAllInIds(List<Long> ids);
 }

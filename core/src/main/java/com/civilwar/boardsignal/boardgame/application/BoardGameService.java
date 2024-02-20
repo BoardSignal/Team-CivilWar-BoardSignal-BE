@@ -15,10 +15,15 @@ import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.GetTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -32,6 +37,7 @@ public class BoardGameService {
     private final BoardGameQueryRepository boardGameQueryRepository;
     private final WishRepository wishRepository;
     private final TipRepository tipRepository;
+    private final UserRepository userRepository;
 
     private void validateTipExists(User user) { // 이미 공략을 등록한 적이 있는 지 검증
         tipRepository.findByUserId(user.getId())
@@ -85,5 +91,27 @@ public class BoardGameService {
         Tip savedTip = tipRepository.save(tip);
 
         return new AddTipResposne(savedTip.getContent());
+    }
+
+    @Transactional(readOnly = true)
+    public GetBoardGameResponse getBoardGame(Long boardGameId) {
+        BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
+
+        List<Tip> tips = tipRepository.findAllByBoardGameId(boardGameId);
+
+        List<Long> userIds = tips.stream()
+            .map(Tip::getUserId)
+            .toList();
+
+        List<User> users = userRepository.findAllInIds(userIds);
+
+        List<GetTipResposne> tipResponse = tips.stream()
+            .flatMap(tip -> users.stream()
+                .filter(user -> Objects.equals(tip.getUserId(), user.getId()))
+                .map(user -> BoardGameMapper.toGetTipResponse(user, tip)))
+            .toList();
+
+        return BoardGameMapper.toGetBoardGameResponse(boardGame, tipResponse);
     }
 }
