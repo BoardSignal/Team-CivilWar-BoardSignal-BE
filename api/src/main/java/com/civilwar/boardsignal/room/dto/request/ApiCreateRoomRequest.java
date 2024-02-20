@@ -15,7 +15,8 @@ public record ApiCreateRoomRequest(
     String subwayLine,
     String subwayStation,
     String place,
-    List<String> categories
+    List<String> categories,
+    boolean isAllowedOppositeGender
 ) {
 
 }
