@@ -33,10 +33,11 @@ public class BoardGameController {
 
     private final BoardGameService boardGameService;
 
+    @Operation(summary = "보드게임 목록 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping
     public ResponseEntity<BoardGamePageResponse<GetAllBoardGamesResponse>> getAllBoardGames(
-        @Parameter(hidden = true) BoardGameSearchCondition condition,
+        BoardGameSearchCondition condition,
         Pageable pageable
     ) {
         BoardGamePageResponse<GetAllBoardGamesResponse> boardGames = boardGameService.getAllBoardGames(
@@ -48,6 +49,7 @@ public class BoardGameController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/wish/{boardGameId}")
     public ResponseEntity<WishBoardGameResponse> wishBoardGame(
+        @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
         @PathVariable("boardGameId") Long boardGameId
     ) {
@@ -59,6 +61,7 @@ public class BoardGameController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/tip/{boardGameId}")
     public ResponseEntity<AddTipResposne> addTip(
+        @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
         @PathVariable("boardGameId") Long boardGameId,
         @RequestBody ApiAddTipRequest request
