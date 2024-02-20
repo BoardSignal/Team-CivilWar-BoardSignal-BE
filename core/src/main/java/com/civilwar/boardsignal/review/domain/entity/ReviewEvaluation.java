@@ -1,10 +1,12 @@
 package com.civilwar.boardsignal.review.domain.entity;
 
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
+import static jakarta.persistence.EnumType.*;
 
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +37,7 @@ public class ReviewEvaluation {
     private Review review;
 
     @Column(name = "REVIEW_EVALUATION_CONTENT")
+    @Enumerated(STRING)
     private ReviewContent content;
 
     @Column(name = "REVIEW_IS_RECOMMENDED")
