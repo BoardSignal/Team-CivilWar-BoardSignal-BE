@@ -287,10 +287,8 @@ class BoardGameServiceTest {
             .willReturn(Optional.of(boardGame));
         given(tipRepository.findAllByBoardGameId(boardGame.getId()))
             .willReturn(List.of(tip1, tip2));
-        given(userRepository.findById(user1.getId()))
-            .willReturn(Optional.of(user1));
-        given(userRepository.findById(user2.getId()))
-            .willReturn(Optional.of(user2));
+        given(userRepository.findAllInIds(List.of(1L, 2L)))
+            .willReturn(List.of(user1, user2));
 
         //when
         GetBoardGameResponse resposne = boardGameService.getBoardGame(boardGame.getId());

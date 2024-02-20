@@ -2,7 +2,6 @@ package com.civilwar.boardsignal.boardgame.application;
 
 import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.AlREADY_TIP_ADDED;
 import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
-import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_TIP_USER;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
@@ -24,6 +23,7 @@ import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -99,13 +99,18 @@ public class BoardGameService {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
 
         List<Tip> tips = tipRepository.findAllByBoardGameId(boardGameId);
-        List<GetTipResposne> tipResponse = tips.stream()
-            .map(tip -> {
-                User user = userRepository.findById(tip.getUserId())
-                    .orElseThrow(() -> new NotFoundException(NOT_FOUND_TIP_USER));
-                return BoardGameMapper.toGetTipResponse(user, tip);
-            })
+
+        List<Long> userIds = tips.stream()
+            .map(Tip::getUserId)
             .toList();
+
+        List<User> users = userRepository.findAllInIds(userIds);
+
+        List<GetTipResposne> tipResponse = tips.stream()
+                .flatMap(tip -> users.stream()
+                    .filter(user -> Objects.equals(tip.getUserId(), user.getId()))
+                    .map(user -> BoardGameMapper.toGetTipResponse(user, tip)))
+                .toList();
 
         return BoardGameMapper.toGetBoardGameResponse(boardGame, tipResponse);
     }
