@@ -116,26 +116,28 @@ class BoardGameControllerTest extends ApiTestSupport {
         params.add("searchKeyword", boardGame1.getTitle().substring(0, 1));
         mockMvc.perform(get("/api/v1/board-games")
                 .params(params))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.boardGamesInfos[0].name")
-                .value(boardGame1.getTitle()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].categories[0]")
-                .value(boardGame2.getCategories().get(0).getCategory().getDescription()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].difficulty")
-                .value(boardGame1.getDifficulty().getDescription()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].minParticipants")
-                .value(boardGame1.getMinParticipants()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].maxParticipants")
-                .value(boardGame1.getMaxParticipants()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].fromPlayTime")
-                .value(boardGame1.getFromPlayTime()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].toPlayTime")
-                .value(boardGame1.getToPlayTime()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].wishCount")
-                .value(boardGame1.getWishCount()))
-            .andExpect(jsonPath("$.boardGamesInfos[0].imageUrl")
-                .value(boardGame1.getMainImageUrl()))
-            .andExpect(jsonPath("$.size").value(1))
-            .andExpect(jsonPath("$.hasNext").value(false));
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.boardGamesInfos[0].name")
+                    .value(boardGame1.getTitle()),
+                jsonPath("$.boardGamesInfos[0].categories[0]")
+                    .value(boardGame2.getCategories().get(0).getCategory().getDescription()),
+                jsonPath("$.boardGamesInfos[0].difficulty")
+                    .value(boardGame1.getDifficulty().getDescription()),
+                jsonPath("$.boardGamesInfos[0].minParticipants")
+                    .value(boardGame1.getMinParticipants()),
+                jsonPath("$.boardGamesInfos[0].maxParticipants")
+                    .value(boardGame1.getMaxParticipants()),
+                jsonPath("$.boardGamesInfos[0].fromPlayTime")
+                    .value(boardGame1.getFromPlayTime()),
+                jsonPath("$.boardGamesInfos[0].toPlayTime")
+                    .value(boardGame1.getToPlayTime()),
+                jsonPath("$.boardGamesInfos[0].wishCount")
+                    .value(boardGame1.getWishCount()),
+                jsonPath("$.boardGamesInfos[0].imageUrl")
+                    .value(boardGame1.getMainImageUrl()),
+                jsonPath("$.size").value(1),
+                jsonPath("$.hasNext").value(false)
+            );
     }
 }
