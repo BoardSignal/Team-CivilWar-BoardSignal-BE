@@ -22,7 +22,7 @@ class ReviewJpaRepositoryTest extends DataJpaTestSupport {
     private ReviewJpaRepository reviewJpaRepository;
 
     @Test
-    @DisplayName("[사용자가 받은 리뷰 별 평가를 갖고온다 (쿼리 확인용)]")
+    @DisplayName("[사용자가 받은 리뷰 별 평가를 갖고온다]")
     void findReviewsByRevieweeIdTest() {
 
         //given
