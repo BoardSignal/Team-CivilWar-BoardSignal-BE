@@ -28,22 +28,36 @@ public class Participant {
     @Column(name = "PARTICIPANT_ROOM_ID")
     private Long roomId;
 
+    @Column(name = "PARTICIPANT_IS_ALLOWED_OPPOSITE_GENDER")
+    private boolean isAllowedOppositeGender;
+
+    @Column(name = "PARTICIPANT_IS_LEADER")
+    private boolean isLeader;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Participant(
         Long userId,
-        Long roomId
+        Long roomId,
+        boolean isAllowedOppositeGender,
+        boolean isLeader
     ) {
         this.userId = userId;
         this.roomId = roomId;
+        this.isAllowedOppositeGender = isAllowedOppositeGender;
+        this.isLeader = isLeader;
     }
 
     public static Participant of(
         Long userId,
-        Long roomId
+        Long roomId,
+        boolean isAllowedOppositeGender,
+        boolean isLeader
     ) {
         return Participant.builder()
             .userId(userId)
             .roomId(roomId)
+            .isAllowedOppositeGender(isAllowedOppositeGender)
+            .isLeader(isLeader)
             .build();
     }
 }
