@@ -4,7 +4,6 @@ import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import java.io.IOException;
 import java.util.List;
@@ -42,12 +41,8 @@ public class RoomFixture {
         );
     }
 
-    public static CreateRoomResponse getCreateRoomResponse() {
-        return new CreateRoomResponse(1L);
-    }
-
     public static Participant getParticipant() {
-        return Participant.of(1L, 1L, true, true);
+        return Participant.of(1L, 1L, true);
     }
 
 }
