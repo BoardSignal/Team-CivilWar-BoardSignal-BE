@@ -11,9 +11,12 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RoomMapper {
+public final class RoomMapper {
 
-    public static Room toRoom(CreateRoomRequest request) {
+    public static Room toRoom(
+        String roomImageUrl,
+        CreateRoomRequest request
+    ) {
         DaySlot daySlot = DaySlot.of(request.day());
         TimeSlot timeSlot = TimeSlot.of(request.time());
         List<Category> categories = request.categories().stream()
@@ -33,6 +36,8 @@ public class RoomMapper {
             request.startTime(),
             request.minAge(),
             request.maxAge(),
+            roomImageUrl,
+            request.isAllowedOppositeGender(),
             categories
         );
     }

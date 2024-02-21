@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.room.dto.response;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public record CreateRoomRequest(
     String roomTitle,
@@ -15,7 +16,9 @@ public record CreateRoomRequest(
     String subwayLine,
     String subwayStation,
     String place,
-    List<String> categories
+    List<String> categories,
+    boolean isAllowedOppositeGender,
+    MultipartFile image
 ) {
 
 }
