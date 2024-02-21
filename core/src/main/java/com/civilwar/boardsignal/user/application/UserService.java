@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.user.application;
 
+import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final WishRepository wishRepository;
     private final ImageRepository imageRepository;
     private final UserReviewFacade userReviewFacade;
 
@@ -51,10 +53,13 @@ public class UserService {
         User findUser = userRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_USER));
 
+        //찜 갯수 조회
+        int wishCount = wishRepository.countWishByUserId(id);
+
         //유저와 관련된 리뷰 정보 조회
         List<UserReviewResponse> userReviews = userReviewFacade.getUserReview(id);
 
-        return UserMapper.toUserProfileResponse(findUser, userReviews);
+        return UserMapper.toUserProfileResponse(findUser, userReviews, wishCount);
     }
 
 }
