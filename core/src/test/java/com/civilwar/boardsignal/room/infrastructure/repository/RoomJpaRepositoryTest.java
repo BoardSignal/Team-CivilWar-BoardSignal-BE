@@ -29,8 +29,8 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     private MeetingInfoJpaRepository meetingInfoJpaRepository;
 
     @Test
-    @DisplayName("[유저는 자신이 과거의 참여했거나, 현재 참여한 모든 room을 조회 할 수 있다]")
-    void findMyGameTest() throws IOException {
+    @DisplayName("[유저는 자신이 참여한 모든 room을 조회하며, roomCategory와 meetingInfo를 fetch loading 한다.]")
+    void findMyFixRoomTest() throws IOException {
         //given
         Long user1 = 1L;
         Long user2 = 2L;
@@ -41,10 +41,10 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
 
         //user1 -> room1 참여
         Participant participant = Participant.of(user1, room.getId(), true);
-        //user2 -> room2 참여
-        Participant participant2 = Participant.of(user2, room2.getId(), true);
         //user1 -> room2 참여
-        Participant participant3 = Participant.of(user1, room2.getId(), false);
+        Participant participant2 = Participant.of(user1, room2.getId(), true);
+        //user2 -> room2 참여
+        Participant participant3 = Participant.of(user2, room2.getId(), false);
         participantJpaRepository.save(participant);
         participantJpaRepository.save(participant2);
         participantJpaRepository.save(participant3);
@@ -57,14 +57,14 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         meetingInfoJpaRepository.save(meetingInfo);
         meetingInfoJpaRepository.save(meetingInfo2);
 
-        room.updateMeetingInfo(meetingInfo);
-        room2.updateMeetingInfo(meetingInfo2);
+        room.fixRoom(meetingInfo);
+        room2.fixRoom(meetingInfo2);
         roomJpaRepository.save(room);
         roomJpaRepository.save(room2);
 
         //when
-        List<Room> userGame1 = roomJpaRepository.findMyGame(user1);
-        List<Room> userGame2 = roomJpaRepository.findMyGame(user2);
+        List<Room> userGame1 = roomJpaRepository.findMyFixRoom(user1);
+        List<Room> userGame2 = roomJpaRepository.findMyFixRoom(user2);
 
         Room room1 = userGame1.get(0);
         //fetch loading 확인
@@ -76,5 +76,37 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         assertThat(userGame2).hasSize(1);
         assertThat(loaded1).isTrue();
         assertThat(loaded2).isTrue();
+    }
+
+    @Test
+    @DisplayName("[자신이 참가한 30개의 room중, fix된 15개의 room만 갖고온다]")
+    void findMyFixRoomTest2() throws IOException {
+        //given
+        Long user1 = 1L;
+
+        for (int i = 0; i < 30; i++) {
+            //방 생성
+            Room room = RoomFixture.getRoom();
+            roomJpaRepository.save(room);
+            Participant participant = Participant.of(user1, room.getId(), true);
+            participantJpaRepository.save(participant);
+
+            if (i % 2 == 0) {
+                //모임 확정
+                MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+                    LocalDateTime.of(2024, 2, 22, 19, 0, 0));
+                meetingInfoJpaRepository.save(meetingInfo);
+                room.fixRoom(meetingInfo);
+                roomJpaRepository.save(room);
+            }
+        }
+
+        //when
+        List<Room> all = roomJpaRepository.findAll();
+        List<Room> userGame1 = roomJpaRepository.findMyFixRoom(user1);
+
+        //then
+        assertThat(all).hasSize(30);
+        assertThat(userGame1).hasSize(15);
     }
 }

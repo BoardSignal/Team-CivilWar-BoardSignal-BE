@@ -15,7 +15,8 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
         + "from Room as r "
         + "join Participant as p "
         + "on r.id = p.roomId "
-        + "where p.userId=:userId ")
-    List<Room> findMyGame(@Param("userId") Long id);
+        + "where p.userId=:userId "
+        + "and r.status='FIX'")
+    List<Room> findMyFixRoom(@Param("userId") Long userId);
 
 }
