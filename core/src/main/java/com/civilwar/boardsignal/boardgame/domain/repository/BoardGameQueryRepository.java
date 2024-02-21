@@ -12,4 +12,6 @@ public interface BoardGameQueryRepository {
 
     Slice<BoardGame> findAll(BoardGameSearchCondition condition, Pageable pageable);
 
+    Optional<BoardGame> findByIdWithLock(Long id);
+
 }
