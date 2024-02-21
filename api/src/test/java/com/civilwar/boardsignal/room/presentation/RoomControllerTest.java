@@ -114,7 +114,7 @@ class RoomControllerTest extends ApiTestSupport {
             //모임 확정
             MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
             meetingInfoRepository.save(meetingInfo);
-            room.updateMeetingInfo(meetingInfo);
+            room.fixRoom(meetingInfo);
             roomRepository.save(room);
         }
 
@@ -150,7 +150,7 @@ class RoomControllerTest extends ApiTestSupport {
             //모임 확정
             MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(after);
             meetingInfoRepository.save(meetingInfo);
-            room.updateMeetingInfo(meetingInfo);
+            room.fixRoom(meetingInfo);
             roomRepository.save(room);
         }
 

@@ -20,7 +20,7 @@ public class RoomFixture {
     public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime) throws IOException {
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(meetingTime);
         Room room = getRoom();
-        room.updateMeetingInfo(meetingInfo);
+        room.fixRoom(meetingInfo);
 
         return room;
     }

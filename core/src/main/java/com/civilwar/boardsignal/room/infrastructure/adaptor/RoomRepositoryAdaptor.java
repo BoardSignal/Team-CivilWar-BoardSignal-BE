@@ -31,7 +31,7 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
-    public List<Room> findMyGame(Long id) {
-        return roomJpaRepository.findMyGame(id);
+    public List<Room> findMyFixRoom(Long userId) {
+        return roomJpaRepository.findMyFixRoom(userId);
     }
 }

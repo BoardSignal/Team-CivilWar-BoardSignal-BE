@@ -13,5 +13,5 @@ public interface RoomRepository {
 
     Optional<Room> findById(Long id);
 
-    List<Room> findMyGame(Long id);
+    List<Room> findMyFixRoom(Long userId);
 }
