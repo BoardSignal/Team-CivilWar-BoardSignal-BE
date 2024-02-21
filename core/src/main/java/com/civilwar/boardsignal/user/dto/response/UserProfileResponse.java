@@ -10,7 +10,8 @@ public record UserProfileResponse(
     String ageGroup,
     String profileImageUrl,
     double mannerScore,
-    List<UserReviewResponse> reviews
+    List<UserReviewResponse> reviews,
+    int wishCount
 ) {
 
 }

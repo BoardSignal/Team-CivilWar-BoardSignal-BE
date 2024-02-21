@@ -16,8 +16,11 @@ public final class UserMapper {
         return new UserModifyResponse(user.getId());
     }
 
-    public static UserProfileResponse toUserProfileResponse(User user,
-        List<UserReviewResponse> reviews) {
+    public static UserProfileResponse toUserProfileResponse(
+        User user,
+        List<UserReviewResponse> reviews,
+        int wishCount
+        ) {
         return new UserProfileResponse(
             user.getNickname(),
             user.getSignal(),
@@ -28,7 +31,8 @@ public final class UserMapper {
             user.getAgeGroup().getDescription(),
             user.getProfileImageUrl(),
             user.getMannerScore(),
-            reviews
+            reviews,
+            wishCount
         );
     }
 
