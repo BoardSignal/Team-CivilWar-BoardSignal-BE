@@ -5,6 +5,7 @@ import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
@@ -31,7 +32,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "ROOM_TABLE")
-public class Room {
+public class Room extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -88,7 +89,7 @@ public class Room {
     private MeetingInfo meetingInfo;
 
     @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
-    private List<RoomCategory> roomCategories = new ArrayList<>();
+    private final List<RoomCategory> roomCategories = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Room(
@@ -163,5 +164,10 @@ public class Room {
             .isAllowedOppositeGender(isAllowedOppositeGender)
             .roomCategories(roomCategories)
             .build();
+    }
+
+    public void updateMeetingInfo(MeetingInfo meetingInfo) {
+        this.meetingInfo = meetingInfo;
+        this.status = RoomStatus.FIX;
     }
 }
