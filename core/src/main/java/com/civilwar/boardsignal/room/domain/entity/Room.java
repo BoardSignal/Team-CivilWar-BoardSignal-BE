@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.room.domain.entity;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
+import static jakarta.persistence.EnumType.*;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.base.BaseEntity;
@@ -11,6 +12,7 @@ import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -52,6 +54,7 @@ public class Room extends BaseEntity {
     private int maxParticipants;
 
     @Column(name = "ROOM_STATUS")
+    @Enumerated(STRING)
     private RoomStatus status;
 
     @Column(name = "ROOM_PLACE_NAME")
@@ -64,9 +67,11 @@ public class Room extends BaseEntity {
     private String subwayStation;
 
     @Column(name = "ROOM_DAY_SLOT")
+    @Enumerated(STRING)
     private DaySlot daySlot;
 
     @Column(name = "ROOM_TIME_SLOT")
+    @Enumerated(STRING)
     private TimeSlot timeSlot;
 
     @Column(name = "ROOM_START_TIME")
@@ -166,7 +171,7 @@ public class Room extends BaseEntity {
             .build();
     }
 
-    public void updateMeetingInfo(MeetingInfo meetingInfo) {
+    public void fixRoom(MeetingInfo meetingInfo) {
         this.meetingInfo = meetingInfo;
         this.status = RoomStatus.FIX;
     }
