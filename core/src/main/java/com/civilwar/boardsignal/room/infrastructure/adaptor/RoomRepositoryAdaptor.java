@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.infrastructure.repository.RoomJpaRepository;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,5 +28,10 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     @Override
     public Optional<Room> findById(Long id) {
         return roomJpaRepository.findById(id);
+    }
+
+    @Override
+    public List<Room> findMyGame(Long id) {
+        return roomJpaRepository.findMyGame(id);
     }
 }
