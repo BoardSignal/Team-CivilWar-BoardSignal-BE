@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.room.application;
 
 import com.civilwar.boardsignal.image.domain.ImageRepository;
+import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
@@ -8,8 +9,17 @@ import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +30,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final ParticipantRepository participantRepository;
     private final ImageRepository imageRepository;
+    private final Supplier<LocalDateTime> now;
 
     @Transactional
     public CreateRoomResponse createRoom(User user, CreateRoomRequest request) {
@@ -36,6 +47,43 @@ public class RoomService {
         participantRepository.save(participant);
 
         return RoomMapper.toCreateRoomResponse(savedRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public RoomPageResponse<GetAllRoomResponse> findMyEndGame(Long userId, Pageable pageable) {
+
+        boolean hasNext = false;
+
+        //1. 내가 참여한 모든 room
+        List<Room> myGame = roomRepository.findMyGame(userId);
+
+        //2. 상태가 fix인 room
+        List<Room> myFixGame = myGame.stream()
+            .filter(room -> room.getStatus().equals(RoomStatus.FIX))
+            .toList();
+
+        //3. (모임 확정 day) < 현재 day 인 room
+        List<Room> myEndGame = new ArrayList<>(
+            myFixGame.stream()
+                .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
+                    .isBefore(now.get().toLocalDate())
+                ).toList()
+        );
+
+        //4. 내가 한 게임 전체 size > 요구 size -> 다음 페이지 존재
+        if (myEndGame.size() > pageable.getPageSize()) {
+            hasNext = true;
+        }
+
+        //5. size 크기만큼 cut
+        List<Room> resultList = myEndGame.stream()
+            .limit(pageable.getPageSize())
+            .toList();
+
+        //6. slice 변환
+        Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
+
+        return RoomMapper.toRoomPageResponse(result);
     }
 
 }
