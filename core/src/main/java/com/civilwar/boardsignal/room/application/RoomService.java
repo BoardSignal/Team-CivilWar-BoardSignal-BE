@@ -31,7 +31,6 @@ public class RoomService {
         Participant participant = Participant.of(
             user.getId(),
             savedRoom.getId(),
-            request.isAllowedOppositeGender(),
             true // 방 생성자가 방장여부는 true
         ); // 나중에 방 폭파 때 해당 방의 Participant 전부 삭제
         participantRepository.save(participant);

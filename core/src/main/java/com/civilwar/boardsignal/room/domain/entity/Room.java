@@ -25,7 +25,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -80,6 +80,9 @@ public class Room {
     @Column(name = "ROOM_IMAGE_URL")
     private String imageUrl;
 
+    @Column(name = "ROOM_IS_ALLOWED_OPPOSITE_GENDER")
+    private boolean isAllowedOppositeGender;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_MEETING_INFO_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private MeetingInfo meetingInfo;
@@ -102,6 +105,7 @@ public class Room {
         int minAge,
         int maxAge,
         @NonNull String imageUrl,
+        @NonNull boolean isAllowedOppositeGender,
         @NonNull List<Category> roomCategories
     ) {
         this.title = title;
@@ -118,6 +122,7 @@ public class Room {
         this.minAge = minAge;
         this.maxAge = maxAge;
         this.imageUrl = imageUrl;
+        this.isAllowedOppositeGender = isAllowedOppositeGender;
         roomCategories.forEach(category -> {
             RoomCategory roomCategory = RoomCategory.of(this, category);
             this.roomCategories.add(roomCategory);
@@ -138,6 +143,7 @@ public class Room {
         int minAge,
         int maxAge,
         String imageUrl,
+        boolean isAllowedOppositeGender,
         List<Category> roomCategories
     ) {
         return Room.builder()
@@ -154,6 +160,7 @@ public class Room {
             .minAge(minAge)
             .maxAge(maxAge)
             .imageUrl(imageUrl)
+            .isAllowedOppositeGender(isAllowedOppositeGender)
             .roomCategories(roomCategories)
             .build();
     }
