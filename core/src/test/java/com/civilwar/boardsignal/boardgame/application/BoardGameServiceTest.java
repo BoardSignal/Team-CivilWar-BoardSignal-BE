@@ -110,10 +110,6 @@ class BoardGameServiceTest {
     @Test
     @DisplayName("[조건을 만족하지 못하는 보드게임은 조회되지 않는다]")
     void findAllWithWrongCondition() {
-        BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
-        BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
-        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
-
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             "어려움",
             List.of(),
@@ -143,21 +139,15 @@ class BoardGameServiceTest {
         BoardGame boardGame = BoardGameFixture.getBoardGame(
             List.of(BoardGameFixture.getBoardGameCategory(WAR))
         );
-        int prevWishCount = boardGame.getWishCount();
         ReflectionTestUtils.setField(boardGame, "id", 1L);
 
         Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
 
-        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.of(boardGame));
+        given(boardGameQueryRepository.findByIdWithLock(1L)).willReturn(Optional.of(boardGame));
         given(
             wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
             Optional.empty());
         given(wishRepository.save(any(Wish.class))).willReturn(wish);
-
-        WishBoardGameResponse response = boardGameService.wishBoardGame(
-            user,
-            boardGame.getId()
-        );
 
         assertThat(boardGame.getWishCount()).isEqualTo(1);
     }
@@ -176,7 +166,7 @@ class BoardGameServiceTest {
 
         Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
 
-        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.of(boardGame));
+        given(boardGameQueryRepository.findByIdWithLock(1L)).willReturn(Optional.of(boardGame));
         given(
             wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
             Optional.of(wish));
@@ -197,9 +187,7 @@ class BoardGameServiceTest {
         );
         ReflectionTestUtils.setField(boardGame, "id", 1L);
 
-        Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
-
-        given(boardGameQueryRepository.findById(1L)).willReturn(Optional.empty());
+        given(boardGameQueryRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
 
         ThrowingCallable when = () -> boardGameService.wishBoardGame(user, boardGame.getId());
         assertThatThrownBy(when)
