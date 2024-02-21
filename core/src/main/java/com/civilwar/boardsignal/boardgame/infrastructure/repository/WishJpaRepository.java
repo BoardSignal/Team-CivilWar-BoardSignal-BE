@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WishJpaRepository extends JpaRepository<Wish, Long> {
 
     Optional<Wish> findByUserIdAndBoardGameId(Long userId, Long boardGameId);
+
+    int countWishByUserId(Long userId);
 }

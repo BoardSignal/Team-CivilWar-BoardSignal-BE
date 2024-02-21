@@ -33,4 +33,9 @@ public class WishRepositoryAdaptor implements WishRepository {
     public void deleteById(Long wishId) {
         wishJpaRepository.deleteById(wishId);
     }
+
+    @Override
+    public int countWishByUserId(Long userId) {
+        return wishJpaRepository.countWishByUserId(userId);
+    }
 }
