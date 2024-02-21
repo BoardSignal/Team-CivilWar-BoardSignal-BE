@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RoomApiMapper {
+public final class RoomApiMapper {
 
     public static CreateRoomRequest toCreateRoomRequest(
         MultipartFile image,

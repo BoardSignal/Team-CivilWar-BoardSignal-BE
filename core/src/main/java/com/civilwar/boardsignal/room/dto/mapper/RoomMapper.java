@@ -11,7 +11,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RoomMapper {
+public final class RoomMapper {
 
     public static Room toRoom(
         String roomImageUrl,
@@ -37,6 +37,7 @@ public class RoomMapper {
             request.minAge(),
             request.maxAge(),
             roomImageUrl,
+            request.isAllowedOppositeGender(),
             categories
         );
     }
