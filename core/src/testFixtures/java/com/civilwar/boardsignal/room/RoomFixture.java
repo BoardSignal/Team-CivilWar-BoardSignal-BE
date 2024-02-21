@@ -1,11 +1,13 @@
 package com.civilwar.boardsignal.room;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
+import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RoomFixture {
+
+    public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime) throws IOException {
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(meetingTime);
+        Room room = getRoom();
+        room.updateMeetingInfo(meetingInfo);
+
+        return room;
+    }
 
     public static Room getRoom() throws IOException {
         MockMultipartFile image = MultipartFileFixture.getMultipartFile();
