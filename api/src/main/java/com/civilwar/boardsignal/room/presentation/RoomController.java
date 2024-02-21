@@ -9,6 +9,7 @@ import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -35,7 +36,7 @@ public class RoomController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping
     public ResponseEntity<CreateRoomResponse> createRoom(
-        @AuthenticationPrincipal User user,
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @RequestPart(value = "image", required = false) MultipartFile image,
         @Valid @RequestPart(value = "data") ApiCreateRoomRequest request
     ) {
@@ -50,7 +51,7 @@ public class RoomController {
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/my/end-games")
     public ResponseEntity<RoomPageResponse<GetAllRoomResponse>> getMyEndGame(
-        @AuthenticationPrincipal User user,
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
         Pageable pageable
     ) {
 
