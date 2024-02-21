@@ -74,33 +74,6 @@ class RoomServiceTest {
         assertThat(response.roomId()).isEqualTo(room.getId());
     }
 
-
-    @Test
-    @DisplayName("[자신이 참여한 방 중 non-fix 방은 보여주지 않는다.]")
-    void findMyEndGameTest() throws IOException {
-        //given
-        Long userId = 1L;
-        int PAGE_NUMBER = 0;
-        int PAGE_SIZE = 5;
-        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
-
-        //non-fix인 방 -> 30개 저장
-        List<Room> testResult = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoom();
-            ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
-            testResult.add(room);
-        }
-        given(roomRepository.findMyGame(userId)).willReturn(testResult);
-
-        //when
-        RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
-            pageRequest);
-
-        //then
-        assertThat(myEndGame.roomsInfos()).isEmpty();
-    }
-
     @Test
     @DisplayName("[자신이 참여한 fix 방 중 모임 확정 시간이 지난 방을 보여준다.]")
     void findMyEndGameTest2() throws IOException {
@@ -121,7 +94,7 @@ class RoomServiceTest {
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
-        given(roomRepository.findMyGame(userId)).willReturn(testResult);
+        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
         RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -152,7 +125,7 @@ class RoomServiceTest {
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
-        given(roomRepository.findMyGame(userId)).willReturn(testResult);
+        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
         RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -183,7 +156,7 @@ class RoomServiceTest {
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
-        given(roomRepository.findMyGame(userId)).willReturn(testResult);
+        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
         RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -214,7 +187,7 @@ class RoomServiceTest {
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
-        given(roomRepository.findMyGame(userId)).willReturn(testResult);
+        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
         RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,

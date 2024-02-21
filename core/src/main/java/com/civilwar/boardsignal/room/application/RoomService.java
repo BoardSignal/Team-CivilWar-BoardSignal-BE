@@ -1,7 +1,6 @@
 package com.civilwar.boardsignal.room.application;
 
 import com.civilwar.boardsignal.image.domain.ImageRepository;
-import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
@@ -55,14 +54,9 @@ public class RoomService {
         boolean hasNext = false;
 
         //1. 내가 참여한 모든 room
-        List<Room> myGame = roomRepository.findMyGame(userId);
+        List<Room> myFixGame = roomRepository.findMyFixRoom(userId);
 
-        //2. 상태가 fix인 room
-        List<Room> myFixGame = myGame.stream()
-            .filter(room -> room.getStatus().equals(RoomStatus.FIX))
-            .toList();
-
-        //3. (모임 확정 day) < 현재 day 인 room
+        //2. (모임 확정 day) < 현재 day 인 room
         List<Room> myEndGame = new ArrayList<>(
             myFixGame.stream()
                 .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
@@ -70,17 +64,17 @@ public class RoomService {
                 ).toList()
         );
 
-        //4. 내가 한 게임 전체 size > 요구 size -> 다음 페이지 존재
+        //3. 내가 한 게임 전체 size > 요구 size -> 다음 페이지 존재
         if (myEndGame.size() > pageable.getPageSize()) {
             hasNext = true;
         }
 
-        //5. size 크기만큼 cut
+        //4. size 크기만큼 cut
         List<Room> resultList = myEndGame.stream()
             .limit(pageable.getPageSize())
             .toList();
 
-        //6. slice 변환
+        //5. slice 변환
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
 
         return RoomMapper.toRoomPageResponse(result);
