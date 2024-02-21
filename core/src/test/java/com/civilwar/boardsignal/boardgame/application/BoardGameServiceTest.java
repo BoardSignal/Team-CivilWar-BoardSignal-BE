@@ -149,6 +149,8 @@ class BoardGameServiceTest {
             Optional.empty());
         given(wishRepository.save(any(Wish.class))).willReturn(wish);
 
+        boardGameService.wishBoardGame(user, boardGame.getId());
+
         assertThat(boardGame.getWishCount()).isEqualTo(1);
     }
 
