@@ -30,14 +30,18 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
     @Autowired
     private BoardGameRepositoryAdaptor boardGameAdaptor;
 
+    private BoardGame boardGame;
+
+    private BoardGame boardGame2;
+
     @BeforeEach
     void setUp() {
         BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
         BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
         BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(PARTY);
 
-        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
-        BoardGame boardGame2 = BoardGameFixture.getBoardGame2(List.of(partyGame));
+        boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
+        boardGame2 = BoardGameFixture.getBoardGame2(List.of(partyGame));
 
         boardGameAdaptor.saveAll(List.of(boardGame, boardGame2));
     }
@@ -49,6 +53,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             "보통",
             null,
             null
+            , ""
         );
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -68,6 +73,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             null,
             null,
             30
+            , null
         );
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -89,6 +95,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             null,
             List.of("워게임", "가족게임"),
             null
+            , null
         ); // playTime 조건은 충족하지만 난이도 조건이 충족되지 않은 상황
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -109,6 +116,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             null,
             List.of("워게임", "파티게임"),
             null
+            , null
         );
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -130,6 +138,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             "어려움",
             null,
             30
+            , null
         ); // playTime 조건은 충족하지만 난이도 조건이 충족되지 않은 상황
 
         PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
@@ -145,6 +154,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             null,
             List.of("워게임", "파티게임"),
             null
+            , null
         );
 
         //총 2개가 반환되어 페이지 사이즈 요청을 1로 하면 다음 보드게임이 있으므로 true가 되어야함
@@ -152,5 +162,61 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
         Slice<BoardGame> all = boardGameQueryAdaptor.findAll(condition, pageRequest);
 
         assertThat(all.hasNext()).isTrue();
+    }
+
+    @Test
+    @DisplayName("[검색 키워드를 통해 조건을 충족하는 보드게임 하나를 조회한다.]")
+    void searchKeyWord() {
+        BoardGameSearchCondition condition = new BoardGameSearchCondition(
+            null,
+            null,
+            null
+            , boardGame.getDescription().substring(1, 3)
+        );
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Slice<BoardGame> all = boardGameQueryAdaptor.findAll(condition, pageRequest);
+        BoardGame findBoardGame = all.getContent().get(0);
+
+        assertAll(
+            () -> assertThat(findBoardGame.getTitle())
+                .isEqualTo(boardGame.getTitle()),
+            () -> assertThat(findBoardGame.getDescription())
+                .isEqualTo(boardGame.getDescription()),
+            () -> assertThat(findBoardGame.getDifficulty())
+                .isEqualTo(boardGame.getDifficulty()),
+            () -> assertThat(findBoardGame.getMinParticipants())
+                .isEqualTo(boardGame.getMinParticipants()),
+            () -> assertThat(findBoardGame.getMaxParticipants())
+                .isEqualTo(boardGame.getMaxParticipants()),
+            () -> assertThat(findBoardGame.getFromPlayTime())
+                .isEqualTo(boardGame.getFromPlayTime()),
+            () -> assertThat(findBoardGame.getToPlayTime())
+                .isEqualTo(boardGame.getToPlayTime()),
+            () -> assertThat(findBoardGame.getCategories().get(0).getCategory())
+                .isEqualTo(boardGame.getCategories().get(0).getCategory()),
+            () -> assertThat(all.getContent()).doesNotContain(boardGame2)
+        );
+    }
+
+    @Test
+    @DisplayName("[검색 키워드 조건을 만족하는 보드게임 두개를 조회한다.]")
+    void searchKeyWordAll() {
+        BoardGameSearchCondition condition = new BoardGameSearchCondition(
+            null,
+            null,
+            null
+            , "게임"
+        );
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Slice<BoardGame> all = boardGameQueryAdaptor.findAll(condition, pageRequest);
+        BoardGame firstGame = all.getContent().get(0);
+        BoardGame secondGame = all.getContent().get(1);
+
+        assertAll(
+            () -> assertThat(firstGame.getTitle()).isEqualTo(boardGame.getTitle()),
+            () -> assertThat(secondGame.getTitle()).isEqualTo(boardGame2.getTitle())
+        );
     }
 }

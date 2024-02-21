@@ -5,7 +5,8 @@ import java.util.List;
 public record BoardGameSearchCondition(
     String difficulty,
     List<String> categories,
-    Integer playTime
+    Integer playTime,
+    String searchKeyword
 ) {
 
 }

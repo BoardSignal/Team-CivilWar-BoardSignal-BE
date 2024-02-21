@@ -1,7 +1,7 @@
 package com.civilwar.boardsignal.review.domain.entity;
 
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
-import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
 import jakarta.persistence.Column;
