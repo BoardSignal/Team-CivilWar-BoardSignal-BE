@@ -157,6 +157,7 @@ class BoardGameControllerTest extends ApiTestSupport {
                 jsonPath("$.hasNext").value(false)
             );
     }
+
     @Test
     @DisplayName("[사용자는 보드게임 상세정보를 조회할 수 있다]")
     void getBoardGame() throws Exception {

@@ -6,9 +6,12 @@ import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RoomMapper {
@@ -44,5 +47,38 @@ public final class RoomMapper {
 
     public static CreateRoomResponse toCreateRoomResponse(Room room) {
         return new CreateRoomResponse(room.getId());
+    }
+
+    public static GetAllRoomResponse toGetAllRoomResponse(Room room) {
+        List<String> categories = room.getRoomCategories().stream()
+            .map(roomCategory -> roomCategory.getCategory().getDescription())
+            .toList();
+
+        return new GetAllRoomResponse(
+            room.getId(),
+            room.getTitle(),
+            room.getDescription(),
+            room.getSubwayStation(),
+            room.getStartTime(),
+            room.getMinAge(),
+            room.getMaxAge(),
+            room.isAllowedOppositeGender(),
+            room.getImageUrl(),
+            room.getMinParticipants(),
+            room.getMaxParticipants(),
+            categories,
+            room.getCreatedAt()
+        );
+    }
+
+    public static RoomPageResponse<GetAllRoomResponse> toRoomPageResponse(Slice<Room> pages) {
+
+        Slice<GetAllRoomResponse> dto = pages.map(RoomMapper::toGetAllRoomResponse);
+
+        return new RoomPageResponse<>(
+            dto.getContent(),
+            dto.getSize(),
+            dto.hasNext()
+        );
     }
 }

@@ -7,8 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -32,4 +35,35 @@ public class MeetingInfo {
     private String station;
 
     private String meetingPlace;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public MeetingInfo(
+        @NonNull LocalDateTime meetingTime,
+        @NonNull int peopleCount,
+        @NonNull String line,
+        @NonNull String station,
+        @NonNull String meetingPlace
+    ) {
+        this.meetingTime = meetingTime;
+        this.peopleCount = peopleCount;
+        this.line = line;
+        this.station = station;
+        this.meetingPlace = meetingPlace;
+    }
+
+    public static MeetingInfo of(
+        LocalDateTime meetingTime,
+        int peopleCount,
+        String line,
+        String station,
+        String meetingPlace
+    ) {
+        return MeetingInfo.builder()
+            .meetingTime(meetingTime)
+            .peopleCount(peopleCount)
+            .line(line)
+            .station(station)
+            .meetingPlace(meetingPlace)
+            .build();
+    }
 }

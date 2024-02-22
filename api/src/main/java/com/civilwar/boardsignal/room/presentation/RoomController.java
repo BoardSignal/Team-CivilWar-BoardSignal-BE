@@ -5,14 +5,19 @@ import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -31,7 +36,7 @@ public class RoomController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping
     public ResponseEntity<CreateRoomResponse> createRoom(
-        @AuthenticationPrincipal User user,
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @RequestPart(value = "image", required = false) MultipartFile image,
         @Valid @RequestPart(value = "data") ApiCreateRoomRequest request
     ) {
@@ -40,5 +45,19 @@ public class RoomController {
         CreateRoomResponse createRoomResponse = roomService.createRoom(user, createRoomRequest);
 
         return ResponseEntity.ok(createRoomResponse);
+    }
+
+    @Operation(summary = "내가 이전에 참여한 모임 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/my/end-games")
+    public ResponseEntity<RoomPageResponse<GetAllRoomResponse>> getMyEndGame(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        Pageable pageable
+    ) {
+
+        RoomPageResponse<GetAllRoomResponse> myParticipants = roomService.findMyEndGame(
+            user.getId(), pageable);
+
+        return ResponseEntity.ok(myParticipants);
     }
 }

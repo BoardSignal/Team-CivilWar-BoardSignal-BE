@@ -1,4 +1,4 @@
-package com.civilwar.boardsignal.common.configuratrion;
+package com.civilwar.boardsignal.common.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
