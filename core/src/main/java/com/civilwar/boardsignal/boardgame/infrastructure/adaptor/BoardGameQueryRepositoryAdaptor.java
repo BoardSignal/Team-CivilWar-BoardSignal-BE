@@ -96,4 +96,9 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
         }
         return new SliceImpl<>(boardGames, pageable, hasNext);
     }
+
+    @Override
+    public Optional<BoardGame> findByIdWithLock(Long id) {
+        return boardGameJpaRepository.findByIdWithLock(id);
+    }
 }
