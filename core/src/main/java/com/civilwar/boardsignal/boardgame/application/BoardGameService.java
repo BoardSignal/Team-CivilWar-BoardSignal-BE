@@ -58,7 +58,7 @@ public class BoardGameService {
 
     @Transactional
     public WishBoardGameResponse wishBoardGame(User user, Long boardGameId) {
-        BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
+        BoardGame boardGame = boardGameQueryRepository.findByIdWithLock(boardGameId)
             .orElseThrow(
                 () -> new NotFoundException(NOT_FOUND_BOARD_GAME)
             );
