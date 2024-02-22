@@ -13,4 +13,6 @@ public interface WishRepository {
     void saveAll(Collection<Wish> wishes);
 
     void deleteById(Long wishId);
+
+    int countWishByUserId(Long userId);
 }

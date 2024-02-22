@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
+import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
+import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.review.ReviewFixture;
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
@@ -40,6 +42,8 @@ class UserApiControllerTest extends ApiTestSupport {
     private ReviewRepository reviewRepository;
     @Autowired
     private TokenProvider tokenProvider;
+    @Autowired
+    private WishRepository wishRepository;
 
     @Test
     @DisplayName("[회원은 정보를 수정 할 수 있다]")
@@ -104,6 +108,11 @@ class UserApiControllerTest extends ApiTestSupport {
             evaluationFixture);
         reviewRepository.save(review);
 
+        Wish wish1 = Wish.of(loginUser.getId(), 1L);
+        Wish wish2 = Wish.of(loginUser.getId(), 2L);
+        wishRepository.save(wish1);
+        wishRepository.save(wish2);
+
         //then
         mockMvc.perform(get("/api/v1/users/my")
                 .header(AUTHORIZATION, accessToken))
@@ -113,6 +122,7 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.ageGroup").value(loginUser.getAgeGroup().getDescription()))
             .andExpect(jsonPath("$.profileImageUrl").value(loginUser.getProfileImageUrl()))
             .andExpect(jsonPath("$.mannerScore").value(loginUser.getMannerScore()))
+            .andExpect(jsonPath("$.wishCount").value(2))
             .andExpect(jsonPath("$.reviews[0].content").value(
                 ReviewContent.TIME_COMMITMENT.getDescription()))
             .andExpect(jsonPath("$.reviews[0].score").value(
