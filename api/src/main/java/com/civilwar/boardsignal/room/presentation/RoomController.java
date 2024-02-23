@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
@@ -59,5 +60,17 @@ public class RoomController {
             user.getId(), pageable);
 
         return ResponseEntity.ok(myParticipants);
+    }
+
+    @Operation(summary = "방 필터링 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/filter")
+    public ResponseEntity<RoomPageResponse<GetAllRoomResponse>> getSearchRoom(
+        RoomSearchCondition condition,
+        Pageable pageable
+    ) {
+        RoomPageResponse<GetAllRoomResponse> rooms = roomService.findRoomBySearch(condition,
+            pageable);
+        return ResponseEntity.ok(rooms);
     }
 }

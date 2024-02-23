@@ -7,9 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
+import com.civilwar.boardsignal.room.domain.constants.DaySlot;
+import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
@@ -18,6 +21,7 @@ import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,6 +48,14 @@ class RoomControllerTest extends ApiTestSupport {
     private MeetingInfoJpaRepository meetingInfoRepository;
     @MockBean
     private Supplier<LocalDateTime> nowTime;
+
+    private final String title = "달무티 할 사람";
+    private final String description = "20대만";
+    private final String station = "사당역";
+    private final DaySlot daySlot = DaySlot.WEEKDAY;
+    private final TimeSlot timeSlot = TimeSlot.AM;
+    private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
+
 
     @Test
     @DisplayName("[사용자는 방을 생성할 수 있다.]")
@@ -175,5 +187,39 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(0));
 
+    }
+
+    @Test
+    @DisplayName("[사용자는 모든 조건에 맞는 방을 필터링 하여 조회할 수 있다]")
+    void getSearchRoom() throws Exception {
+        //given
+        for (int i = 0; i < 100; i++) {
+            Room room = RoomFixture.getRoom();
+            roomRepository.save(room);
+        }
+        Room anotherRoom = RoomFixture.getAnotherRoom(
+            title,
+            description,
+            station,
+            daySlot,
+            timeSlot,
+            categories,
+            true
+        );
+        roomRepository.save(anotherRoom);
+
+        //then
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("size", "100");
+        params.add("station", station);
+        params.add("time", "평일_오전");
+        params.add("category", "파티게임");
+
+        mockMvc.perform(get("/api/v1/rooms/filter")
+                .header(AUTHORIZATION, accessToken)
+                .params(params))
+            .andExpect(jsonPath("$.size").value(100))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(1));
     }
 }
