@@ -61,9 +61,7 @@ public class RoomRepositoryAdaptor implements RoomRepository {
             .map(this::equalTime)
             .toArray(BooleanExpression[]::new);
 
-        BooleanExpression result = Expressions.anyOf(booleanExpressions);
-
-        return result;
+        return Expressions.anyOf(booleanExpressions);
     }
 
     private BooleanExpression equalTime(String[] timeSplit) {

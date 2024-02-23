@@ -182,10 +182,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     void findAllTest2() {
         //given
         for (int i = 0; i < 100; i++) {
-            Boolean allowedGender = true;
-            if (i%2==0) {
-                allowedGender = false;
-            }
+            boolean allowedGender = i % 2 != 0;
             Room room = RoomFixture.getAnotherRoom(
                 title,
                 description,
