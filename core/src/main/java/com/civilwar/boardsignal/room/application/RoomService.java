@@ -7,6 +7,7 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
@@ -49,7 +50,10 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public RoomPageResponse<GetAllRoomResponse> findMyEndGame(Long userId, Pageable pageable) {
+    public RoomPageResponse<GetAllRoomResponse> findMyEndGame(
+        Long userId,
+        Pageable pageable
+    ) {
 
         boolean hasNext = false;
 
@@ -78,6 +82,15 @@ public class RoomService {
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
 
         return RoomMapper.toRoomPageResponse(result);
+    }
+
+    @Transactional(readOnly = true)
+    public RoomPageResponse<GetAllRoomResponse> findRoomBySearch(
+        RoomSearchCondition roomSearchCondition,
+        Pageable pageable
+    ) {
+        Slice<Room> findRooms = roomRepository.findAll(roomSearchCondition, pageable);
+        return RoomMapper.toRoomPageResponse(findRooms);
     }
 
 }
