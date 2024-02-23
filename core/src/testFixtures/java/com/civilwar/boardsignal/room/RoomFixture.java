@@ -1,6 +1,9 @@
 package com.civilwar.boardsignal.room;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.MultipartFileFixture;
+import com.civilwar.boardsignal.room.domain.constants.DaySlot;
+import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
@@ -28,6 +31,34 @@ public class RoomFixture {
     public static Room getRoom() throws IOException {
         MockMultipartFile image = MultipartFileFixture.getMultipartFile();
         return RoomMapper.toRoom("imageUrl", getCreateRoomRequest(image));
+    }
+
+    public static Room getAnotherRoom(
+        String title,
+        String description,
+        String station,
+        DaySlot day,
+        TimeSlot time,
+        List<Category> categories,
+        Boolean isAllowedOppositeGender
+        ) {
+        return Room.of(
+            title,
+            description,
+            3,
+            6,
+            "사당역 레드버튼",
+            "2호선",
+            station,
+            day,
+            time,
+            "20시 예정",
+            20,
+            29,
+            "imageUrl",
+            isAllowedOppositeGender,
+            categories
+        );
     }
 
     public static CreateRoomRequest getCreateRoomRequest(MultipartFile image) {
