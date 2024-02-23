@@ -17,7 +17,7 @@ public record GetAllRoomResponse(
     int minParticipants,
     int maxParticipants,
     List<String> categories,
-    @JsonFormat(pattern = "MM-dd")
+    @JsonFormat(pattern = "MM-dd'T'HH:mm:ss")
     LocalDateTime createdAt
 ) {
 
