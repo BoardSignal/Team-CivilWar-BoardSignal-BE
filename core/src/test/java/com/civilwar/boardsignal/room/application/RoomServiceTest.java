@@ -6,7 +6,9 @@ import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
+import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
+import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
@@ -14,15 +16,21 @@ import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +43,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @DisplayName("[RoomService 테스트]")
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class RoomServiceTest {
 
     @Mock
@@ -51,6 +60,12 @@ class RoomServiceTest {
 
     @InjectMocks
     private RoomService roomService;
+
+    private String concat(String string1, String string2) {
+        return string1
+            + " "
+            + string2;
+    }
 
     @Test
     @DisplayName("[방을 생성할 수 있다.]")
@@ -196,5 +211,71 @@ class RoomServiceTest {
         //then
         assertThat(myEndGame.roomsInfos()).hasSize(30);
         assertThat(myEndGame.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("[non-fix 방을 방장이 조회하면, 방장 여부와 & 생성 시 작성한 방 정보가 조회된다]")
+    void findRoomInfoTest() throws IOException {
+        //given
+        Long loginUserId = 1L;
+        Room findRoom = RoomFixture.getRoom();
+        ReflectionTestUtils.setField(findRoom, "id", 1L);
+        List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
+            1L, "김강훈", AgeGroup.TWENTY, true, 99
+        ));
+        String place = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
+        String time = concat(findRoom.getDaySlot().getDescription(),
+            findRoom.getTimeSlot().getDescription());
+
+        given(roomRepository.findById(1L)).willReturn(Optional.of(findRoom));
+        given(participantRepository.findParticipantByRoomId(findRoom.getId()))
+            .willReturn(participantJpaDtos);
+
+        //when
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(loginUserId, findRoom.getId());
+
+        //then
+        assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
+        assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
+        assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
+        assertThat(roomInfo.startTime()).isEqualTo(time);
+        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.isLeader()).isTrue();
+        assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
+    }
+
+    @Test
+    @DisplayName("[fix 방을 방장이 아닌 사람이 조회하면, 방장 여부와 & 모임 확정 정보가 조회된다]")
+    void findRoomInfoTest2() throws IOException {
+        //given
+        Long loginUserId = 2L;
+        Room findRoom = RoomFixture.getRoom();
+        ReflectionTestUtils.setField(findRoom, "id", 1L);
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2023, 2, 26, 20, 3, 59));
+        findRoom.fixRoom(meetingInfo);
+
+        List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
+            1L, "김강훈", AgeGroup.TWENTY, true, 99
+        ));
+        String place = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
+        String time = meetingInfo.getMeetingTime()
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+        given(roomRepository.findById(1L)).willReturn(Optional.of(findRoom));
+        given(participantRepository.findParticipantByRoomId(findRoom.getId()))
+            .willReturn(participantJpaDtos);
+
+        //when
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(loginUserId, findRoom.getId());
+
+        //then
+        assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
+        assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
+        assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
+        assertThat(roomInfo.startTime()).isEqualTo(time);
+        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.isLeader()).isFalse();
+        assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
 }
