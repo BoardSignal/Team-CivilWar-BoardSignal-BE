@@ -7,6 +7,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -72,5 +74,16 @@ public class RoomController {
         RoomPageResponse<GetAllRoomResponse> rooms = roomService.findRoomBySearch(condition,
             pageable);
         return ResponseEntity.ok(rooms);
+    }
+
+    @Operation(summary = "방 상세정보 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/{roomId}")
+    public ResponseEntity<RoomInfoResponse> getRoomInfo(
+        @PathVariable("roomId") Long roomId,
+        @AuthenticationPrincipal User user
+    ) {
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(user.getId(), roomId);
+        return ResponseEntity.ok(roomInfo);
     }
 }
