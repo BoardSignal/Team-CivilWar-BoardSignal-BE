@@ -28,6 +28,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.NonNull;
 
 @Entity
@@ -93,6 +94,7 @@ public class Room extends BaseEntity {
     @JoinColumn(name = "ROOM_MEETING_INFO_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private MeetingInfo meetingInfo;
 
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private final List<RoomCategory> roomCategories = new ArrayList<>();
 
