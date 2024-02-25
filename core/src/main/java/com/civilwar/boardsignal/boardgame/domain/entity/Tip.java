@@ -33,6 +33,9 @@ public class Tip extends BaseEntity {
     @Column(name = "TIP_CONTENT")
     private String content;
 
+    @Column(name = "TIP_LIKE_COUNT")
+    private int likeCount;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Tip(
         @NonNull Long boardGameId,
@@ -42,6 +45,7 @@ public class Tip extends BaseEntity {
         this.boardGameId = boardGameId;
         this.userId = userId;
         this.content = content;
+        this.likeCount = 0;
     }
 
     public static Tip of(
@@ -54,5 +58,13 @@ public class Tip extends BaseEntity {
             .userId(userId)
             .content(content)
             .build();
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
     }
 }
