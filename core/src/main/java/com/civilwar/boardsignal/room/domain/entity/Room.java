@@ -37,8 +37,6 @@ import org.springframework.lang.NonNull;
 @Table(name = "ROOM_TABLE")
 public class Room extends BaseEntity {
 
-    @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
-    private final List<RoomCategory> roomCategories = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ROOM_ID")
