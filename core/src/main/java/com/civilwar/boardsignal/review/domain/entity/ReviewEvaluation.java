@@ -4,6 +4,7 @@ import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
+import com.civilwar.boardsignal.review.domain.constant.ReviewRecommend;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -41,24 +42,24 @@ public class ReviewEvaluation {
     private ReviewContent content;
 
     @Column(name = "REVIEW_IS_RECOMMENDED")
-    private int isRecommended;
+    private ReviewRecommend recommend;
 
     @Builder(access = AccessLevel.PRIVATE)
     public ReviewEvaluation(
         @NonNull ReviewContent content,
-        int isRecommended
+        @NonNull ReviewRecommend recommend
     ) {
         this.content = content;
-        this.isRecommended = isRecommended;
+        this.recommend = recommend;
     }
 
     public static ReviewEvaluation of(
         ReviewContent content,
-        int isRecommended
+        ReviewRecommend recommend
     ) {
         return ReviewEvaluation.builder()
             .content(content)
-            .isRecommended(isRecommended)
+            .recommend(recommend)
             .build();
     }
 
