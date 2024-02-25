@@ -2,11 +2,14 @@ package com.civilwar.boardsignal.boardgame.application;
 
 import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.AlREADY_TIP_ADDED;
 import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_TIP;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
+import com.civilwar.boardsignal.boardgame.domain.entity.Like;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.LikeRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.dto.BoardGameMapper;
@@ -17,6 +20,7 @@ import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetTipResposne;
+import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
@@ -38,6 +42,7 @@ public class BoardGameService {
     private final WishRepository wishRepository;
     private final TipRepository tipRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
 
     private void validateTipExists(User user) { // 이미 공략을 등록한 적이 있는 지 검증
         tipRepository.findByUserId(user.getId())
@@ -113,5 +118,29 @@ public class BoardGameService {
             .toList();
 
         return BoardGameMapper.toGetBoardGameResponse(boardGame, tipResponse);
+    }
+
+    @Transactional
+    public LikeTipResponse likeTip(User user, Long tipId) {
+        Tip tip = tipRepository.findByIdWithLock(tipId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_TIP));
+
+        Like like = Like.of(tipId, user.getId());
+        likeRepository.save(like);
+
+        tip.increaseLikeCount();
+
+        return new LikeTipResponse(tipId, tip.getLikeCount());
+    }
+
+    @Transactional
+    public LikeTipResponse cancelLikeTip(User user, Long tipId) {
+        Tip tip = tipRepository.findByIdWithLock(tipId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_TIP));
+
+        tip.decreaseLikeCount();
+        likeRepository.deleteByTipIdAndUserId(tipId, user.getId());
+
+        return new LikeTipResponse(tipId, tip.getLikeCount());
     }
 }
