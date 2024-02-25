@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.user.facade;
 
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
+import com.civilwar.boardsignal.review.domain.constant.ReviewRecommend;
 import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
 import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
@@ -37,8 +38,9 @@ public class UserReviewFacade {
             //4. 유저에 대한 각 항목의 좋아요 합계 계산
             int totalScore = userEvaluations.stream()
                 .filter(evaluation -> evaluation.getContent().equals(content))
-                .mapToInt(ReviewEvaluation::getIsRecommended)
-                .filter(isRecommended -> isRecommended == 1)
+                .map(ReviewEvaluation::getRecommend)
+                .filter(recommend -> recommend.equals(ReviewRecommend.LIKE))
+                .mapToInt(ReviewRecommend::getScore)
                 .sum();
 
             //5. 정리된 리뷰 & 데이터 저장
