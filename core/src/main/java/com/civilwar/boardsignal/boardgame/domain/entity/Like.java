@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 @Entity
 @NoArgsConstructor
@@ -30,8 +31,8 @@ public class Like {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Like(
-        Long tipId,
-        Long userId
+        @NonNull Long tipId,
+        @NonNull Long userId
     ) {
         this.tipId = tipId;
         this.userId = userId;
