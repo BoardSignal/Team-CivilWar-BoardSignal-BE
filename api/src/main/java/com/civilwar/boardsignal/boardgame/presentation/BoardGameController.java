@@ -97,7 +97,7 @@ public class BoardGameController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "보드게임 공략 좋아요 API")
+    @Operation(summary = "보드게임 공략 좋아요 취소 API")
     @ApiResponse(useReturnTypeSchema = true)
     @DeleteMapping("/{tipId}")
     public ResponseEntity<LikeTipResponse> cancelLikeTip(
