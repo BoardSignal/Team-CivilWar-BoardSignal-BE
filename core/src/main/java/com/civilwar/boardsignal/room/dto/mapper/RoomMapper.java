@@ -7,6 +7,9 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
+import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import java.util.List;
 import lombok.AccessLevel;
@@ -79,6 +82,43 @@ public final class RoomMapper {
             dto.getContent(),
             dto.getSize(),
             dto.hasNext()
+        );
+    }
+
+    public static RoomInfoResponse toRoomInfoResponse(
+        Room room,
+        String time,
+        String place,
+        Boolean isLeader,
+        List<ParticipantResponse> participants
+    ) {
+        return new RoomInfoResponse(
+            room.getId(),
+            room.getTitle(),
+            room.getDescription(),
+            time,
+            place,
+            room.getMinAge(),
+            room.getMaxAge(),
+            room.getImageUrl(),
+            isLeader,
+            room.getStatus().getDescription(),
+            room.isAllowedOppositeGender(),
+            room.getRoomCategories().stream()
+                .map(roomCategory -> roomCategory.getCategory().getDescription())
+                .toList(),
+            participants,
+            room.getCreatedAt()
+        );
+    }
+
+    public static ParticipantResponse toParticipantResponse(ParticipantJpaDto participantJpaDto) {
+        return new ParticipantResponse(
+            participantJpaDto.userId(),
+            participantJpaDto.nickname(),
+            participantJpaDto.ageGroup().getDescription(),
+            participantJpaDto.isLeader(),
+            participantJpaDto.mannerScore()
         );
     }
 }

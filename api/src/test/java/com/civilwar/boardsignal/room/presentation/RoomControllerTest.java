@@ -20,9 +20,13 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
+import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +49,8 @@ class RoomControllerTest extends ApiTestSupport {
     private final DaySlot daySlot = DaySlot.WEEKDAY;
     private final TimeSlot timeSlot = TimeSlot.AM;
     private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
@@ -218,5 +224,68 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.size").value(100))
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(1));
+    }
+
+    @Test
+    @DisplayName("[방장이 non-fix 방 상세정보를 조회한다]")
+    void getRoomInfoTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom();
+        roomRepository.save(room);
+
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(participant);
+
+        mockMvc.perform(get("/api/v1/rooms/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.roomId").value(room.getId()))
+            .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.startTime").value(
+                room.getDaySlot().getDescription()
+                    + " " + room.getTimeSlot().getDescription()))
+            .andExpect(jsonPath("$.isFix").value("미확정"))
+            .andExpect(jsonPath("$.isLeader").value(true))
+            .andExpect(jsonPath("$.place").value(
+                room.getSubwayStation() + " " + room.getPlaceName()
+            ))
+            .andExpect(jsonPath("$.participantResponse[0].isLeader")
+                .value(true))
+            .andExpect(jsonPath("$.participantResponse[0].nickname")
+                .value("injuning"));
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람이 fix 방 상세정보를 조회한다]")
+    void getRoomInfoTest2() throws Exception {
+        //given
+        User anotherUser = UserFixture.getUserFixture2("providerId", "imageUrl");
+        userRepository.save(anotherUser);
+
+        Room room = RoomFixture.getRoom();
+        roomRepository.save(room);
+
+        Participant participant = Participant.of(anotherUser.getId(), room.getId(), true);
+        participantRepository.save(participant);
+
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+        meetingInfoRepository.save(meetingInfo);
+        room.fixRoom(meetingInfo);
+        roomRepository.save(room);
+
+        mockMvc.perform(get("/api/v1/rooms/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.roomId").value(room.getId()))
+            .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.startTime").value(
+                meetingInfo.getMeetingTime()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
+            .andExpect(jsonPath("$.place").value(
+                meetingInfo.getStation()
+                    + " " + meetingInfo.getMeetingPlace()
+            ))
+            .andExpect(jsonPath("$.participantResponse.size()").value(1))
+            .andExpect(jsonPath("$.participantResponse[0].nickname")
+                .value("macbook"));
     }
 }
