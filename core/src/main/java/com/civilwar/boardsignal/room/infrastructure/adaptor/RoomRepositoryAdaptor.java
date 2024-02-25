@@ -1,8 +1,8 @@
 package com.civilwar.boardsignal.room.infrastructure.adaptor;
 
-import static com.civilwar.boardsignal.room.domain.entity.QRoom.*;
-import static com.civilwar.boardsignal.room.domain.entity.QRoomCategory.*;
-import static org.springframework.util.StringUtils.*;
+import static com.civilwar.boardsignal.room.domain.entity.QRoom.room;
+import static com.civilwar.boardsignal.room.domain.entity.QRoomCategory.roomCategory;
+import static org.springframework.util.StringUtils.hasText;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;

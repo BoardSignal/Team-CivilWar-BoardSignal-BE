@@ -32,8 +32,7 @@ public class Like {
     private Like(
         Long tipId,
         Long userId
-    )
-    {
+    ) {
         this.tipId = tipId;
         this.userId = userId;
     }
@@ -41,8 +40,7 @@ public class Like {
     public static Like of(
         Long tipId,
         Long userId
-    )
-    {
+    ) {
         return Like.builder()
             .tipId(tipId)
             .userId(userId)
