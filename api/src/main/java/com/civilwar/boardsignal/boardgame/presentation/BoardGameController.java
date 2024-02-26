@@ -87,7 +87,7 @@ public class BoardGameController {
 
     @Operation(summary = "보드게임 공략 좋아요 API")
     @ApiResponse(useReturnTypeSchema = true)
-    @PostMapping("/{tipId}")
+    @PostMapping("/like/{tipId}")
     public ResponseEntity<LikeTipResponse> likeTip(
         @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
@@ -99,7 +99,7 @@ public class BoardGameController {
 
     @Operation(summary = "보드게임 공략 좋아요 취소 API")
     @ApiResponse(useReturnTypeSchema = true)
-    @DeleteMapping("/{tipId}")
+    @DeleteMapping("/like/{tipId}")
     public ResponseEntity<LikeTipResponse> cancelLikeTip(
         @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
@@ -107,6 +107,17 @@ public class BoardGameController {
     ) {
         LikeTipResponse response = boardGameService.cancelLikeTip(user, tipId);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "보드게임 공략 삭제 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/{tipId}")
+    public void deleteTip(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("tipId") Long tipId
+    ) {
+        boardGameService.deleteTip(user, tipId);
     }
 
 }
