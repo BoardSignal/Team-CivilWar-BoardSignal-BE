@@ -243,6 +243,8 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.startTime").value(
                 room.getDaySlot().getDescription()
                     + " " + room.getTimeSlot().getDescription()))
+            .andExpect(jsonPath("$.minParticipants").value(3))
+            .andExpect(jsonPath("$.maxParticipants").value(6))
             .andExpect(jsonPath("$.isFix").value("미확정"))
             .andExpect(jsonPath("$.isLeader").value(true))
             .andExpect(jsonPath("$.place").value(
