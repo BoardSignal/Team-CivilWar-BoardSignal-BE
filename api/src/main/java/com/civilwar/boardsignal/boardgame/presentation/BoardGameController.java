@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -82,4 +84,29 @@ public class BoardGameController {
         GetBoardGameResponse response = boardGameService.getBoardGame(boardGameId);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "보드게임 공략 좋아요 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/{tipId}")
+    public ResponseEntity<LikeTipResponse> likeTip(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("tipId") Long tipId
+    ) {
+        LikeTipResponse response = boardGameService.likeTip(user, tipId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "보드게임 공략 좋아요 취소 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/{tipId}")
+    public ResponseEntity<LikeTipResponse> cancelLikeTip(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("tipId") Long tipId
+    ) {
+        LikeTipResponse response = boardGameService.cancelLikeTip(user, tipId);
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -199,5 +200,35 @@ class BoardGameControllerTest extends ApiTestSupport {
                 jsonPath("$.tips[0].content")
                     .value(tip.getContent())
             );
+    }
+
+    @Test
+    @DisplayName("[사용자는 보드게임 공략에 대해 좋아요를 할 수 있다.]")
+    void likeTip() throws Exception {
+        Tip tip = BoardGameFixture.getTip(1L, 1L, "이게 팁입니다.");
+        Tip savedTip = tipRepository.save(tip);
+        int prevLikeCount = savedTip.getLikeCount();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/{tipId}", savedTip.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tipId").value(savedTip.getId()))
+            .andExpect(jsonPath("$.likeCount").value(++prevLikeCount));
+    }
+
+    @Test
+    @DisplayName("[사용자는 보드게임 공략에 대해 좋아요를 취소할 수 있다.]")
+    void cancelLikeTip() throws Exception {
+        Tip tip = BoardGameFixture.getTip(1L, 1L, "이게 팁입니다.");
+        tip.increaseLikeCount();
+        Tip savedTip = tipRepository.save(tip);
+        int prevLikeCount = savedTip.getLikeCount();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/v1/board-games/{tipId}", savedTip.getId())
+                    .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tipId").value(savedTip.getId()))
+            .andExpect(jsonPath("$.likeCount").value(--prevLikeCount));
     }
 }

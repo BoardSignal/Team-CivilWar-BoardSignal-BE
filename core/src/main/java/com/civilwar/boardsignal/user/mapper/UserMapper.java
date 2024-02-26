@@ -20,7 +20,7 @@ public final class UserMapper {
         User user,
         List<UserReviewResponse> reviews,
         int wishCount
-        ) {
+    ) {
         return new UserProfileResponse(
             user.getNickname(),
             user.getSignal(),

@@ -34,4 +34,14 @@ public class TipRepositoryAdaptor implements TipRepository {
     public List<Tip> findAllByBoardGameId(Long boardGameId) {
         return tipJpaRepository.findAllByBoardGameId(boardGameId);
     }
+
+    @Override
+    public Optional<Tip> findById(Long id) {
+        return tipJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Tip> findByIdWithLock(Long id) {
+        return tipJpaRepository.findByIdWithLock(id);
+    }
 }

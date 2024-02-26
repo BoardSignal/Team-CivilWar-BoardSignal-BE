@@ -41,7 +41,7 @@ public class RoomFixture {
         TimeSlot time,
         List<Category> categories,
         Boolean isAllowedOppositeGender
-        ) {
+    ) {
         return Room.of(
             title,
             description,

@@ -2,8 +2,8 @@ package com.civilwar.boardsignal.common.support;
 
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
-import com.civilwar.boardsignal.common.config.TestAuditingConfig;
 import com.civilwar.boardsignal.common.config.QueryDslConfig;
+import com.civilwar.boardsignal.common.config.TestAuditingConfig;
 import com.civilwar.boardsignal.support.DatabaseCleaner;
 import com.civilwar.boardsignal.support.DatabaseCleanerExtension;
 import com.civilwar.boardsignal.support.TestContainerSupport;

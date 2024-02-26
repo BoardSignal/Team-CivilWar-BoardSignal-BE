@@ -15,4 +15,8 @@ public interface TipRepository {
 
     List<Tip> findAllByBoardGameId(Long boardGameId);
 
+    Optional<Tip> findById(Long id);
+
+    Optional<Tip> findByIdWithLock(Long id);
+
 }

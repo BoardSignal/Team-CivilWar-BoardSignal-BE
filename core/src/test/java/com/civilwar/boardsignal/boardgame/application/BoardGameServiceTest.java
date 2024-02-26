@@ -17,6 +17,7 @@ import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.LikeRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
@@ -25,7 +26,9 @@ import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
@@ -63,6 +66,9 @@ class BoardGameServiceTest {
 
     @Mock
     private WishRepository wishRepository;
+
+    @Mock
+    private LikeRepository likeRepository;
 
     @InjectMocks
     private BoardGameService boardGameService;
@@ -362,6 +368,67 @@ class BoardGameServiceTest {
             () -> assertThat(findBoardGame.imageUrl())
                 .isEqualTo(boardGame.getMainImageUrl())
         );
+    }
+
+    @Test
+    @DisplayName("[보드게임 공략에 대해 좋아요를 할 수 있다.]")
+    void likeTip() {
+        //given
+        User user = UserFixture.getUserFixture("prprp", "gttps");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        Tip tip = BoardGameFixture.getTip(user.getId(), 1L, "개꿀팁");
+        ReflectionTestUtils.setField(tip, "id", 1L);
+        int prevLikeCount = tip.getLikeCount();
+
+        given(tipRepository.findByIdWithLock(tip.getId()))
+            .willReturn(Optional.of(tip));
+
+        //when
+        LikeTipResponse response = boardGameService.likeTip(user, 1L);
+        int currLikeCount = response.likeCount();
+
+        //then
+        assertThat(currLikeCount).isEqualTo(++prevLikeCount);
+    }
+
+    @Test
+    @DisplayName("[존재하지 않는 공략에 대해 좋아요를 하면 예외가 발생한다.]")
+    void likeTipNotExist() {
+        //given
+        User user = UserFixture.getUserFixture("prpr", "https~");
+        given(tipRepository.findByIdWithLock(any(Long.class)))
+            .willReturn(Optional.empty());
+
+        //when
+        ThrowingCallable when = () -> boardGameService.likeTip(user, 1L);
+
+        //when
+        assertThatThrownBy(when)
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(BoardGameErrorCode.NOT_FOUND_TIP.getMessage());
+    }
+
+    @Test
+    @DisplayName("[공략의 좋아요를 취소할 수 있다.]")
+    void cancelLikeTip() {
+        //given
+        User user = UserFixture.getUserFixture("prprp", "gttps");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        Tip tip = BoardGameFixture.getTip(user.getId(), 1L, "개꿀팁");
+        ReflectionTestUtils.setField(tip, "id", 1L);
+        int prevLikeCount = tip.getLikeCount();
+
+        given(tipRepository.findByIdWithLock(tip.getId()))
+            .willReturn(Optional.of(tip));
+
+        //when
+        LikeTipResponse response = boardGameService.cancelLikeTip(user, 1L);
+        int currLikeCount = response.likeCount();
+
+        //then
+        assertThat(currLikeCount).isEqualTo(--prevLikeCount);
     }
 
 

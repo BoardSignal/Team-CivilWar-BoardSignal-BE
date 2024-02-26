@@ -26,6 +26,13 @@ import org.springframework.data.domain.Slice;
 
 class RoomJpaRepositoryTest extends DataJpaTestSupport {
 
+    private final String title = "달무티 할 사람";
+    private final String description = "20대만";
+    private final String station = "사당역";
+    private final DaySlot daySlot = DaySlot.WEEKDAY;
+    private final TimeSlot timeSlot = TimeSlot.AM;
+    private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
+    private final Boolean isAllowedOppositeGender = true;
     @PersistenceUnit
     EntityManagerFactory emf;
     @Autowired
@@ -34,14 +41,6 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     private ParticipantJpaRepository participantJpaRepository;
     @Autowired
     private MeetingInfoJpaRepository meetingInfoJpaRepository;
-
-    private final String title = "달무티 할 사람";
-    private final String description = "20대만";
-    private final String station = "사당역";
-    private final DaySlot daySlot = DaySlot.WEEKDAY;
-    private final TimeSlot timeSlot = TimeSlot.AM;
-    private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
-    private final Boolean isAllowedOppositeGender = true;
 
     @Test
     @DisplayName("[유저는 자신이 참여한 모든 room을 조회하며, roomCategory와 meetingInfo를 fetch loading 한다.]")
@@ -266,7 +265,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
             TimeSlot.PM,
             TimeSlot.AM
         );
-        for (int i=0 ; i<day.size() ; i++) {
+        for (int i = 0; i < day.size(); i++) {
             Room room = RoomFixture.getAnotherRoom(
                 title,
                 description,

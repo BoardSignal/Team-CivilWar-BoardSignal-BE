@@ -24,7 +24,6 @@ import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,6 +43,12 @@ import org.springframework.util.MultiValueMap;
 @DisplayName("[RoomController 테스트]")
 class RoomControllerTest extends ApiTestSupport {
 
+    private final String title = "달무티 할 사람";
+    private final String description = "20대만";
+    private final String station = "사당역";
+    private final DaySlot daySlot = DaySlot.WEEKDAY;
+    private final TimeSlot timeSlot = TimeSlot.AM;
+    private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -54,14 +59,6 @@ class RoomControllerTest extends ApiTestSupport {
     private MeetingInfoJpaRepository meetingInfoRepository;
     @MockBean
     private Supplier<LocalDateTime> nowTime;
-
-    private final String title = "달무티 할 사람";
-    private final String description = "20대만";
-    private final String station = "사당역";
-    private final DaySlot daySlot = DaySlot.WEEKDAY;
-    private final TimeSlot timeSlot = TimeSlot.AM;
-    private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
-
 
     @Test
     @DisplayName("[사용자는 방을 생성할 수 있다.]")
