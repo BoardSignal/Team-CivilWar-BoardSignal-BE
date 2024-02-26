@@ -12,6 +12,8 @@ public record RoomInfoResponse(
     String place,
     int minAge,
     int maxAge,
+    int minParticipants,
+    int maxParticipants,
     String imageUrl,
     Boolean isLeader,
     String isFix,
