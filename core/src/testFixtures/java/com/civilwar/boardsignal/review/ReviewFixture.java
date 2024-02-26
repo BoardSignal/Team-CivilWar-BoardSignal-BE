@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.review;
 import static lombok.AccessLevel.PRIVATE;
 
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
+import com.civilwar.boardsignal.review.domain.constant.ReviewRecommend;
 import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
 import java.util.List;
@@ -29,15 +30,15 @@ public final class ReviewFixture {
         return List.of(
             ReviewEvaluation.of(
                 ReviewContent.TIME_COMMITMENT,
-                1
+                ReviewRecommend.LIKE
             ),
             ReviewEvaluation.of(
                 ReviewContent.GOOD_MANNER,
-                0
+                ReviewRecommend.NON_REVIEW
             ),
             ReviewEvaluation.of(
                 ReviewContent.FAST_RESPONSE,
-                -1
+                ReviewRecommend.DISLIKE
             )
         );
     }
