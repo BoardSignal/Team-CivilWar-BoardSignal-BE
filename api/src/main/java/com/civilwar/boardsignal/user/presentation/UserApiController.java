@@ -48,24 +48,14 @@ public class UserApiController {
         return ResponseEntity.ok(userModifyResponse);
     }
 
-    @Operation(summary = "본인 프로필 조회 API")
-    @ApiResponse(useReturnTypeSchema = true)
-    @GetMapping("/my")
-    public ResponseEntity<UserProfileResponse> getUserProfile(
-        @Parameter(hidden = true) @AuthenticationPrincipal User user
-    ) {
-        UserProfileResponse userProfileResponse = userService.getUserProfileInfo(user.getId());
-
-        return ResponseEntity.ok(userProfileResponse);
-    }
-
-    @Operation(summary = "타인 프로필 조회 API")
+    @Operation(summary = "프로필 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileResponse> getAnotherUserProfile(
-        @PathVariable("userId") Long id
+        @Parameter(hidden = true) @AuthenticationPrincipal User loginUser,
+        @PathVariable("userId") Long profileUserId
     ) {
-        UserProfileResponse userProfileResponse = userService.getUserProfileInfo(id);
+        UserProfileResponse userProfileResponse = userService.getUserProfileInfo(profileUserId, loginUser);
 
         return ResponseEntity.ok(userProfileResponse);
     }
