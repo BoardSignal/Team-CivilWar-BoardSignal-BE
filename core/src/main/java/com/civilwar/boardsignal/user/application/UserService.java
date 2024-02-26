@@ -48,18 +48,21 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserProfileResponse getUserProfileInfo(Long id) {
+    public UserProfileResponse getUserProfileInfo(Long profileUserId, User loginUser) {
         //유저 정보 조회
-        User findUser = userRepository.findById(id)
+        User profileUser = userRepository.findById(profileUserId)
             .orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_USER));
 
         //찜 갯수 조회
-        int wishCount = wishRepository.countWishByUserId(id);
+        int wishCount = wishRepository.countWishByUserId(profileUserId);
 
         //유저와 관련된 리뷰 정보 조회
-        List<UserReviewResponse> userReviews = userReviewFacade.getUserReview(id);
+        List<UserReviewResponse> userReviews = userReviewFacade.getUserReview(profileUserId);
 
-        return UserMapper.toUserProfileResponse(findUser, userReviews, wishCount);
+        //프로필 방문 유저가 해당 프로필 주인인지 확인
+        Boolean isProfileManager = profileUserId.equals(loginUser.getId());
+
+        return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount, isProfileManager);
     }
 
 }
