@@ -37,6 +37,9 @@ import org.springframework.lang.NonNull;
 @Table(name = "ROOM_TABLE")
 public class Room extends BaseEntity {
 
+    @BatchSize(size = 10)
+    @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
+    private final List<RoomCategory> roomCategories = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ROOM_ID")
@@ -77,11 +80,6 @@ public class Room extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_MEETING_INFO_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private MeetingInfo meetingInfo;
-
-
-    @BatchSize(size = 10)
-    @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
-    private final List<RoomCategory> roomCategories = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Room(

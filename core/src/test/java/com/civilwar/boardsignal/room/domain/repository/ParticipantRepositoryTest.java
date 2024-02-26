@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.room.domain.repository;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.civilwar.boardsignal.common.support.DataJpaTestSupport;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
