@@ -21,6 +21,7 @@ import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.MyTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
@@ -44,8 +45,8 @@ public class BoardGameService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
 
-    private void validateTipExists(User user) { // 이미 공략을 등록한 적이 있는 지 검증
-        tipRepository.findByUserId(user.getId())
+    private void validateTipExists(Long boardGameId, User user) { // 이미 공략을 등록한 적이 있는 지 검증
+        tipRepository.findByBoardGameIdAndUserId(boardGameId, user.getId())
             .ifPresent(tip -> {
                 throw new ValidationException(AlREADY_TIP_ADDED);
             });
@@ -89,7 +90,7 @@ public class BoardGameService {
         Long boardGameId,
         AddTipRequest request
     ) {
-        validateTipExists(user);
+        validateTipExists(boardGameId, user);
 
         Tip tip = Tip.of(boardGameId, user.getId(), request.content());
 
@@ -99,11 +100,24 @@ public class BoardGameService {
     }
 
     @Transactional(readOnly = true)
-    public GetBoardGameResponse getBoardGame(Long boardGameId) {
+    public GetBoardGameResponse getBoardGame(User user, Long boardGameId) {
         BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
 
         List<Tip> tips = tipRepository.findAllByBoardGameId(boardGameId);
+
+        MyTipResponse myTipResponse = null;
+
+        //로그인 한 회원이라면 MyTip이 있는 지 추출, 없으면 null
+        if (user != null) {
+            for (Tip tip : tips) {
+                if (Objects.equals(tip.getUserId(), user.getId())) {
+                    myTipResponse = BoardGameMapper.toMyTip(user, tip);
+                    tips.remove(tip); // 공략 리스트에서는 나의 공략 삭제(맨 위에 있으므로)
+                    break;
+                }
+            }
+        }
 
         List<Long> userIds = tips.stream()
             .map(Tip::getUserId)
@@ -113,11 +127,12 @@ public class BoardGameService {
 
         List<GetTipResposne> tipResponse = tips.stream()
             .flatMap(tip -> users.stream()
-                .filter(user -> Objects.equals(tip.getUserId(), user.getId()))
-                .map(user -> BoardGameMapper.toGetTipResponse(user, tip)))
+                .filter(findUser -> Objects.equals(tip.getUserId(), findUser.getId()))
+                .map(findUser -> BoardGameMapper.toGetTipResponse(findUser, tip)))
             .toList();
 
-        return BoardGameMapper.toGetBoardGameResponse(boardGame, tipResponse);
+        //나의 공략은 따로 나의 공략 필드에 매핑 (공략 리스트에는 나의 공략 없음. 맨 위에 어차피 있으므로)
+        return BoardGameMapper.toGetBoardGameResponse(boardGame, myTipResponse, tipResponse);
     }
 
     @Transactional
