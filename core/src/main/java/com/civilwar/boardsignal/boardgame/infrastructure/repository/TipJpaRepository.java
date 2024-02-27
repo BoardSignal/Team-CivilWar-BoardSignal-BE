@@ -11,8 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface TipJpaRepository extends JpaRepository<Tip, Long> {
 
-    Optional<Tip> findByUserId(Long userId);
+    Optional<Tip> findByBoardGameIdAndUserId(Long boardGameId, Long userId);
 
+    @Query("select t from Tip t where t.boardGameId = :boardGameId order by t.likeCount desc ")
     List<Tip> findAllByBoardGameId(Long boardGameId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

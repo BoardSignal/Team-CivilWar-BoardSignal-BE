@@ -16,8 +16,8 @@ public class TipRepositoryAdaptor implements TipRepository {
     private final TipJpaRepository tipJpaRepository;
 
     @Override
-    public Optional<Tip> findByUserId(Long userId) {
-        return tipJpaRepository.findByUserId(userId);
+    public Optional<Tip> findByBoardGameIdAndUserId(Long boardGameId, Long userId) {
+        return tipJpaRepository.findByBoardGameIdAndUserId(boardGameId, userId);
     }
 
     @Override
