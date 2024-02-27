@@ -14,7 +14,7 @@ public interface TipJpaRepository extends JpaRepository<Tip, Long> {
     Optional<Tip> findByBoardGameIdAndUserId(Long boardGameId, Long userId);
 
     @Query("select t from Tip t where t.boardGameId = :boardGameId order by t.likeCount desc ")
-    List<Tip> findAllByBoardGameId(Long boardGameId);
+    List<Tip> findAllByBoardGameId(@Param("boardGameId") Long boardGameId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from Tip t where t.id = :id")
