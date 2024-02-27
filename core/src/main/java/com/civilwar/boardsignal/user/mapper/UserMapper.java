@@ -19,9 +19,11 @@ public final class UserMapper {
     public static UserProfileResponse toUserProfileResponse(
         User user,
         List<UserReviewResponse> reviews,
-        int wishCount
+        int wishCount,
+        Boolean isProfileManager
     ) {
         return new UserProfileResponse(
+            user.getId(),
             user.getNickname(),
             user.getSignal(),
             user.getUserCategories().stream()
@@ -32,7 +34,8 @@ public final class UserMapper {
             user.getProfileImageUrl(),
             user.getMannerScore(),
             reviews,
-            wishCount
+            wishCount,
+            isProfileManager
         );
     }
 

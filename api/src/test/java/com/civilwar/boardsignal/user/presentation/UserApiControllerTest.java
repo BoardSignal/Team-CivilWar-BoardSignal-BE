@@ -100,7 +100,7 @@ class UserApiControllerTest extends ApiTestSupport {
 
 
     @Test
-    @DisplayName("유저의 프로필을 조회할 수 있다.")
+    @DisplayName("유저의 자신의 프로필을 조회할 수 있다.")
     void getUserProfileTest() throws Exception {
         //given
         List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
@@ -114,7 +114,7 @@ class UserApiControllerTest extends ApiTestSupport {
         wishRepository.save(wish2);
 
         //then
-        mockMvc.perform(get("/api/v1/users/my")
+        mockMvc.perform(get("/api/v1/users/" + loginUser.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(jsonPath("$.nickname").value(loginUser.getNickname()))
             .andExpect(jsonPath("$.signal").value(loginUser.getSignal()))
@@ -134,7 +134,48 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.reviews[2].content").value(
                 ReviewContent.FAST_RESPONSE.getDescription()))
             .andExpect(jsonPath("$.reviews[2].score").value(
-                0));
+                0))
+            .andExpect(jsonPath("$.isProfileManager").value(true));
+    }
 
+    @Test
+    @DisplayName("타인의 프로필을 조회할 수 있다.")
+    void getUserProfileTest2() throws Exception {
+        //given
+        User anotherUser = UserFixture.getUserFixture2("providerId", "testUrl");
+        userRepository.save(anotherUser);
+        List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
+        Review review = ReviewFixture.getReviewFixture(100L, anotherUser.getId(), 1L,
+            evaluationFixture);
+        reviewRepository.save(review);
+
+        Wish wish1 = Wish.of(anotherUser.getId(), 1L);
+        Wish wish2 = Wish.of(anotherUser.getId(), 2L);
+        wishRepository.save(wish1);
+        wishRepository.save(wish2);
+
+        //then
+        mockMvc.perform(get("/api/v1/users/" + anotherUser.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.nickname").value(anotherUser.getNickname()))
+            .andExpect(jsonPath("$.signal").value(anotherUser.getSignal()))
+            .andExpect(jsonPath("$.gender").value(anotherUser.getGender().getDescription()))
+            .andExpect(jsonPath("$.ageGroup").value(anotherUser.getAgeGroup().getDescription()))
+            .andExpect(jsonPath("$.profileImageUrl").value(anotherUser.getProfileImageUrl()))
+            .andExpect(jsonPath("$.mannerScore").value(anotherUser.getMannerScore()))
+            .andExpect(jsonPath("$.wishCount").value(2))
+            .andExpect(jsonPath("$.reviews[0].content").value(
+                ReviewContent.TIME_COMMITMENT.getDescription()))
+            .andExpect(jsonPath("$.reviews[0].score").value(
+                1))
+            .andExpect(jsonPath("$.reviews[1].content").value(
+                ReviewContent.GOOD_MANNER.getDescription()))
+            .andExpect(jsonPath("$.reviews[1].score").value(
+                0))
+            .andExpect(jsonPath("$.reviews[2].content").value(
+                ReviewContent.FAST_RESPONSE.getDescription()))
+            .andExpect(jsonPath("$.reviews[2].score").value(
+                0))
+            .andExpect(jsonPath("$.isProfileManager").value(false));
     }
 }

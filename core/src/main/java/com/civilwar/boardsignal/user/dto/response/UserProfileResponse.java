@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.user.dto.response;
 import java.util.List;
 
 public record UserProfileResponse(
+    Long profileUserId,
     String nickname,
     int signal,
     List<String> preferCategories,
@@ -11,7 +12,8 @@ public record UserProfileResponse(
     String profileImageUrl,
     double mannerScore,
     List<UserReviewResponse> reviews,
-    int wishCount
+    int wishCount,
+    Boolean isProfileManager
 ) {
 
 }
