@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 public record GetTipResposne(
+    Long tipId,
     String nickname,
     String profileImageUrl,
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime createdAt,
-    String content
+    String content,
+    int likeCount
 ) {
 
 }
