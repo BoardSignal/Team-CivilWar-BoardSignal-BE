@@ -127,7 +127,8 @@ public class RoomService {
         }
 
         //3. 방 참가자 정보
-        List<ParticipantResponse> participants = participantRepository.findParticipantByRoomId(roomId)
+        List<ParticipantResponse> participants = participantRepository.findParticipantByRoomId(
+                roomId)
             .stream()
             .map(RoomMapper::toParticipantResponse)
             .toList();
@@ -139,7 +140,8 @@ public class RoomService {
             .findAny()
             .orElse(false);
 
-        return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader, participants);
+        return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader,
+            participants);
     }
 
 }

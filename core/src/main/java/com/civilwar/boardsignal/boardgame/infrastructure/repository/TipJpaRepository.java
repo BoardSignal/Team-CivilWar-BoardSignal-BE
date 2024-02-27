@@ -18,4 +18,6 @@ public interface TipJpaRepository extends JpaRepository<Tip, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from Tip t where t.id = :id")
     Optional<Tip> findByIdWithLock(@Param("id") Long id);
+
+    void deleteByIdAndUserId(Long id, Long userId);
 }

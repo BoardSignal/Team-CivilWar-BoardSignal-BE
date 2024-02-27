@@ -7,4 +7,5 @@ public record ParticipantResponse(
     Boolean isLeader,
     double mannerScore
 ) {
+
 }

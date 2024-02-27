@@ -44,4 +44,10 @@ public class TipRepositoryAdaptor implements TipRepository {
     public Optional<Tip> findByIdWithLock(Long id) {
         return tipJpaRepository.findByIdWithLock(id);
     }
+
+
+    @Override
+    public void deleteByTipIdAndUserId(Long tipId, Long userId) {
+        tipJpaRepository.deleteByIdAndUserId(tipId, userId);
+    }
 }

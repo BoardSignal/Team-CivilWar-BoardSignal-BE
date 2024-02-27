@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.boardgame.presentation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -209,8 +210,9 @@ class BoardGameControllerTest extends ApiTestSupport {
         Tip savedTip = tipRepository.save(tip);
         int prevLikeCount = savedTip.getLikeCount();
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/board-games/{tipId}", savedTip.getId())
-                .header(AUTHORIZATION, accessToken))
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/api/v1/board-games/like/{tipId}", savedTip.getId())
+                    .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.tipId").value(savedTip.getId()))
             .andExpect(jsonPath("$.likeCount").value(++prevLikeCount));
@@ -225,10 +227,30 @@ class BoardGameControllerTest extends ApiTestSupport {
         int prevLikeCount = savedTip.getLikeCount();
 
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/v1/board-games/{tipId}", savedTip.getId())
+                MockMvcRequestBuilders.delete("/api/v1/board-games/like/{tipId}", savedTip.getId())
                     .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.tipId").value(savedTip.getId()))
             .andExpect(jsonPath("$.likeCount").value(--prevLikeCount));
+    }
+
+    @Test
+    @DisplayName("[자신이 등록한 보드게임 공략을 삭제할 수 있다.]")
+    void deleteTip() throws Exception {
+        //given
+        Tip tip = BoardGameFixture.getTip(1L, 1L, "이게 팁입니다.");
+        Tip savedTip = tipRepository.save(tip);
+        List<Tip> prevTips = tipRepository.findAllByBoardGameId(savedTip.getBoardGameId());
+
+        //when
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/v1/board-games/{tipId}", savedTip.getId())
+                    .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk());
+
+        List<Tip> currTips = tipRepository.findAllByBoardGameId(savedTip.getBoardGameId());
+
+        //then
+        assertThat(currTips.size()).isEqualTo(prevTips.size() - 1);
     }
 }

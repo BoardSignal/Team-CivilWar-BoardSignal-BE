@@ -19,4 +19,5 @@ public interface TipRepository {
 
     Optional<Tip> findByIdWithLock(Long id);
 
+    void deleteByTipIdAndUserId(Long tipId, Long userId);
 }

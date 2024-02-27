@@ -143,4 +143,9 @@ public class BoardGameService {
 
         return new LikeTipResponse(tipId, tip.getLikeCount());
     }
+
+    @Transactional
+    public void deleteTip(User user, Long tipId) {
+        tipRepository.deleteByTipIdAndUserId(tipId, user.getId());
+    }
 }
