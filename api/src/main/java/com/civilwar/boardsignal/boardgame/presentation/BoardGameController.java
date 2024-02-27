@@ -79,9 +79,11 @@ public class BoardGameController {
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/{boardGameId}")
     public ResponseEntity<GetBoardGameResponse> getBoard(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
         @PathVariable("boardGameId") Long boardGameId
     ) {
-        GetBoardGameResponse response = boardGameService.getBoardGame(boardGameId);
+        GetBoardGameResponse response = boardGameService.getBoardGame(user, boardGameId);
         return ResponseEntity.ok(response);
     }
 

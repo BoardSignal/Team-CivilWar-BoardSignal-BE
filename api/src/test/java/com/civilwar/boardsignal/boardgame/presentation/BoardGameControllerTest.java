@@ -19,6 +19,7 @@ import com.civilwar.boardsignal.fixture.BoardGameFixture;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -251,6 +252,67 @@ class BoardGameControllerTest extends ApiTestSupport {
         List<Tip> currTips = tipRepository.findAllByBoardGameId(savedTip.getBoardGameId());
 
         //then
-        assertThat(currTips.size()).isEqualTo(prevTips.size() - 1);
+        assertThat(currTips).hasSize(prevTips.size() - 1);
+    }
+
+    @Test
+    @DisplayName("[보드게임 상세조회 시 자신의 공략을 조회할 수 있다.]")
+    void getBoardGameLoginUser() throws Exception {
+        //given
+        User savedUser = userRepository.save(loginUser);
+        Tip tip = BoardGameFixture.getTip(
+            savedUser.getId(),
+            boardGame1.getId(),
+            "보드게임1의 팁"
+        );
+        Tip savedTip = tipRepository.save(tip);
+
+        //then
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/v1/board-games/{boardGameId}", boardGame1.getId())
+                    .header(AUTHORIZATION, accessToken))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.myTip.tipId").value(savedTip.getId()),
+                jsonPath("$.myTip.nickname").value(loginUser.getNickname()),
+                jsonPath("$.myTip.profileImageUrl").value(loginUser.getProfileImageUrl()),
+                jsonPath("$.myTip.createdAt").value(
+                    savedTip.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()),
+                jsonPath("$.myTip.content").value(savedTip.getContent()),
+                jsonPath("$.myTip.likeCount").value(savedTip.getLikeCount())
+            );
+    }
+
+    @Test
+    @DisplayName("[보드게임 상세 조회 시 등록한 공략이 없다면 나의 공략은 비어있다.]")
+    void getBoardGameWithoutMyTip() throws Exception {
+        //given
+        userRepository.save(loginUser);
+
+        Tip tip = BoardGameFixture.getTip(
+            100L,
+            boardGame1.getId(),
+            "개꿀팁"
+        ); // 다른 사람의 공략
+        tipRepository.save(tip);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/v1/board-games/{boardGameId}", boardGame1.getId())
+                    .header(AUTHORIZATION, accessToken))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.myTip").doesNotExist()
+            );
+    }
+
+    @Test
+    @DisplayName("[로그인 안한 사용자가 조회 시 나의 공략은 비어있다.]")
+    void getBoardGameWithoutLogin() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/v1/board-games/{boardGameId}", boardGame1.getId()))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.myTip").doesNotExist()
+            );
     }
 }

@@ -3,7 +3,7 @@ package com.civilwar.boardsignal.boardgame.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
-public record GetTipResposne(
+public record MyTipResponse(
     Long tipId,
     String nickname,
     String profileImageUrl,

@@ -6,6 +6,7 @@ import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetTipResposne;
+import com.civilwar.boardsignal.boardgame.dto.response.MyTipResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.util.List;
 import lombok.AccessLevel;
@@ -45,7 +46,9 @@ public final class BoardGameMapper {
 
     public static GetBoardGameResponse toGetBoardGameResponse(
         BoardGame boardGame,
-        List<GetTipResposne> tips) {
+        MyTipResponse myTipResponse,
+        List<GetTipResposne> tips
+    ) {
         List<String> categories = boardGame.getCategories().stream()
             .map(category -> category.getCategory().getDescription())
             .toList();
@@ -62,16 +65,30 @@ public final class BoardGameMapper {
             boardGame.getToPlayTime(),
             boardGame.getWishCount(),
             boardGame.getMainImageUrl(),
+            myTipResponse,
             tips
         );
     }
 
     public static GetTipResposne toGetTipResponse(User user, Tip tip) {
         return new GetTipResposne(
+            tip.getId(),
             user.getNickname(),
             user.getProfileImageUrl(),
             tip.getCreatedAt(),
-            tip.getContent()
+            tip.getContent(),
+            tip.getLikeCount()
+        );
+    }
+
+    public static MyTipResponse toMyTip(User user, Tip tip) {
+        return new MyTipResponse(
+            tip.getId(),
+            user.getNickname(),
+            user.getProfileImageUrl(),
+            tip.getCreatedAt(),
+            tip.getContent(),
+            tip.getLikeCount()
         );
     }
 

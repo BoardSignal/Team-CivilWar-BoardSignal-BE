@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface TipRepository {
 
-    Optional<Tip> findByUserId(Long userId);
+    Optional<Tip> findByBoardGameIdAndUserId(Long tipId, Long userId);
 
     Tip save(Tip tip);
 

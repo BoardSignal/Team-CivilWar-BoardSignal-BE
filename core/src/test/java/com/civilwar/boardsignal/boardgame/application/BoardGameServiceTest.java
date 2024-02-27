@@ -217,7 +217,8 @@ class BoardGameServiceTest {
         AddTipRequest request = new AddTipRequest("개꿀팁 공유합니다~");
         Tip tip = BoardGameFixture.getTip(user.getId(), boardGame.getId(), request.content());
 
-        given(tipRepository.findByUserId(user.getId())).willReturn(Optional.empty());
+        given(tipRepository.findByBoardGameIdAndUserId(boardGame.getId(), user.getId())).willReturn(
+            Optional.empty());
         given(tipRepository.save(any(Tip.class))).willReturn(tip);
 
         AddTipResposne response = boardGameService.addTip(user, boardGame.getId(), request);
@@ -239,7 +240,8 @@ class BoardGameServiceTest {
         AddTipRequest request = new AddTipRequest("개꿀팁 공유합니다~");
         Tip tip = BoardGameFixture.getTip(user.getId(), boardGame.getId(), request.content());
 
-        given(tipRepository.findByUserId(user.getId())).willReturn(Optional.of(tip));
+        given(tipRepository.findByBoardGameIdAndUserId(boardGame.getId(), user.getId())).willReturn(
+            Optional.of(tip));
 
         ThrowingCallable when = () -> boardGameService.addTip(user, boardGame.getId(), request);
         assertThatThrownBy(when)
@@ -287,7 +289,7 @@ class BoardGameServiceTest {
             .willReturn(List.of(user1, user2));
 
         //when
-        GetBoardGameResponse resposne = boardGameService.getBoardGame(boardGame.getId());
+        GetBoardGameResponse resposne = boardGameService.getBoardGame(null, boardGame.getId());
         String firstTip = resposne.tips().get(0).content();
         String secondTip = resposne.tips().get(1).content();
 
@@ -315,7 +317,7 @@ class BoardGameServiceTest {
             .willReturn(Optional.empty());
 
         //when
-        ThrowingCallable when = () -> boardGameService.getBoardGame(1L);
+        ThrowingCallable when = () -> boardGameService.getBoardGame(null, 1L);
 
         //then
         assertThatThrownBy(when)
