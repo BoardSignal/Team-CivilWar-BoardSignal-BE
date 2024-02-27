@@ -100,6 +100,8 @@ public final class RoomMapper {
             place,
             room.getMinAge(),
             room.getMaxAge(),
+            room.getMinParticipants(),
+            room.getMaxParticipants(),
             room.getImageUrl(),
             isLeader,
             room.getStatus().getDescription(),
