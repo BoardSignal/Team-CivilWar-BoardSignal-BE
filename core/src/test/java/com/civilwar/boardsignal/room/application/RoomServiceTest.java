@@ -21,6 +21,7 @@ import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -73,7 +74,7 @@ class RoomServiceTest {
         MockMultipartFile imageFixture = MultipartFileFixture.getMultipartFile();
 
         User user = UserFixture.getUserFixture("providerID", "imageUrl");
-        Room room = RoomFixture.getRoom();
+        Room room = RoomFixture.getRoom(user.getGender());
         Participant participant = RoomFixture.getParticipant();
 
         ReflectionTestUtils.setField(user, "id", 1L);
@@ -105,7 +106,7 @@ class RoomServiceTest {
         //fix이면서 시간이 지난 방 -> 30개
         List<Room> testResult = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before);
+            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
@@ -136,7 +137,7 @@ class RoomServiceTest {
         //fix이면서 아직 시간이 지나지 않은 방 -> 30개
         List<Room> testResult = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(after);
+            Room room = RoomFixture.getRoomWithMeetingInfo(after, Gender.UNION);
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
@@ -167,7 +168,7 @@ class RoomServiceTest {
         //fix이면서 시간이 지난 방 -> 30개
         List<Room> testResult = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before);
+            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
@@ -198,7 +199,7 @@ class RoomServiceTest {
         //fix이면서 시간이 지난 방 -> 30개
         List<Room> testResult = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before);
+            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
             ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
             testResult.add(room);
         }
@@ -218,7 +219,7 @@ class RoomServiceTest {
     void findRoomInfoTest() throws IOException {
         //given
         Long loginUserId = 1L;
-        Room findRoom = RoomFixture.getRoom();
+        Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
             1L, "김강훈", AgeGroup.TWENTY, true, 99
@@ -249,7 +250,7 @@ class RoomServiceTest {
     void findRoomInfoTest2() throws IOException {
         //given
         Long loginUserId = 2L;
-        Room findRoom = RoomFixture.getRoom();
+        Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
             LocalDateTime.of(2023, 2, 26, 20, 3, 59));
