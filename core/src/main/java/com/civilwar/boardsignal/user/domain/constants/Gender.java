@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 public enum Gender {
 
     MALE("male", "M", "남성"),
-    FEMALE("female", "F", "여성");
+    FEMALE("female", "F", "여성"),
+    UNION(null, null, "혼성");
 
     private final String kakaoType;
     private final String naverType;
@@ -31,5 +32,16 @@ public enum Gender {
         } else {
             return input.equalsIgnoreCase(this.naverType);
         }
+    }
+
+    public static Gender toGender(String input) {
+        return Arrays.stream(values())
+            .filter(gender -> gender.isEqual(input))
+            .findAny()
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
+    }
+
+    private boolean isEqual(String input) {
+        return input.equalsIgnoreCase(this.description);
     }
 }
