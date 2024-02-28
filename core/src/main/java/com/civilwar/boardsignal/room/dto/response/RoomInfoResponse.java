@@ -17,7 +17,7 @@ public record RoomInfoResponse(
     String imageUrl,
     Boolean isLeader,
     String isFix,
-    Boolean isAllowedAppositeGender,
+    String allowedGender,
     List<String> categories,
     List<ParticipantResponse> participantResponse,
     @JsonFormat(pattern = "MM-dd'T'HH:mm:ss")

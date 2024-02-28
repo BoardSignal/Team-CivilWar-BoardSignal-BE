@@ -9,6 +9,7 @@ import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,17 +21,17 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RoomFixture {
 
-    public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime) throws IOException {
+    public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime, Gender gender) throws IOException {
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(meetingTime);
-        Room room = getRoom();
+        Room room = getRoom(gender);
         room.fixRoom(meetingInfo);
 
         return room;
     }
 
-    public static Room getRoom() throws IOException {
+    public static Room getRoom(Gender allowedGender) throws IOException {
         MockMultipartFile image = MultipartFileFixture.getMultipartFile();
-        return RoomMapper.toRoom("imageUrl", getCreateRoomRequest(image));
+        return RoomMapper.toRoom("imageUrl", getCreateRoomRequest(image), allowedGender);
     }
 
     public static Room getAnotherRoom(
@@ -40,7 +41,7 @@ public class RoomFixture {
         DaySlot day,
         TimeSlot time,
         List<Category> categories,
-        Boolean isAllowedOppositeGender
+        Gender allowedGender
     ) {
         return Room.of(
             title,
@@ -56,7 +57,7 @@ public class RoomFixture {
             20,
             29,
             "imageUrl",
-            isAllowedOppositeGender,
+            allowedGender,
             categories
         );
     }

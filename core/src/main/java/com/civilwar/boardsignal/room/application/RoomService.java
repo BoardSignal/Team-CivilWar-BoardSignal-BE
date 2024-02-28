@@ -17,6 +17,7 @@ import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,8 +49,13 @@ public class RoomService {
     @Transactional
     public CreateRoomResponse createRoom(User user, CreateRoomRequest request) {
         String roomImageUrl = imageRepository.save(request.image());
+        Gender allowedGender = user.getGender();
+        //이성의 입장을 허용한다면
+        if(request.isAllowedOppositeGender()) {
+            allowedGender = Gender.UNION;
+        }
 
-        Room room = RoomMapper.toRoom(roomImageUrl, request);
+        Room room = RoomMapper.toRoom(roomImageUrl, request, allowedGender);
         Room savedRoom = roomRepository.save(room);
 
         Participant participant = Participant.of(

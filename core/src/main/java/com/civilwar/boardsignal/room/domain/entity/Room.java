@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.common.base.BaseEntity;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -75,8 +76,11 @@ public class Room extends BaseEntity {
     private int maxAge;
     @Column(name = "ROOM_IMAGE_URL")
     private String imageUrl;
-    @Column(name = "ROOM_IS_ALLOWED_OPPOSITE_GENDER")
-    private boolean isAllowedOppositeGender;
+    @Column(name = "ROOM_ALLOWED_GENDER")
+    @Enumerated(STRING)
+    private Gender allowedGender;
+    @Column(name = "ROOM_HEAD_COUNT")
+    private int headCount;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_MEETING_INFO_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private MeetingInfo meetingInfo;
@@ -96,7 +100,7 @@ public class Room extends BaseEntity {
         int minAge,
         int maxAge,
         @NonNull String imageUrl,
-        @NonNull boolean isAllowedOppositeGender,
+        @NonNull Gender allowedGender,
         @NonNull List<Category> roomCategories
     ) {
         this.title = title;
@@ -113,11 +117,12 @@ public class Room extends BaseEntity {
         this.minAge = minAge;
         this.maxAge = maxAge;
         this.imageUrl = imageUrl;
-        this.isAllowedOppositeGender = isAllowedOppositeGender;
+        this.allowedGender = allowedGender;
         roomCategories.forEach(category -> {
             RoomCategory roomCategory = RoomCategory.of(this, category);
             this.roomCategories.add(roomCategory);
         });
+        this.headCount = 0;
     }
 
     public static Room of(
@@ -134,7 +139,7 @@ public class Room extends BaseEntity {
         int minAge,
         int maxAge,
         String imageUrl,
-        boolean isAllowedOppositeGender,
+        Gender allowedGender,
         List<Category> roomCategories
     ) {
         return Room.builder()
@@ -151,7 +156,7 @@ public class Room extends BaseEntity {
             .minAge(minAge)
             .maxAge(maxAge)
             .imageUrl(imageUrl)
-            .isAllowedOppositeGender(isAllowedOppositeGender)
+            .allowedGender(allowedGender)
             .roomCategories(roomCategories)
             .build();
     }

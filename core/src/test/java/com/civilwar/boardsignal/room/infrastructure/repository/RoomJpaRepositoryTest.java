@@ -13,6 +13,7 @@ import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 import java.io.IOException;
@@ -32,7 +33,6 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     private final DaySlot daySlot = DaySlot.WEEKDAY;
     private final TimeSlot timeSlot = TimeSlot.AM;
     private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
-    private final Boolean isAllowedOppositeGender = true;
     @PersistenceUnit
     EntityManagerFactory emf;
     @Autowired
@@ -48,8 +48,8 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         //given
         Long user1 = 1L;
         Long user2 = 2L;
-        Room room = RoomFixture.getRoom();
-        Room room2 = RoomFixture.getRoom();
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        Room room2 = RoomFixture.getRoom(Gender.UNION);
         roomRepository.save(room);
         roomRepository.save(room2);
 
@@ -100,7 +100,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
 
         for (int i = 0; i < 30; i++) {
             //방 생성
-            Room room = RoomFixture.getRoom();
+            Room room = RoomFixture.getRoom(Gender.UNION);
             roomRepository.save(room);
             Participant participant = Participant.of(user1, room.getId(), true);
             participantJpaRepository.save(participant);
@@ -137,7 +137,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
                 daySlot,
                 timeSlot,
                 categories,
-                isAllowedOppositeGender
+                Gender.UNION
             );
             roomRepository.save(room);
         }
@@ -180,8 +180,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     @DisplayName("[동성만 입장 허용하는 방을 검색한다]")
     void findAllTest2() {
         //given
-        for (int i = 0; i < 100; i++) {
-            boolean allowedGender = i % 2 != 0;
+        for (int i = 0; i < 50; i++) {
             Room room = RoomFixture.getAnotherRoom(
                 title,
                 description,
@@ -189,7 +188,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
                 daySlot,
                 timeSlot,
                 categories,
-                allowedGender
+                Gender.UNION
             );
             roomRepository.save(room);
         }
@@ -200,7 +199,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
             null,
             null,
             null,
-            false
+            Gender.UNION.getDescription()
         );
         PageRequest pageRequest1 = PageRequest.of(0, 50);
 
@@ -226,7 +225,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
                 daySlot,
                 timeSlot,
                 categories,
-                isAllowedOppositeGender
+                Gender.UNION
             );
             roomRepository.save(room);
         }
@@ -273,7 +272,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
                 day.get(i),
                 time.get(i),
                 categories,
-                isAllowedOppositeGender
+                Gender.UNION
             );
             roomRepository.save(room);
         }
@@ -322,7 +321,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
                 daySlot,
                 timeSlot,
                 categoryList,
-                isAllowedOppositeGender
+                Gender.UNION
             );
             roomRepository.save(room);
         }

@@ -11,6 +11,7 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.infrastructure.repository.RoomJpaRepository;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -30,12 +31,13 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     private final RoomJpaRepository roomJpaRepository;
     private final JPAQueryFactory jpaQueryFactory;
 
-    private BooleanExpression equalAllowedOppositeGender(Boolean allowedOppositeGender) {
-        if (allowedOppositeGender == null) {
+    private BooleanExpression equalAllowedOppositeGender(String allowedGender) {
+        if (allowedGender == null) {
             return null;
         }
+        Gender genderType = Gender.toGender(allowedGender);
 
-        return room.isAllowedOppositeGender.eq(allowedOppositeGender);
+        return room.allowedGender.eq(genderType);
     }
 
     private BooleanExpression containsCategory(List<String> category) {
@@ -118,7 +120,7 @@ public class RoomRepositoryAdaptor implements RoomRepository {
                 containsStation(roomSearchCondition.station()),
                 containsAnyTime(roomSearchCondition.time()),
                 containsCategory(roomSearchCondition.category()),
-                equalAllowedOppositeGender(roomSearchCondition.oppositeGender())
+                equalAllowedOppositeGender(roomSearchCondition.gender())
             )
             .groupBy(room)
             .orderBy(room.createdAt.desc())
