@@ -7,7 +7,7 @@ public record RoomSearchCondition(
     List<String> station,
     List<String> time,
     List<String> category,
-    Boolean oppositeGender
+    String gender
 
 ) {
 
