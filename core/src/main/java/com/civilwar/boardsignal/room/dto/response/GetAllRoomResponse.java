@@ -12,13 +12,14 @@ public record GetAllRoomResponse(
     String time,
     int minAge,
     int maxAge,
-    boolean isAllowedAppositeGender,
+    String allowedGender,
     String imageUrl,
     int minParticipants,
     int maxParticipants,
     List<String> categories,
     @JsonFormat(pattern = "MM-dd'T'HH:mm:ss")
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    int headCount
 ) {
 
 }
