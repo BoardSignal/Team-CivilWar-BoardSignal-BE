@@ -11,6 +11,7 @@ import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,8 @@ public final class RoomMapper {
 
     public static Room toRoom(
         String roomImageUrl,
-        CreateRoomRequest request
+        CreateRoomRequest request,
+        Gender allowedGender
     ) {
         DaySlot daySlot = DaySlot.of(request.day());
         TimeSlot timeSlot = TimeSlot.of(request.time());
@@ -43,7 +45,7 @@ public final class RoomMapper {
             request.minAge(),
             request.maxAge(),
             roomImageUrl,
-            request.isAllowedOppositeGender(),
+            allowedGender,
             categories
         );
     }
@@ -65,12 +67,13 @@ public final class RoomMapper {
             room.getStartTime(),
             room.getMinAge(),
             room.getMaxAge(),
-            room.isAllowedOppositeGender(),
+            room.getAllowedGender().getDescription(),
             room.getImageUrl(),
             room.getMinParticipants(),
             room.getMaxParticipants(),
             categories,
-            room.getCreatedAt()
+            room.getCreatedAt(),
+            room.getHeadCount()
         );
     }
 
@@ -105,7 +108,7 @@ public final class RoomMapper {
             room.getImageUrl(),
             isLeader,
             room.getStatus().getDescription(),
-            room.isAllowedOppositeGender(),
+            room.getAllowedGender().getDescription(),
             room.getRoomCategories().stream()
                 .map(roomCategory -> roomCategory.getCategory().getDescription())
                 .toList(),
