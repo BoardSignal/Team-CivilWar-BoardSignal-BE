@@ -83,7 +83,7 @@ public class RoomController {
         @PathVariable("roomId") Long roomId,
         @AuthenticationPrincipal User user
     ) {
-        RoomInfoResponse roomInfo = roomService.findRoomInfo(user.getId(), roomId);
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(user, roomId);
         return ResponseEntity.ok(roomInfo);
     }
 }
