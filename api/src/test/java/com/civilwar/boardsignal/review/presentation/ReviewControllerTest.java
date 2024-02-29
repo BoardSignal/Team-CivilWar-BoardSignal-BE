@@ -66,7 +66,7 @@ class ReviewControllerTest extends ApiTestSupport {
             .header(HttpHeaders.AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(apiReviewSaveRequest)))
-            .andExpect(jsonPath("$.reviewCount").value(3));
+            .andExpect(jsonPath("$.reviewIds.length()").value(3));
 
 
         Review review1 = reviewRepository.findById(1L).get();
@@ -76,7 +76,7 @@ class ReviewControllerTest extends ApiTestSupport {
         ReviewEvaluation reviewEvaluation3 = reviewEvaluations.get(2);
 
         assertThat(review1.getReviewerId()).isEqualTo(loginUser.getId());
-        assertThat(review1.getRevieweeId()).isEqualTo(0);
+        assertThat(review1.getRevieweeId()).isZero();
 
         assertThat(reviewEvaluation1.getContent()).isEqualTo(ReviewContent.GOOD_MANNER);
         assertThat(reviewEvaluation1.getRecommend()).isEqualTo(ReviewRecommend.LIKE);

@@ -55,7 +55,7 @@ public class ReviewService {
             reviewIds.add(review.getId());
         }
 
-        return new ReviewSaveResponse(reviewIds.size());
+        return new ReviewSaveResponse(reviewIds);
     }
 
 }

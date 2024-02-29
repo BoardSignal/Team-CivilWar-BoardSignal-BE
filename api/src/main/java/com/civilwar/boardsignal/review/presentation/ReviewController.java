@@ -23,7 +23,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/{roomId}")
-    public ResponseEntity<?> postReviews(
+    public ResponseEntity<ReviewSaveResponse> postReviews(
         @RequestBody ApiReviewSaveRequest apiReviewSaveRequest,
         @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId

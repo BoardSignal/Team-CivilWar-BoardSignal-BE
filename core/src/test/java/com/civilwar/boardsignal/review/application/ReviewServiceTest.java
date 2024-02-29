@@ -69,7 +69,7 @@ class ReviewServiceTest {
             loginUser, roomId);
 
         //then
-        Assertions.assertThat(reviewSaveResponse.reviewCount()).isEqualTo(3);
+        Assertions.assertThat(reviewSaveResponse.reviewIds()).hasSize(3);
         verify(reviewRepository,times(3)).save(any(Review.class));
     }
 }
