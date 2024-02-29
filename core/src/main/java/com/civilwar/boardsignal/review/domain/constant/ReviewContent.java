@@ -1,5 +1,9 @@
 package com.civilwar.boardsignal.review.domain.constant;
 
+import static com.civilwar.boardsignal.review.exception.ReviewErrorCode.*;
+
+import com.civilwar.boardsignal.common.exception.NotFoundException;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,5 +15,16 @@ public enum ReviewContent {
     FAST_RESPONSE("응답이 빨라요");
 
     private final String description;
+
+    public static ReviewContent of(String input) {
+        return Arrays.stream(values())
+            .filter(reviewContent -> reviewContent.isEqual(input))
+            .findAny()
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_CONTENT));
+    }
+
+    private boolean isEqual(String input) {
+        return input.equalsIgnoreCase(this.description);
+    }
 
 }
