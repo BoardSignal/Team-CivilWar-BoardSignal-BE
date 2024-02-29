@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.NonNull;
 
 @Entity
@@ -24,6 +25,7 @@ import org.springframework.lang.NonNull;
 @Table(name = "REVIEW_TABLE")
 public class Review {
 
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "review", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     List<ReviewEvaluation> reviewEvaluations = new ArrayList<>();
 
