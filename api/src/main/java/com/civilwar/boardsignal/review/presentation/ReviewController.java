@@ -5,6 +5,9 @@ import com.civilwar.boardsignal.review.dto.ApiReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.request.ReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.response.ReviewSaveResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +25,12 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @Operation(summary = "리뷰 등록 API")
+    @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/{roomId}")
     public ResponseEntity<ReviewSaveResponse> postReviews(
         @RequestBody ApiReviewSaveRequest apiReviewSaveRequest,
-        @AuthenticationPrincipal User user,
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
         List<ReviewSaveRequest> reviews = apiReviewSaveRequest.reviews();
