@@ -3,8 +3,6 @@ package com.civilwar.boardsignal.auth.config;
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.filter.CustomAuthenticationFilter;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -40,15 +37,6 @@ public class SecurityConfig {
             .sessionManagement(
                 configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .anonymous(AbstractHttpConfigurer::disable)
-            .cors(configurer -> configurer.configurationSource(request -> {
-                    CorsConfiguration cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of("http://localhost:8080"));
-                    cors.setAllowedMethods(Collections.singletonList("*"));
-                    cors.setAllowedHeaders(Collections.singletonList("*"));
-                    cors.setAllowCredentials(true);
-                    return cors;
-                }
-            ))
             .authorizeHttpRequests(registry -> registry
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
