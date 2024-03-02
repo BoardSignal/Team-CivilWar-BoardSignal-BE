@@ -51,6 +51,7 @@ public class SecurityConfig {
             ))
             .authorizeHttpRequests(registry -> registry
                 .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/oauth2/**").permitAll()
                 .anyRequest().permitAll()
             )
             .exceptionHandling(configurer -> configurer
