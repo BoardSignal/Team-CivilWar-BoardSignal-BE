@@ -52,6 +52,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(registry -> registry
                 .requestMatchers("/api/v1/board-games").permitAll()
                 .requestMatchers("/api/v1/board-games/{boardGameId}").permitAll()
+                .requestMatchers("/api/v1/notifications").permitAll()
                 .requestMatchers("/api/v1/users").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
