@@ -55,7 +55,8 @@ public class UserApiController {
         @Parameter(hidden = true) @AuthenticationPrincipal User loginUser,
         @PathVariable("userId") Long profileUserId
     ) {
-        UserProfileResponse userProfileResponse = userService.getUserProfileInfo(profileUserId, loginUser);
+        UserProfileResponse userProfileResponse = userService.getUserProfileInfo(profileUserId,
+            loginUser);
 
         return ResponseEntity.ok(userProfileResponse);
     }

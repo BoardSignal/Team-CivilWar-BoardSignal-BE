@@ -42,6 +42,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private final List<UserCategory> userCategories = new ArrayList<>();
 
+    @BatchSize(size = 8)
+    @OneToMany(mappedBy = "user", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
+    private final List<UserFcmToken> userFcmTokens = new ArrayList<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "USER_ID")

@@ -51,7 +51,7 @@ public class RoomService {
         String roomImageUrl = imageRepository.save(request.image());
         Gender allowedGender = user.getGender();
         //이성의 입장을 허용한다면
-        if(request.isAllowedOppositeGender()) {
+        if (request.isAllowedOppositeGender()) {
             allowedGender = Gender.UNION;
         }
 
