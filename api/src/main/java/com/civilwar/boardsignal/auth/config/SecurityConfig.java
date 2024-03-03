@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -50,11 +51,16 @@ public class SecurityConfig {
                 }
             ))
             .authorizeHttpRequests(registry -> registry
-                .requestMatchers("/api/v1/board-games").permitAll()
-                .requestMatchers("/api/v1/board-games/{boardGameId}").permitAll()
-                .requestMatchers("/api/v1/users").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                //방
+                .requestMatchers(HttpMethod.GET, "/api/v1/rooms/my/end-games").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/rooms/**").permitAll()
+                //보드게임
+                .requestMatchers(HttpMethod.GET, "/api/v1/board-games/**").permitAll()
+                //인증
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/reissue").permitAll()
+                .requestMatchers(HttpMethod.GET, "/oauth2/authorization/**").permitAll()
+                .anyRequest().authenticated()
             )
             .exceptionHandling(configurer -> configurer
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
