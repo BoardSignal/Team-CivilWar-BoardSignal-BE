@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.auth.config;
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.filter.CustomAuthenticationFilter;
+import com.civilwar.boardsignal.auth.filter.JwtExceptionHandlerFilter;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
+    private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
     private final UserRepository userRepository;
 
     @Bean
@@ -64,6 +66,11 @@ public class SecurityConfig {
             )
             .exceptionHandling(configurer -> configurer
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+            //Jwt 관련 예외 처리
+            .addFilterBefore(
+                jwtExceptionHandlerFilter,
+                UsernamePasswordAuthenticationFilter.class
+            )
             .addFilterBefore(
                 new CustomAuthenticationFilter(tokenProvider, userRepository),
                 UsernamePasswordAuthenticationFilter.class)
