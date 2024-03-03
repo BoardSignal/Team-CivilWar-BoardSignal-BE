@@ -218,6 +218,8 @@ class RoomServiceTest {
     @DisplayName("[non-fix 방을 방장이 조회하면, 방장 여부와 & 생성 시 작성한 방 정보가 조회된다]")
     void findRoomInfoTest() throws IOException {
         //given
+        User user = UserFixture.getUserFixture("providerId", "imageUrl");
+        ReflectionTestUtils.setField(user, "id", 1L);
         Long loginUserId = 1L;
         Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
@@ -233,7 +235,7 @@ class RoomServiceTest {
             .willReturn(participantJpaDtos);
 
         //when
-        RoomInfoResponse roomInfo = roomService.findRoomInfo(loginUserId, findRoom.getId());
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(user, findRoom.getId());
 
         //then
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
@@ -249,7 +251,8 @@ class RoomServiceTest {
     @DisplayName("[fix 방을 방장이 아닌 사람이 조회하면, 방장 여부와 & 모임 확정 정보가 조회된다]")
     void findRoomInfoTest2() throws IOException {
         //given
-        Long loginUserId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "imageUrl");
+        ReflectionTestUtils.setField(user, "id", 2L);
         Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
@@ -268,7 +271,7 @@ class RoomServiceTest {
             .willReturn(participantJpaDtos);
 
         //when
-        RoomInfoResponse roomInfo = roomService.findRoomInfo(loginUserId, findRoom.getId());
+        RoomInfoResponse roomInfo = roomService.findRoomInfo(user, findRoom.getId());
 
         //then
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
