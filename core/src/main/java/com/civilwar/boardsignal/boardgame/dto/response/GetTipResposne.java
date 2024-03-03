@@ -10,7 +10,8 @@ public record GetTipResposne(
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime createdAt,
     String content,
-    int likeCount
+    int likeCount,
+    boolean isLiked
 ) {
 
 }
