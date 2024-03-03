@@ -1,11 +1,14 @@
 package com.civilwar.boardsignal.auth.presentation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.auth.domain.model.Token;
+import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.user.UserFixture;
@@ -81,5 +84,30 @@ class AuthApiControllerTest extends ApiTestSupport {
                     .header(AUTHORIZATION, BEARER + token.accessToken())
             )
             .andExpect(jsonPath("$.logoutResult").value(false));
+    }
+
+    @Test
+    @DisplayName("[인증이 안 된 사용자가 접근 시 401 에러와 전용 에러 메시지 & 코드를 반환한다.]")
+    void exceptionHandlingTest() throws Exception {
+
+        mockMvc.perform(
+                get("/api/v1/users/" + loginUser.getId()))
+            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_REQUIRED.getMessage()))
+            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_REQUIRED.getCode()))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("[잘못된 AccessToken이 넘어온다면 401 에러와 전용 에러 메시지 & 코드를 반환한다.]")
+    void exceptionHandlingTest2() throws Exception {
+
+        String wrongToken = "Bearer WrongToken";
+
+        mockMvc.perform(
+                get("/api/v1/users/" + loginUser.getId())
+                    .header(AUTHORIZATION, wrongToken))
+            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_INVALID.getMessage()))
+            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_INVALID.getCode()))
+            .andExpect(status().isUnauthorized());
     }
 }
