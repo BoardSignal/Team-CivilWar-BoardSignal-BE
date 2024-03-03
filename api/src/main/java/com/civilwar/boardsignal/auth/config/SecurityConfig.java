@@ -15,9 +15,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -31,6 +31,7 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
     private final UserRepository userRepository;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -64,8 +65,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/oauth2/authorization/**").permitAll()
                 .anyRequest().authenticated()
             )
+            //인증 안 된 사용자 접근 시 예외 처리
             .exceptionHandling(configurer -> configurer
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+                .authenticationEntryPoint(authenticationEntryPoint))
             //Jwt 관련 예외 처리
             .addFilterBefore(
                 jwtExceptionHandlerFilter,
