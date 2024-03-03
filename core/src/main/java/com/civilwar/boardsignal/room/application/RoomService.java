@@ -113,7 +113,7 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public RoomInfoResponse findRoomInfo(Long userId, Long roomId) {
+    public RoomInfoResponse findRoomInfo(User user, Long roomId) {
         //1. 모임 정보 & 모임 확정 정보 (MeetingInfo)
         Room findRoom = roomRepository.findById(roomId)
             .orElseThrow(() -> new NotFoundException(RoomErrorCode.NOT_FOUND_ROOM));
@@ -139,12 +139,20 @@ public class RoomService {
             .map(RoomMapper::toParticipantResponse)
             .toList();
 
-        //4. 현재 사용자의 방장 여부 확인
-        Boolean isLeader = participants.stream()
-            .filter(participant -> participant.userId().equals(userId))
-            .map(ParticipantResponse::isLeader)
-            .findAny()
-            .orElse(false);
+        //4. 로그인 한 사용자인지 확인
+
+        //현재 로그인 상태가 아니라면 -> leaderX
+        Boolean isLeader = false;
+
+        //현재 로그인 상태라면 -> leader 확인
+        if (user != null){
+            //4. 현재 사용자의 방장 여부 확인
+            isLeader = participants.stream()
+                .filter(participant -> participant.userId().equals(user.getId()))
+                .map(ParticipantResponse::isLeader)
+                .findAny()
+                .orElse(false);
+        }
 
         return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader,
             participants);
