@@ -27,6 +27,7 @@ import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -104,12 +105,24 @@ public class BoardGameService {
         BoardGame boardGame = boardGameQueryRepository.findById(boardGameId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
 
-        List<Tip> tips = tipRepository.findAllByBoardGameId(boardGameId);
+        List<Tip> tips = new ArrayList<>(tipRepository.findAllByBoardGameId(boardGameId));
 
         MyTipResponse myTipResponse = null;
+        boolean isWished = false; // 찜 여부 초기값
+
+        //사용자가 좋아요 한 팁ID 전부 추출
+        List<Long> isLikedTip = new ArrayList<>();
 
         //로그인 한 회원이라면 MyTip이 있는 지 추출, 없으면 null
         if (user != null) {
+            isLikedTip.addAll(likeRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(Like::getTipId)
+                .toList());
+
+            isWished = wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGameId)
+                .isPresent();
+
             for (Tip tip : tips) {
                 if (Objects.equals(tip.getUserId(), user.getId())) {
                     myTipResponse = BoardGameMapper.toMyTip(user, tip);
@@ -128,11 +141,18 @@ public class BoardGameService {
         List<GetTipResposne> tipResponse = tips.stream()
             .flatMap(tip -> users.stream()
                 .filter(findUser -> Objects.equals(tip.getUserId(), findUser.getId()))
-                .map(findUser -> BoardGameMapper.toGetTipResponse(findUser, tip)))
+                .map(findUser -> {
+                    GetTipResposne response = BoardGameMapper.toGetTipResponse(findUser, tip,
+                        false);
+                    if (isLikedTip.contains(tip.getId())) { // 사용자가 좋아요 한 팁이라면 isLiked True
+                        response = BoardGameMapper.toGetTipResponse(findUser, tip, true);
+                    }
+                    return response;
+                }))
             .toList();
 
         //나의 공략은 따로 나의 공략 필드에 매핑 (공략 리스트에는 나의 공략 없음. 맨 위에 어차피 있으므로)
-        return BoardGameMapper.toGetBoardGameResponse(boardGame, myTipResponse, tipResponse);
+        return BoardGameMapper.toGetBoardGameResponse(boardGame, myTipResponse, tipResponse, isWished);
     }
 
     @Transactional
