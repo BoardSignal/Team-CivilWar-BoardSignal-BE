@@ -6,7 +6,7 @@ import static org.springframework.http.HttpMethod.POST;
 
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.domain.repository.NotificationRepository;
-import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequst;
+import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequest;
 import com.civilwar.boardsignal.notification.dto.request.NotificationTestRequest;
 import com.civilwar.boardsignal.notification.dto.response.CreateFcmTokenResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -114,7 +114,7 @@ public class NotificationService {
     }
 
     //사용자 기기 토큰 저장
-    public CreateFcmTokenResponse createFcmToken(User user, CreateFcmTokenReequst request) {
+    public CreateFcmTokenResponse createFcmToken(User user, CreateFcmTokenReequest request) {
         UserFcmToken userFcmToken = UserFcmToken.of(user, request.token());
         UserFcmToken savedToken = userFcmTokenRepository.save(userFcmToken);
         return new CreateFcmTokenResponse(savedToken.getId());

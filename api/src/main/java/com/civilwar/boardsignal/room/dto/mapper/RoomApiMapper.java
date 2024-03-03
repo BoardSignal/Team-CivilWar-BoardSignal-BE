@@ -16,8 +16,8 @@ public final class RoomApiMapper {
         return new CreateRoomRequest(
             request.time(),
             request.description(),
-            request.minPartipants(),
-            request.maxPartipants(),
+            request.minParticipants(),
+            request.maxParticipants(),
             request.day(),
             request.time(),
             request.startTime(),

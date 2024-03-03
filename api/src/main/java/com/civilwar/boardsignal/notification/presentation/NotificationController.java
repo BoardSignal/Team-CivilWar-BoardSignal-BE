@@ -1,7 +1,7 @@
 package com.civilwar.boardsignal.notification.presentation;
 
 import com.civilwar.boardsignal.notification.application.NotificationService;
-import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequst;
+import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequest;
 import com.civilwar.boardsignal.notification.dto.request.NotificationTestRequest;
 import com.civilwar.boardsignal.notification.dto.response.CreateFcmTokenResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -38,7 +38,7 @@ public class NotificationController {
     public ResponseEntity<CreateFcmTokenResponse> createToken(
         @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
-        @RequestBody CreateFcmTokenReequst request
+        @RequestBody CreateFcmTokenReequest request
     ) {
         CreateFcmTokenResponse response = notificationService.createFcmToken(user, request);
         return ResponseEntity.ok(response);
