@@ -82,4 +82,18 @@ class AuthApiControllerTest extends ApiTestSupport {
             )
             .andExpect(jsonPath("$.logoutResult").value(false));
     }
+
+    @Test
+    @DisplayName("[AccessToken의 사용자 정보를 반환한다.]")
+    void getLoginUserInfoTest() throws Exception {
+        //then
+        mockMvc.perform(get("/api/v1/auth")
+            .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.id").value(loginUser.getId()))
+            .andExpect(jsonPath("$.email").value(loginUser.getEmail()))
+            .andExpect(jsonPath("$.nickname").value(loginUser.getNickname()))
+            .andExpect(jsonPath("$.ageGroup").value(loginUser.getAgeGroup().getDescription()))
+            .andExpect(jsonPath("$.gender").value(loginUser.getGender().getDescription()))
+            .andExpect(jsonPath("$.isJoined").value(loginUser.getIsJoined()));
+    }
 }

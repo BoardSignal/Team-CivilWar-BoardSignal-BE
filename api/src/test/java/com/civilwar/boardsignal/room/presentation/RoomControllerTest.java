@@ -380,4 +380,41 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.participantResponse[0].nickname")
                 .value("macbook"));
     }
+
+    @Test
+    @DisplayName("[비로그인 유저가 fix 방 상세정보를 조회한다]")
+    void getRoomInfoTest3() throws Exception {
+        //given
+        User anotherUser = UserFixture.getUserFixture2("providerId", "imageUrl");
+        userRepository.save(anotherUser);
+
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        Participant participant = Participant.of(anotherUser.getId(), room.getId(), true);
+        participantRepository.save(participant);
+
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+        meetingInfoRepository.save(meetingInfo);
+        room.fixRoom(meetingInfo);
+        roomRepository.save(room);
+
+        mockMvc.perform(get("/api/v1/rooms/" + room.getId()))
+            .andExpect(jsonPath("$.roomId").value(room.getId()))
+            .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.startTime").value(
+                meetingInfo.getMeetingTime()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
+            .andExpect(jsonPath("$.place").value(
+                meetingInfo.getStation()
+                    + " " + meetingInfo.getMeetingPlace()
+            ))
+            .andExpect(jsonPath("$.isFix").value("확정"))
+            .andExpect(jsonPath("$.isLeader").value(false))
+            .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
+            .andExpect(jsonPath("$.participantResponse.size()").value(1))
+            .andExpect(jsonPath("$.participantResponse[0].nickname")
+                .value("macbook"));
+    }
 }

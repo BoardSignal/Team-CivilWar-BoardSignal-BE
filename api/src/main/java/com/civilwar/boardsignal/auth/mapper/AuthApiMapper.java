@@ -4,12 +4,13 @@ import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.dto.OAuthUserInfo;
 import com.civilwar.boardsignal.auth.dto.request.UserLoginRequest;
 import com.civilwar.boardsignal.auth.dto.response.ApiUserLoginResponse;
+import com.civilwar.boardsignal.auth.dto.response.LoginUserInfoResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class AuthApiMapper {
+public final class AuthApiMapper {
 
     public static UserLoginRequest toUserLoginRequest(OAuthUserInfo oAuthUserInfo) {
         return new UserLoginRequest(
@@ -30,5 +31,22 @@ public class AuthApiMapper {
         return new ApiUserLoginResponse(userLoginResponse.isJoined(), token.accessToken());
     }
 
+    public static LoginUserInfoResponse toLoginUserInfoResponse(
+        Long id,
+        String email,
+        String nickname,
+        String ageGroup,
+        String gender,
+        Boolean isJoined
+    ) {
+        return new LoginUserInfoResponse(
+            id,
+            email,
+            nickname,
+            ageGroup,
+            gender,
+            isJoined
+        );
+    }
 
 }
