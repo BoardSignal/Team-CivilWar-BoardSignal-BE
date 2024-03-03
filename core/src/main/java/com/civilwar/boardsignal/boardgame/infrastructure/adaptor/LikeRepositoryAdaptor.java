@@ -25,11 +25,6 @@ public class LikeRepositoryAdaptor implements LikeRepository {
     }
 
     @Override
-    public List<Like> findAllByTipId(Long tipId) {
-        return likeJpaRepository.findAllByTipId(tipId);
-    }
-
-    @Override
     public Like save(Like like) {
         return likeJpaRepository.save(like);
     }
@@ -37,5 +32,10 @@ public class LikeRepositoryAdaptor implements LikeRepository {
     @Override
     public void deleteByTipIdAndUserId(Long tipId, Long userId) {
         likeJpaRepository.deleteByTipIdAndUserId(tipId, userId);
+    }
+
+    @Override
+    public List<Like> findAllByUserId(Long userId) {
+        return likeJpaRepository.findAllByUserId(userId);
     }
 }

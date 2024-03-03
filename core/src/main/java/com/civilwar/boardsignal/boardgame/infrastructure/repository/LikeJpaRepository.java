@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LikeJpaRepository extends JpaRepository<Like, Long> {
 
-    List<Like> findAllByTipId(Long tipId);
-
     void deleteByTipIdAndUserId(Long tipId, Long userId);
+
+    List<Like> findAllByUserId(Long userId);
 }
