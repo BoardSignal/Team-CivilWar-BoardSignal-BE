@@ -62,7 +62,8 @@ public class UserService {
         //프로필 방문 유저가 해당 프로필 주인인지 확인
         Boolean isProfileManager = profileUserId.equals(loginUser.getId());
 
-        return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount, isProfileManager);
+        return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount,
+            isProfileManager);
     }
 
 }

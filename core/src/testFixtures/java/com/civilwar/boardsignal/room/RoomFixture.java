@@ -21,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RoomFixture {
 
-    public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime, Gender gender) throws IOException {
+    public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime, Gender gender)
+        throws IOException {
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(meetingTime);
         Room room = getRoom(gender);
         room.fixRoom(meetingInfo);

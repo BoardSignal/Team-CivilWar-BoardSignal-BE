@@ -26,19 +26,19 @@ public enum Gender {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
     }
 
+    public static Gender toGender(String input) {
+        return Arrays.stream(values())
+            .filter(gender -> gender.isEqual(input))
+            .findAny()
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
+    }
+
     private boolean isEqual(String input, String provider) {
         if (provider.equals(OAuthProvider.KAKAO.getType())) {
             return input.equalsIgnoreCase(this.kakaoType);
         } else {
             return input.equalsIgnoreCase(this.naverType);
         }
-    }
-
-    public static Gender toGender(String input) {
-        return Arrays.stream(values())
-            .filter(gender -> gender.isEqual(input))
-            .findAny()
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_GENDER));
     }
 
     private boolean isEqual(String input) {

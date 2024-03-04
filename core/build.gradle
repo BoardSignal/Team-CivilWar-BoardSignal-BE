@@ -33,6 +33,13 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.15.1"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+
+    //fcm
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.2.0'
+
+    //JsonObject
+    implementation group: 'org.json', name: 'json', version: '20231013'
 }
 
 bootJar { enabled = false }

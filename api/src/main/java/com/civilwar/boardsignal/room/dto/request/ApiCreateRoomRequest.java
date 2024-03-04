@@ -5,8 +5,8 @@ import java.util.List;
 public record ApiCreateRoomRequest(
     String roomTitle,
     String description,
-    int minPartipants,
-    int maxPartipants,
+    int minParticipants,
+    int maxParticipants,
     String day,
     String time,
     String startTime,
