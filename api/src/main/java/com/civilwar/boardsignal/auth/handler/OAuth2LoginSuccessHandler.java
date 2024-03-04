@@ -25,6 +25,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final String DOMAIN = "http://localhost:5173";
+
     private final AuthService authService;
 
     private void sendResponse(HttpServletRequest request, HttpServletResponse response,
@@ -40,11 +42,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(43200);   //임시 값 -> 12시간
-        cookie.setDomain("http://localhost:5173");
+        cookie.setDomain(DOMAIN);
         response.addCookie(cookie);
 
         //Redirect URL 생성
-        String url = UriComponentsBuilder.fromUriString("http://localhost:5173" + "/redirect")
+        String url = UriComponentsBuilder.fromUriString(DOMAIN + "/redirect")
             .queryParam("access-token", apiUserLoginResponse.accessToken())
             .queryParam("is-joined", apiUserLoginResponse.isJoined())
             .build()
