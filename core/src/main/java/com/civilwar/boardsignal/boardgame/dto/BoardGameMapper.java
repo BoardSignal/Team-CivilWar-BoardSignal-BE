@@ -47,7 +47,8 @@ public final class BoardGameMapper {
     public static GetBoardGameResponse toGetBoardGameResponse(
         BoardGame boardGame,
         MyTipResponse myTipResponse,
-        List<GetTipResposne> tips
+        List<GetTipResposne> tips,
+        boolean isWished
     ) {
         List<String> categories = boardGame.getCategories().stream()
             .map(category -> category.getCategory().getDescription())
@@ -65,19 +66,21 @@ public final class BoardGameMapper {
             boardGame.getToPlayTime(),
             boardGame.getWishCount(),
             boardGame.getMainImageUrl(),
+            isWished,
             myTipResponse,
             tips
         );
     }
 
-    public static GetTipResposne toGetTipResponse(User user, Tip tip) {
+    public static GetTipResposne toGetTipResponse(User user, Tip tip, boolean isLiked) {
         return new GetTipResposne(
             tip.getId(),
             user.getNickname(),
             user.getProfileImageUrl(),
             tip.getCreatedAt(),
             tip.getContent(),
-            tip.getLikeCount()
+            tip.getLikeCount(),
+            isLiked
         );
     }
 

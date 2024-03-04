@@ -14,6 +14,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
+import com.civilwar.boardsignal.boardgame.domain.entity.Like;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameQueryRepository;
@@ -305,7 +306,83 @@ class BoardGameServiceTest {
             () -> assertThat(firstTip).isEqualTo(tip1.getContent()),
             () -> assertThat(secondTip).isEqualTo(tip2.getContent()),
             () -> assertThat(resposne.tips().get(0).nickname()).isEqualTo(user1.getNickname()),
-            () -> assertThat(resposne.tips().get(1).nickname()).isEqualTo(user2.getNickname())
+            () -> assertThat(resposne.tips().get(1).nickname()).isEqualTo(user2.getNickname()),
+            //로그인 안한 사용자이므로 찜, 좋아요 둘 다 false
+            () -> assertThat(resposne.isWished()).isFalse(),
+            () -> assertThat(resposne.tips().get(0).isLiked()).isFalse(),
+            () -> assertThat(resposne.tips().get(1).isLiked()).isFalse()
+        );
+    }
+
+    @Test
+    @DisplayName("[찜한 보드게임의 공략도 좋아요 한 사용자는 보드게임 조회 시 둘의 여부를 응답받을 수 있다.]")
+    void getBoardGameWishAndLikeTip(){
+        //given
+        User user1 = UserFixture.getUserFixture("provider", "hhtps~");
+        User user2 = UserFixture.getUserFixture2("provider2", "https2~");
+        User user3 = UserFixture.getUserFixture2("asdasd", "image");
+        ReflectionTestUtils.setField(user1, "id", 1L);
+        ReflectionTestUtils.setField(user2, "id", 2L);
+        ReflectionTestUtils.setField(user3, "id", 3L);
+
+        BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
+        BoardGameCategory partyGame = BoardGameFixture.getBoardGameCategory(PARTY);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, partyGame));
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Tip tip1 = Tip.of(boardGame.getId(), 1L, "꿀팁1");
+        Tip tip2 = Tip.of(boardGame.getId(), 2L, "꿀팁2");
+        ReflectionTestUtils.setField(
+            tip1,
+            "createdAt",
+            LocalDateTime.of(2024, 1, 1, 15, 30)
+        );
+        ReflectionTestUtils.setField(
+            tip2,
+            "createdAt",
+            LocalDateTime.of(2024, 1, 1, 16, 30)
+        );
+        ReflectionTestUtils.setField(tip1, "id", 1L);
+        ReflectionTestUtils.setField(tip2, "id", 2L);
+
+        Like like1 = Like.of(tip1.getId(), user3.getId());
+        Like like2 = Like.of(tip2.getId(), user3.getId());
+        Wish wish = BoardGameFixture.getWish(user3.getId(), boardGame.getId());
+
+        given(boardGameQueryRepository.findById(boardGame.getId()))
+            .willReturn(Optional.of(boardGame));
+        given(tipRepository.findAllByBoardGameId(boardGame.getId()))
+            .willReturn(List.of(tip1, tip2));
+        given(userRepository.findAllInIds(List.of(1L ,2L)))
+            .willReturn(List.of(user1, user2));
+        given(likeRepository.findAllByUserId(user3.getId()))
+            .willReturn(List.of(like1, like2));
+        given(wishRepository.findByUserIdAndBoardGameId(user3.getId(), boardGame.getId()))
+            .willReturn(Optional.of(wish));
+
+        //when
+        GetBoardGameResponse resposne = boardGameService.getBoardGame(user3, boardGame.getId());
+        String firstTip = resposne.tips().get(0).content();
+        String secondTip = resposne.tips().get(1).content();
+
+        //then
+        assertAll(
+            () -> assertThat(resposne.name()).isEqualTo(boardGame.getTitle()),
+            () -> assertThat(resposne.categories()).hasSize(2),
+            () -> assertThat(resposne.categories()).contains(
+                warGame.getCategory().getDescription()),
+            () -> assertThat(resposne.categories()).contains(
+                partyGame.getCategory().getDescription()),
+            () -> assertThat(resposne.tips()).hasSize(2),
+            () -> assertThat(firstTip).isEqualTo(tip1.getContent()),
+            () -> assertThat(secondTip).isEqualTo(tip2.getContent()),
+            () -> assertThat(resposne.tips().get(0).nickname()).isEqualTo(user1.getNickname()),
+            () -> assertThat(resposne.tips().get(1).nickname()).isEqualTo(user2.getNickname()),
+            //보드게임 찜, 공략에 모두 좋아요 한 상태
+            () -> assertThat(resposne.isWished()).isTrue(),
+            () -> assertThat(resposne.tips().get(0).isLiked()).isTrue(),
+            () -> assertThat(resposne.tips().get(1).isLiked()).isTrue()
         );
     }
 

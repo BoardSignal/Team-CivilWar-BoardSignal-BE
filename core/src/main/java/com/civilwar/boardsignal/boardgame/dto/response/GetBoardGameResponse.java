@@ -14,6 +14,7 @@ public record GetBoardGameResponse(
     int toPlayTime,
     int wishCount,
     String imageUrl,
+    boolean isWished,
     MyTipResponse myTip,
     List<GetTipResposne> tips
 ) {
