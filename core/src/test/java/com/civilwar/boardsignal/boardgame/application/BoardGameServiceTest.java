@@ -562,5 +562,66 @@ class BoardGameServiceTest {
         assertThat(currLikeCount).isEqualTo(--prevLikeCount);
     }
 
+    @Test
+    @DisplayName("[찜한 보드게임을 전체 조회할 수 있다.]")
+    void getAllWishBoardGames() {
+        User user = UserFixture.getUserFixture("prpr", "https");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGameCategory warGame = BoardGameFixture.getBoardGameCategory(WAR);
+        BoardGameCategory familyGame = BoardGameFixture.getBoardGameCategory(FAMILY);
+        BoardGame boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        Wish wish = Wish.of(user.getId(), boardGame.getId());
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+
+        given(wishRepository.findAllByUserId(user.getId()))
+            .willReturn(List.of(wish));
+        given(boardGameQueryRepository.findAllInIds(List.of(boardGame.getId()), pageRequest))
+            .willReturn(new PageImpl<>(List.of(boardGame)));
+
+        GetAllBoardGamesResponse findBoardGame = boardGameService.getAllWishBoardGames(
+            user.getId(), pageRequest
+        ).boardGamesInfos().get(0);
+
+        assertAll(
+            () -> assertThat(findBoardGame.name()).isEqualTo(boardGame.getTitle()),
+            () -> assertThat(findBoardGame.categories()).hasSameSizeAs(boardGame.getCategories()),
+            () -> assertThat(findBoardGame.difficulty()).isEqualTo(
+                boardGame.getDifficulty().getDescription()),
+            () -> assertThat(findBoardGame.minParticipants()).isEqualTo(
+                boardGame.getMinParticipants()),
+            () -> assertThat(findBoardGame.maxParticipants()).isEqualTo(
+                boardGame.getMaxParticipants()),
+            () -> assertThat(findBoardGame.fromPlayTime()).isEqualTo(boardGame.getFromPlayTime()),
+            () -> assertThat(findBoardGame.toPlayTime()).isEqualTo(boardGame.getToPlayTime()),
+            () -> assertThat(findBoardGame.wishCount()).isEqualTo(boardGame.getWishCount()),
+            () -> assertThat(findBoardGame.imageUrl()).isEqualTo(boardGame.getMainImageUrl())
+        );
+    }
+
+    @Test
+    @DisplayName("[찜한 보드게임이 없다면 아무것도 조회되지 않는다.]")
+    void getAllWishBoardGamesNothing() {
+        User user = UserFixture.getUserFixture("prpr", "https");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+
+        given(wishRepository.findAllByUserId(user.getId()))
+            .willReturn(List.of());
+        given(boardGameQueryRepository.findAllInIds(List.of(), pageRequest))
+            .willReturn(new PageImpl<>(List.of()));
+
+        List<GetAllBoardGamesResponse> findBoardGames = boardGameService.getAllWishBoardGames(
+            user.getId(), pageRequest
+        ).boardGamesInfos();
+
+        assertThat(findBoardGames).isEmpty();
+
+    }
+
 
 }
