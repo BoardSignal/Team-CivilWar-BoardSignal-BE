@@ -17,12 +17,14 @@ import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.CancelWishResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.MyTipResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
+import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -72,9 +74,8 @@ public class BoardGameService {
 
         wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGameId)
             .ifPresentOrElse(
-                wish -> { // 찜한 내역이 있던 게임이라면 찜 취소 로직
-                    boardGame.decreaseWishCount();
-                    wishRepository.deleteById(wish.getId());
+                wish -> { // 찜한 내역이 있던 게임이라면 예외 발생
+                    throw new ValidationException(BoardGameErrorCode.ALREADY_WISHED);
                 },
                 () -> { // 찜한 내역이 없던 게임이라면 찜 등록 로직
                     boardGame.increaseWishCount();
@@ -83,6 +84,21 @@ public class BoardGameService {
                 }
             );
         return new WishBoardGameResponse(boardGame.getWishCount());
+    }
+
+    @Transactional
+    public CancelWishResposne cancelWish(User user, Long boardGameId) {
+        BoardGame boardGame = boardGameQueryRepository.findByIdWithLock(boardGameId)
+            .orElseThrow(
+                () -> new NotFoundException(NOT_FOUND_BOARD_GAME)
+            );
+        Wish wish = wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGameId)
+            .orElseThrow(() -> new ValidationException(BoardGameErrorCode.NOT_FOUND_WISH));
+
+        boardGame.decreaseWishCount();
+        wishRepository.deleteById(wish.getId());
+
+        return new CancelWishResposne(boardGame.getWishCount());
     }
 
     @Transactional
@@ -152,7 +168,12 @@ public class BoardGameService {
             .toList();
 
         //나의 공략은 따로 나의 공략 필드에 매핑 (공략 리스트에는 나의 공략 없음. 맨 위에 어차피 있으므로)
-        return BoardGameMapper.toGetBoardGameResponse(boardGame, myTipResponse, tipResponse, isWished);
+        return BoardGameMapper.toGetBoardGameResponse(
+            boardGame,
+            myTipResponse,
+            tipResponse,
+            isWished
+        );
     }
 
     @Transactional

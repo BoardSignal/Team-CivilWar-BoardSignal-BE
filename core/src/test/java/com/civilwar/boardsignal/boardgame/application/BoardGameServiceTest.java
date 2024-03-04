@@ -25,10 +25,10 @@ import com.civilwar.boardsignal.boardgame.dto.request.AddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.CancelWishResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
-import com.civilwar.boardsignal.boardgame.dto.response.WishBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
@@ -162,8 +162,8 @@ class BoardGameServiceTest {
     }
 
     @Test
-    @DisplayName("[이미 찜했던 게임에 대해 찜 등록 요청을 하면 찜이 취소된다]")
-    void cancelWish() {
+    @DisplayName("[이미 찜했던 게임에 대해 찜 등록 요청을 하면 예외가 발생한다.]")
+    void wishBoardGameAlreadyWished() {
         User user = UserFixture.getUserFixture("provider", "https~");
         ReflectionTestUtils.setField(user, "id", 1L);
 
@@ -180,9 +180,13 @@ class BoardGameServiceTest {
             wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
             Optional.of(wish));
 
-        WishBoardGameResponse response = boardGameService.wishBoardGame(user, boardGame.getId());
+        ThrowingCallable when = () -> boardGameService.wishBoardGame(
+            user, boardGame.getId()
+        );
 
-        assertThat(response.wishCount()).isEqualTo(prevWishCount - 1);
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(BoardGameErrorCode.ALREADY_WISHED.getMessage());
     }
 
     @Test
@@ -202,6 +206,54 @@ class BoardGameServiceTest {
         assertThatThrownBy(when)
             .isInstanceOf(NotFoundException.class)
             .hasMessageContaining(NOT_FOUND_BOARD_GAME.getMessage());
+    }
+
+    @Test
+    @DisplayName("[보드게임 찜을 취소할 수 있다.]")
+    void cancelWish() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+        boardGame.increaseWishCount();
+
+        Wish wish = BoardGameFixture.getWish(user.getId(), boardGame.getId());
+
+        given(boardGameQueryRepository.findByIdWithLock(1L)).willReturn(Optional.of(boardGame));
+        given(
+            wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
+            Optional.of(wish));
+
+        CancelWishResposne response = boardGameService.cancelWish(user,
+            boardGame.getId());
+
+        assertThat(response.wishCount()).isZero();
+    }
+
+    @Test
+    @DisplayName("[찜한 적이 없는 보드게임에 대해 찜 취소를 하려하면 예외가 발생한다.]")
+    void cancelWishException() {
+        User user = UserFixture.getUserFixture("provider", "https~");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        BoardGame boardGame = BoardGameFixture.getBoardGame(
+            List.of(BoardGameFixture.getBoardGameCategory(WAR))
+        );
+        ReflectionTestUtils.setField(boardGame, "id", 1L);
+
+        given(boardGameQueryRepository.findByIdWithLock(1L)).willReturn(Optional.of(boardGame));
+        given(
+            wishRepository.findByUserIdAndBoardGameId(user.getId(), boardGame.getId())).willReturn(
+            Optional.empty());
+
+        ThrowingCallable when = () -> boardGameService.cancelWish(user, boardGame.getId());
+
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(BoardGameErrorCode.NOT_FOUND_WISH.getMessage());
     }
 
     @Test
@@ -316,7 +368,7 @@ class BoardGameServiceTest {
 
     @Test
     @DisplayName("[찜한 보드게임의 공략도 좋아요 한 사용자는 보드게임 조회 시 둘의 여부를 응답받을 수 있다.]")
-    void getBoardGameWishAndLikeTip(){
+    void getBoardGameWishAndLikeTip() {
         //given
         User user1 = UserFixture.getUserFixture("provider", "hhtps~");
         User user2 = UserFixture.getUserFixture2("provider2", "https2~");
@@ -354,7 +406,7 @@ class BoardGameServiceTest {
             .willReturn(Optional.of(boardGame));
         given(tipRepository.findAllByBoardGameId(boardGame.getId()))
             .willReturn(List.of(tip1, tip2));
-        given(userRepository.findAllInIds(List.of(1L ,2L)))
+        given(userRepository.findAllInIds(List.of(1L, 2L)))
             .willReturn(List.of(user1, user2));
         given(likeRepository.findAllByUserId(user3.getId()))
             .willReturn(List.of(like1, like2));
