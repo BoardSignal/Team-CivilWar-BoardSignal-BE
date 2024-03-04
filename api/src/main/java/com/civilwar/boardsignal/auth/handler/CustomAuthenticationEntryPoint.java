@@ -8,12 +8,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -33,6 +35,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException authException) throws IOException, ServletException {
         AuthErrorCode errorCode = AuthErrorCode.AUTH_REQUIRED;
+        log.info("{}", errorCode.getMessage());
         sendJson(response, toJson(new ErrorResponse(errorCode.getMessage(), errorCode.getCode())));
     }
 }

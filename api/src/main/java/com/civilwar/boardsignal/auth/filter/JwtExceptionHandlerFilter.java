@@ -11,10 +11,12 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class JwtExceptionHandlerFilter extends GenericFilter {
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -39,6 +41,7 @@ public class JwtExceptionHandlerFilter extends GenericFilter {
         try {
             chain.doFilter(request, response);
         } catch (ValidationException ve) {
+            log.info("{}", ve.getMessage());
             sendJson(httpServletResponse, toJson(new ErrorResponse(ve.getMessage(), ve.getCode())));
         }
 
