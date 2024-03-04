@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.boardgame.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,8 +12,10 @@ import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGame;
 import com.civilwar.boardsignal.boardgame.domain.entity.BoardGameCategory;
 import com.civilwar.boardsignal.boardgame.domain.entity.Tip;
+import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.BoardGameRepository;
 import com.civilwar.boardsignal.boardgame.domain.repository.TipRepository;
+import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.fixture.BoardGameFixture;
@@ -41,6 +44,9 @@ class BoardGameControllerTest extends ApiTestSupport {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WishRepository wishRepository;
 
     private BoardGame boardGame1;
 
@@ -97,7 +103,7 @@ class BoardGameControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @DisplayName("[특정 보드게임을 찜 등록을 하거나 취소할 수 있다.]")
+    @DisplayName("[특정 보드게임을 찜 등록 할 수 있다.]")
     void wishBoardGame() throws Exception {
         int prevWishCount = boardGame1.getWishCount();
         //찜 등록
@@ -106,12 +112,22 @@ class BoardGameControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishCount").value(prevWishCount + 1));
+    }
+
+    @Test
+    @DisplayName("[특정 보드게임에 대해 찜 취소를 할 수 있다.]")
+    void cancelWish() throws Exception {
+        Wish wish = Wish.of(loginUser.getId(), boardGame1.getId());
+        wishRepository.save(wish);
+
+        int prevWishCount = boardGame1.getWishCount();
+
         //찜 취소
-        mockMvc.perform(post("/api/v1/board-games/wish/{boardGameId}",
+        mockMvc.perform(delete("/api/v1/board-games/wish/{boardGameId}",
                 boardGame1.getId())
                 .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.wishCount").value(prevWishCount));
+            .andExpect(jsonPath("$.wishCount").value(--prevWishCount));
     }
 
     @Test

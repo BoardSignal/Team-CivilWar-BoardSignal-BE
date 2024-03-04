@@ -8,6 +8,7 @@ import com.civilwar.boardsignal.boardgame.dto.request.ApiAddTipRequest;
 import com.civilwar.boardsignal.boardgame.dto.request.BoardGameSearchCondition;
 import com.civilwar.boardsignal.boardgame.dto.response.AddTipResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.BoardGamePageResponse;
+import com.civilwar.boardsignal.boardgame.dto.response.CancelWishResposne;
 import com.civilwar.boardsignal.boardgame.dto.response.GetAllBoardGamesResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.GetBoardGameResponse;
 import com.civilwar.boardsignal.boardgame.dto.response.LikeTipResponse;
@@ -58,6 +59,18 @@ public class BoardGameController {
         @PathVariable("boardGameId") Long boardGameId
     ) {
         WishBoardGameResponse response = boardGameService.wishBoardGame(user, boardGameId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "보드게임 찜 취소 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/wish/{boardGameId}")
+    public ResponseEntity<CancelWishResposne> cancelWish(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("boardGameId") Long boardGameId
+    ) {
+        CancelWishResposne response = boardGameService.cancelWish(user, boardGameId);
         return ResponseEntity.ok(response);
     }
 
