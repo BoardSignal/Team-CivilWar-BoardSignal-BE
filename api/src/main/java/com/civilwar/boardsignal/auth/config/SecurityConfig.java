@@ -44,6 +44,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(registry -> registry
                 //방
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms/my/end-games").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/board-games/{userId}/wish")
+                .authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rooms/**").permitAll()
                 //보드게임
                 .requestMatchers(HttpMethod.GET, "/api/v1/board-games/**").permitAll()
@@ -51,6 +53,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/reissue").permitAll()
                 .requestMatchers(HttpMethod.GET, "/oauth2/authorization/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/index.html#/").permitAll()
                 .anyRequest().authenticated()
             )
             //인증 안 된 사용자 접근 시 예외 처리
