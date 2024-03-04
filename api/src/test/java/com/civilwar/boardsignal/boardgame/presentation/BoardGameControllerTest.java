@@ -331,4 +331,41 @@ class BoardGameControllerTest extends ApiTestSupport {
                 jsonPath("$.myTip").doesNotExist()
             );
     }
+
+    @Test
+    @DisplayName("[찜한 보드게임 목록을 전체 조회할 수 있다.]")
+    void getAllWishBoardGames() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("size", "1");
+
+        Wish wish = Wish.of(loginUser.getId(), boardGame1.getId());
+        wishRepository.save(wish);
+
+        mockMvc.perform(get("/api/v1/board-games/{userId}/wish", loginUser.getId())
+                .params(params)
+                .header(AUTHORIZATION, accessToken))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.boardGamesInfos[0].name")
+                    .value(boardGame1.getTitle()),
+                jsonPath("$.boardGamesInfos[0].categories[0]")
+                    .value(boardGame2.getCategories().get(0).getCategory().getDescription()),
+                jsonPath("$.boardGamesInfos[0].difficulty")
+                    .value(boardGame1.getDifficulty().getDescription()),
+                jsonPath("$.boardGamesInfos[0].minParticipants")
+                    .value(boardGame1.getMinParticipants()),
+                jsonPath("$.boardGamesInfos[0].maxParticipants")
+                    .value(boardGame1.getMaxParticipants()),
+                jsonPath("$.boardGamesInfos[0].fromPlayTime")
+                    .value(boardGame1.getFromPlayTime()),
+                jsonPath("$.boardGamesInfos[0].toPlayTime")
+                    .value(boardGame1.getToPlayTime()),
+                jsonPath("$.boardGamesInfos[0].wishCount")
+                    .value(boardGame1.getWishCount()),
+                jsonPath("$.boardGamesInfos[0].imageUrl")
+                    .value(boardGame1.getMainImageUrl()),
+                jsonPath("$.size").value(1),
+                jsonPath("$.hasNext").value(false)
+            );
+    }
 }
