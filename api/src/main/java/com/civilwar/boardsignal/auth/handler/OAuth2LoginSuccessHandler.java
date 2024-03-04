@@ -42,7 +42,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(43200);   //임시 값 -> 12시간
-        cookie.setDomain(DOMAIN);
         response.addCookie(cookie);
 
         //Redirect URL 생성
