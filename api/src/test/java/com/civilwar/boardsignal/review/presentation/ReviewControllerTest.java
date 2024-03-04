@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.review.presentation;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -63,11 +63,10 @@ class ReviewControllerTest extends ApiTestSupport {
 
         //then
         mockMvc.perform(post("/api/v1/reviews/" + roomId)
-            .header(HttpHeaders.AUTHORIZATION, accessToken)
+                .header(HttpHeaders.AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(apiReviewSaveRequest)))
             .andExpect(jsonPath("$.reviewIds.length()").value(3));
-
 
         Review review1 = reviewRepository.findById(1L).get();
         List<ReviewEvaluation> reviewEvaluations = review1.getReviewEvaluations();

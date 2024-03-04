@@ -70,6 +70,6 @@ class ReviewServiceTest {
 
         //then
         Assertions.assertThat(reviewSaveResponse.reviewIds()).hasSize(3);
-        verify(reviewRepository,times(3)).save(any(Review.class));
+        verify(reviewRepository, times(3)).save(any(Review.class));
     }
 }
