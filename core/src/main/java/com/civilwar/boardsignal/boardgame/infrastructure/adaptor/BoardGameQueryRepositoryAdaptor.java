@@ -101,4 +101,9 @@ public class BoardGameQueryRepositoryAdaptor implements BoardGameQueryRepository
     public Optional<BoardGame> findByIdWithLock(Long id) {
         return boardGameJpaRepository.findByIdWithLock(id);
     }
+
+    @Override
+    public Slice<BoardGame> findAllInIds(List<Long> ids, Pageable pageable) {
+        return boardGameJpaRepository.findAllInIds(ids, pageable);
+    }
 }

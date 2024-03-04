@@ -219,4 +219,18 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
             () -> assertThat(secondGame.getTitle()).isEqualTo(boardGame2.getTitle())
         );
     }
+
+    @Test
+    @DisplayName("[보드게임 아이디 리스트안에 속하는 보드게임을 전체 조회할 수 있다.]")
+    void findAllInIds() {
+        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Slice<BoardGame> boardGames = boardGameQueryAdaptor.findAllInIds(
+            List.of(boardGame.getId(), boardGame2.getId()),
+            pageRequest
+        );
+
+        List<BoardGame> gameList = boardGames.getContent();
+
+        assertThat(gameList).contains(boardGame).contains(boardGame2);
+    }
 }
