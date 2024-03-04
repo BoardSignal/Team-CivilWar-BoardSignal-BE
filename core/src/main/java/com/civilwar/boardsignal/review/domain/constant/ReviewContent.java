@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.review.domain.constant;
 
-import static com.civilwar.boardsignal.review.exception.ReviewErrorCode.*;
+import static com.civilwar.boardsignal.review.exception.ReviewErrorCode.NOT_FOUND_CONTENT;
 
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
