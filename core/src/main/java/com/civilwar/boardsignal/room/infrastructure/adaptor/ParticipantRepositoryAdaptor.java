@@ -7,6 +7,7 @@ import com.civilwar.boardsignal.room.infrastructure.repository.ParticipantJpaRep
 import com.civilwar.boardsignal.room.infrastructure.repository.ParticipantQueryJpaRepository;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -30,5 +31,10 @@ public class ParticipantRepositoryAdaptor implements ParticipantRepository {
     @Override
     public List<ParticipantJpaDto> findParticipantByRoomId(Long roomId) {
         return participantQueryJpaRepository.findParticipantByRoomId(roomId);
+    }
+
+    @Override
+    public Optional<Participant> findByUserIdAndRoomId(Long userId, Long roomId) {
+        return participantQueryJpaRepository.findByUserIdAndRoomId(userId, roomId);
     }
 }
