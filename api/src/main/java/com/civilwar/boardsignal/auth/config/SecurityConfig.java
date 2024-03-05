@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/reissue").permitAll()
                 .requestMatchers(HttpMethod.GET, "/oauth2/authorization/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/").permitAll()
                 .anyRequest().authenticated()
             )
             //인증 안 된 사용자 접근 시 예외 처리
