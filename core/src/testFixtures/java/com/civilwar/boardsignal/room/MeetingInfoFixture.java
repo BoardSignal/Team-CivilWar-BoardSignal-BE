@@ -11,7 +11,8 @@ public final class MeetingInfoFixture {
     public static MeetingInfo getMeetingInfo(LocalDateTime meetingTime) {
         return MeetingInfo.of(
             meetingTime,
-            3,
+            "토요일",
+            5,
             "2호선",
             "사당역",
             "레드버튼"
