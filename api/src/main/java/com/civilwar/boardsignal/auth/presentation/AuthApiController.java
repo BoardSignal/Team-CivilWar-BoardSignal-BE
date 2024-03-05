@@ -69,21 +69,19 @@ public class AuthApiController {
         return ResponseEntity.ok(authService.issueAccessToken(refreshTokenId));
     }
 
-    @Operation(summary = "로그아웃 API", description = "Cookie에 RefreshToken Id 필요")
+    @Operation(summary = "AccessToken 재발급 API", description = "Cookie에 RefreshToken Id 필요")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/logout")
     public ResponseEntity<UserLogoutResponse> logout(
-        @CookieValue(name = REFRESHTOKEN_NAME, required = false) String refreshTokenId,
+        @CookieValue(name = REFRESHTOKEN_NAME) String refreshTokenId,
         HttpServletResponse response
     ) {
-        //로그아웃 처리
-        UserLogoutResponse logout = authService.logout(refreshTokenId);
         //쿠키 제거
         Cookie cookie = new Cookie(REFRESHTOKEN_NAME, null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
         //로그아웃 성공 시 true 반환
-        return ResponseEntity.ok(logout);
+        return ResponseEntity.ok(authService.logout(refreshTokenId));
     }
 
     @Operation(summary = "현재 로그인 한 사용자 정보 확인 API")
