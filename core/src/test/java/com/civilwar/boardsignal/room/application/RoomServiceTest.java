@@ -1,24 +1,32 @@
 package com.civilwar.boardsignal.room.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
+import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
@@ -32,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +67,9 @@ class RoomServiceTest {
 
     @Mock
     private ParticipantRepository participantRepository;
+
+    @Mock
+    private MeetingInfoRepository meetingInfoRepository;
 
     @InjectMocks
     private RoomService roomService;
@@ -281,5 +293,85 @@ class RoomServiceTest {
         assertThat(roomInfo.place()).isEqualTo(place);
         assertThat(roomInfo.isLeader()).isFalse();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
+    }
+
+    @Test
+    @DisplayName("[방장은 모임을 확정시킬 수 있다.]")
+    void fixRoom() throws IOException {
+        //given
+        User user = UserFixture.getUserFixture("prpr", "https");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        Participant participant = RoomFixture.getParticipant();
+
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", 1L);
+
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 7, 31, 5, 30)
+        );
+        ReflectionTestUtils.setField(meetingInfo, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(user.getId(), room.getId()))
+            .willReturn(Optional.of(participant));
+        given(roomRepository.findById(room.getId()))
+            .willReturn(Optional.of(room));
+        given(meetingInfoRepository.save(any(MeetingInfo.class)))
+            .willReturn(meetingInfo);
+
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
+
+        //when
+        FixRoomResponse response = roomService.fixRoom(user, room.getId(), request);
+
+        //then
+        assertAll(
+            () -> assertThat(response.roomId()).isEqualTo(room.getId()),
+            () -> assertThat(response.meetingInfoId()).isEqualTo(meetingInfo.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("[해당 방의 참가자가 아닌 회원이 모임 확정 요청을 할 시 예외가 발생한다]")
+    void fixRoomInvaliParticipant() {
+        //given
+        User user = UserFixture.getUserFixture("erer", "qweqwe");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
+
+        given(participantRepository.findByUserIdAndRoomId(any(Long.class), any(Long.class)))
+            .willReturn(Optional.empty());
+
+        //when
+        ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
+
+        //then
+        assertThatThrownBy(when)
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 회원이 모임 확정을 할 시 예외가 발생한다]")
+    void fixRoomNotLeader() {
+        //given
+        Participant participantNotLeader = RoomFixture.getParticipantNotLeader();
+
+        User user = UserFixture.getUserFixture("erer", "qweqwe");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
+
+        given(participantRepository.findByUserIdAndRoomId(any(Long.class), any(Long.class)))
+            .willReturn(Optional.of(participantNotLeader));
+
+        //when
+        ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
+
+        //then
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(RoomErrorCode.IS_NOT_LEADER.getMessage());
     }
 }

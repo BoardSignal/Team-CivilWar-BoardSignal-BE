@@ -1,22 +1,29 @@
 package com.civilwar.boardsignal.room.application;
 
+import static com.civilwar.boardsignal.room.exception.RoomErrorCode.INVALID_PARTICIPANT;
+import static com.civilwar.boardsignal.room.exception.RoomErrorCode.IS_NOT_LEADER;
+import static com.civilwar.boardsignal.room.exception.RoomErrorCode.NOT_FOUND_ROOM;
+
 import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
-import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.time.LocalDateTime;
@@ -37,6 +44,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final ParticipantRepository participantRepository;
+    private final MeetingInfoRepository meetingInfoRepository;
     private final ImageRepository imageRepository;
     private final Supplier<LocalDateTime> now;
 
@@ -116,7 +124,7 @@ public class RoomService {
     public RoomInfoResponse findRoomInfo(User user, Long roomId) {
         //1. 모임 정보 & 모임 확정 정보 (MeetingInfo)
         Room findRoom = roomRepository.findById(roomId)
-            .orElseThrow(() -> new NotFoundException(RoomErrorCode.NOT_FOUND_ROOM));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //1-1. 모임 시간 & 장소 정보 추출
         String resultPlace = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
@@ -156,6 +164,39 @@ public class RoomService {
 
         return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader,
             participants);
+    }
+
+    @Transactional
+    public FixRoomResponse fixRoom(
+        User user,
+        Long roomId,
+        FixRoomRequest request
+    ) {
+        //방에 존재하는 참가자 인 지 검증
+        Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
+            .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
+
+        //방장인 지 검증
+        if (!participant.isLeader()) {
+            throw new ValidationException(IS_NOT_LEADER);
+        }
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        MeetingInfo meetingInfo = MeetingInfo.of(
+            request.meetingTime(),
+            request.weekDay(),
+            request.peopleCount(),
+            request.line(),
+            request.station(),
+            request.meetingPlace()
+        );
+
+        MeetingInfo savedMeetingInfo = meetingInfoRepository.save(meetingInfo);
+        room.fixRoom(savedMeetingInfo);
+
+        return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
     }
 
 }
