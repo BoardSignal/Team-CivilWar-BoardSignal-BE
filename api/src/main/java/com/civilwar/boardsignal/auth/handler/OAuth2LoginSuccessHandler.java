@@ -7,13 +7,13 @@ import com.civilwar.boardsignal.auth.dto.response.ApiUserLoginResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
 import com.civilwar.boardsignal.auth.mapper.AuthApiMapper;
 import com.civilwar.boardsignal.auth.mapper.OAuthAttributeMapper;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -39,11 +39,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             userLoginResponse);
 
         //Cookie -> RefreshToken Id
-        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, userLoginResponse.token().refreshTokenId());
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(43200);   //임시 값 -> 12시간
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(REFRESHTOKEN_NAME, userLoginResponse.token().refreshTokenId())
+            .path("/")
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .maxAge(43200)
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
 
         //Redirect URL 생성
         String url = UriComponentsBuilder.fromUriString(DOMAIN + "/redirect")
