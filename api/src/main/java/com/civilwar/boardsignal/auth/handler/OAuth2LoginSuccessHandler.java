@@ -26,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final String DOMAIN = "http://localhost:5173";
+    private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
 
     private final AuthService authService;
 
@@ -38,7 +39,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             userLoginResponse);
 
         //Cookie -> RefreshToken Id
-        Cookie cookie = new Cookie("TestRefreshToken", userLoginResponse.token().refreshTokenId());
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, userLoginResponse.token().refreshTokenId());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(43200);   //임시 값 -> 12시간
