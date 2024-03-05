@@ -38,7 +38,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             userLoginResponse);
 
         //Cookie -> RefreshToken Id
-        Cookie cookie = new Cookie("RefreshTokenId", userLoginResponse.token().refreshTokenId());
+        Cookie cookie = new Cookie("TestRefreshToken", userLoginResponse.token().refreshTokenId());
         cookie.setPath("/");
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
