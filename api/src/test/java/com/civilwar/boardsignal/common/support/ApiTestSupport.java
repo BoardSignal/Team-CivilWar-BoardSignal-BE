@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public abstract class ApiTestSupport extends TestContainerSupport {
     private TokenProvider tokenProvider;
 
     protected String toJson(Object object) throws JsonProcessingException {
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.writeValueAsString(object);
     }
 
