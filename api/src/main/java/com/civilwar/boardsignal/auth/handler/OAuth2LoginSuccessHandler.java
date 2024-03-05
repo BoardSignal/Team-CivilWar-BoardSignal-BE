@@ -41,7 +41,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         Cookie cookie = new Cookie("TestRefreshToken", userLoginResponse.token().refreshTokenId());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "None");
         cookie.setMaxAge(43200);   //임시 값 -> 12시간
         response.addCookie(cookie);
 
