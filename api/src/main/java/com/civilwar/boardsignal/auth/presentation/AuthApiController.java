@@ -62,7 +62,7 @@ public class AuthApiController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/logout")
     public ResponseEntity<UserLogoutResponse> logout(
-        @CookieValue(name = "RefreshTokenId") String refreshTokenId,
+        @CookieValue(name = "RefreshTokenId", required = false) String refreshTokenId,
         HttpServletResponse response
     ) {
         //쿠키 제거
