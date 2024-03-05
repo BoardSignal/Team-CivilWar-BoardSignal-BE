@@ -69,7 +69,7 @@ public class AuthApiController {
         return ResponseEntity.ok(authService.issueAccessToken(refreshTokenId));
     }
 
-    @Operation(summary = "AccessToken 재발급 API", description = "Cookie에 RefreshToken Id 필요")
+    @Operation(summary = "로그아웃 API", description = "Cookie에 RefreshToken Id 필요")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/logout")
     public ResponseEntity<UserLogoutResponse> logout(
