@@ -26,6 +26,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 @DisplayName("[AuthApiController 테스트]")
 class AuthApiControllerTest extends ApiTestSupport {
 
+    private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
     private final String BEARER = "Bearer ";
     @Autowired
     private UserRepository userRepository;
@@ -42,7 +43,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", token.refreshTokenId());
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, token.refreshTokenId());
 
         //then
         mockMvc.perform(
@@ -61,7 +62,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", token.refreshTokenId());
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, token.refreshTokenId());
 
         //then
         mockMvc.perform(
@@ -80,7 +81,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", "fakeId");
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, "fakeId");
 
         //then
         mockMvc.perform(
@@ -132,8 +133,8 @@ class AuthApiControllerTest extends ApiTestSupport {
         mockMvc.perform(
                 get("/api/v1/users/" + loginUser.getId())
                     .header(AUTHORIZATION, wrongToken))
-            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_INVALID.getMessage()))
-            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_INVALID.getCode()))
+            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getMessage()))
+            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getCode()))
             .andExpect(status().isUnauthorized());
     }
 }

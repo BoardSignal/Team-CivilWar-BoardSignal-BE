@@ -13,7 +13,9 @@ public enum BoardGameErrorCode implements ErrorCode {
     NOT_FOUND_DIFFICULTY("존재하지 않는 난이도입니다.", "B_002"),
     AlREADY_TIP_ADDED("이미 등록한 공략이 있는 보드게임입니다.", "B_003"),
     NOT_FOUND_TIP_USER("해당 공략을 등록한 회원이 존재하지 않습니다.", "B_004"),
-    NOT_FOUND_TIP("존재하지 않는 공략입니다.", "B_005");
+    NOT_FOUND_TIP("존재하지 않는 공략입니다.", "B_005"),
+    ALREADY_WISHED("이미 찜한 보드게임입니다.", "B_006"),
+    NOT_FOUND_WISH("찜한 적이 없는 보드게임입니다", "B_007");
 
     private final String message;
     private final String code;

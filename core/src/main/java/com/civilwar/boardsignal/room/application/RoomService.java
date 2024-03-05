@@ -145,7 +145,7 @@ public class RoomService {
         Boolean isLeader = false;
 
         //현재 로그인 상태라면 -> leader 확인
-        if (user != null){
+        if (user != null) {
             //4. 현재 사용자의 방장 여부 확인
             isLeader = participants.stream()
                 .filter(participant -> participant.userId().equals(user.getId()))
