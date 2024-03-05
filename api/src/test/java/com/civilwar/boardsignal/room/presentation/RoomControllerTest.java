@@ -31,13 +31,11 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Supplier;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,14 +66,6 @@ class RoomControllerTest extends ApiTestSupport {
     private MeetingInfoJpaRepository meetingInfoRepository;
     @MockBean
     private Supplier<LocalDateTime> nowTime;
-
-    private Room room;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        room = RoomFixture.getRoom(Gender.MALE);
-        roomRepository.save(room);
-    }
 
     @Test
     @DisplayName("[사용자는 방을 생성할 수 있다.]")
@@ -372,7 +362,7 @@ class RoomControllerTest extends ApiTestSupport {
         participantRepository.save(participant);
 
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+            LocalDateTime.of(2024, 2, 26, 20, 3, 59));
         meetingInfoRepository.save(meetingInfo);
         room.fixRoom(meetingInfo);
         roomRepository.save(room);
@@ -410,7 +400,7 @@ class RoomControllerTest extends ApiTestSupport {
         participantRepository.save(participant);
 
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+            LocalDateTime.of(2024, 2, 26, 20, 3, 59));
         meetingInfoRepository.save(meetingInfo);
         room.fixRoom(meetingInfo);
         roomRepository.save(room);
@@ -437,6 +427,8 @@ class RoomControllerTest extends ApiTestSupport {
     @DisplayName("[방장은 모임을 확정시킬 수 있다.]")
     void fixRoom() throws Exception {
         //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
         ApiFixRoomRequest request = new ApiFixRoomRequest(
             LocalDateTime.of(2024, 3, 31, 5, 30),
             "수요일",
