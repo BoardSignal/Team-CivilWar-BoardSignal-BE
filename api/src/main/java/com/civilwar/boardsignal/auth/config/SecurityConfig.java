@@ -17,6 +17,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -42,16 +43,19 @@ public class SecurityConfig {
                 configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .anonymous(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(registry -> registry
-                //방
-                .requestMatchers(HttpMethod.GET, "/api/v1/rooms/my/end-games").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/v1/rooms/**").permitAll()
-                //보드게임
-                .requestMatchers(HttpMethod.GET, "/api/v1/board-games/**").permitAll()
-                //인증
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/auth/reissue").permitAll()
-                .requestMatchers(HttpMethod.GET, "/oauth2/authorization/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/").permitAll()
+                //알림
+                .requestMatchers(HttpMethod.POST, "/api/v1/notifications").authenticated()
+                .requestMatchers(
+                    new AntPathRequestMatcher("/api/v1/rooms/my/end-games")).authenticated()
+                .requestMatchers(HttpMethod.GET,
+                    //방
+                    "/api/v1/rooms/**",
+                    //보드게임
+                    "/api/v1/board-games/**",
+                    //인증
+                    "/api/v1/auth/reissue", "/oauth2/authorization/**",
+                    "/"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             //인증 안 된 사용자 접근 시 예외 처리
