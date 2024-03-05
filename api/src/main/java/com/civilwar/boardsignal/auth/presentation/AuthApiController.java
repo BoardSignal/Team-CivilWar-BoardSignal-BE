@@ -79,6 +79,9 @@ public class AuthApiController {
         //쿠키 제거
         Cookie cookie = new Cookie(REFRESHTOKEN_NAME, null);
         cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
         //로그아웃 성공 시 true 반환
         return ResponseEntity.ok(authService.logout(refreshTokenId));
