@@ -13,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -93,10 +94,16 @@ public class AuthApiController {
     public ResponseEntity<LoginUserInfoResponse> getLoginUserInfo(
         @AuthenticationPrincipal User loginUser) {
 
+        int currentYear = LocalDate.now().getYear();
+        int birthYear = loginUser.getBirth();
+        //로그인 유저 나이
+        int myAge = currentYear - birthYear + 1;
+
         LoginUserInfoResponse loginUserInfoResponse = AuthApiMapper.toLoginUserInfoResponse(
             loginUser.getId(),
             loginUser.getEmail(),
             loginUser.getNickname(),
+            myAge,
             loginUser.getAgeGroup().getDescription(),
             loginUser.getGender().getDescription(),
             loginUser.getIsJoined()
