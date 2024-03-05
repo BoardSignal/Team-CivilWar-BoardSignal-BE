@@ -120,8 +120,8 @@ class AuthApiControllerTest extends ApiTestSupport {
         mockMvc.perform(
                 get("/api/v1/users/" + loginUser.getId())
                     .header(AUTHORIZATION, wrongToken))
-            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_INVALID.getMessage()))
-            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_INVALID.getCode()))
+            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getMessage()))
+            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getCode()))
             .andExpect(status().isUnauthorized());
     }
 }

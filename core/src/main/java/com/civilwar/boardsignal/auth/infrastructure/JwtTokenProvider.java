@@ -17,7 +17,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -61,13 +61,14 @@ public class JwtTokenProvider implements TokenProvider {
                 .parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             throw new ValidationException(AuthErrorCode.AUTH_TOKEN_EXPIRED);
-        } catch (
-            SecurityException |
-            MalformedJwtException |
-            UnsupportedJwtException |
-            IllegalArgumentException e
-        ) {
-            throw new ValidationException(AuthErrorCode.AUTH_TOKEN_INVALID);
+        } catch (MalformedJwtException me) {
+            throw new ValidationException(AuthErrorCode.AUTH_TOKEN_MALFORMED);
+        } catch (UnsupportedJwtException ue) {
+            throw new ValidationException(AuthErrorCode.AUTH_TOKEN_UNSUPPORTED);
+        } catch (IllegalArgumentException ie) {
+            throw new ValidationException(AuthErrorCode.AUTH_TOKEN_ILLEGAL);
+        } catch (SignatureException se) {
+            throw new ValidationException(AuthErrorCode.AUTH_TOKEN_NOT_SIGNATURE);
         }
     }
 
