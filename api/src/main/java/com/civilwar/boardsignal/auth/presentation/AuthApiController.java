@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {
 
+    private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
     private final AuthService authService;
 
     @Operation(summary = "카카오 로그인 API", description = "웹 페이지를 통한 로그인")
@@ -53,24 +55,35 @@ public class AuthApiController {
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/reissue")
     public ResponseEntity<IssueTokenResponse> issueAccessToken(
-        @CookieValue(name = "RefreshTokenId") String refreshTokenId
+        HttpServletRequest request
     ) {
+        String refreshTokenId = null;
+
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if(cookie.getName().equals(REFRESHTOKEN_NAME)) {
+                refreshTokenId = cookie.getValue();
+            }
+        }
+
         return ResponseEntity.ok(authService.issueAccessToken(refreshTokenId));
     }
 
-    @Operation(summary = "AccessToken 재발급 API", description = "Cookie에 RefreshToken Id 필요")
+    @Operation(summary = "로그아웃 API", description = "Cookie에 RefreshToken Id 필요")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/logout")
     public ResponseEntity<UserLogoutResponse> logout(
-        @CookieValue(name = "RefreshTokenId", required = false) String refreshTokenId,
+        @CookieValue(name = REFRESHTOKEN_NAME, required = false) String refreshTokenId,
         HttpServletResponse response
     ) {
+        //로그아웃 처리
+        UserLogoutResponse logout = authService.logout(refreshTokenId);
         //쿠키 제거
-        Cookie cookie = new Cookie("RefreshTokenId", null);
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
         //로그아웃 성공 시 true 반환
-        return ResponseEntity.ok(authService.logout(refreshTokenId));
+        return ResponseEntity.ok(logout);
     }
 
     @Operation(summary = "현재 로그인 한 사용자 정보 확인 API")
