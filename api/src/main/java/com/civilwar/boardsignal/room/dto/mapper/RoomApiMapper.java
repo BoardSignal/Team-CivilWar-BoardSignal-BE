@@ -1,6 +1,8 @@
 package com.civilwar.boardsignal.room.dto.mapper;
 
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -29,6 +31,17 @@ public final class RoomApiMapper {
             request.categories(),
             request.isAllowedOppositeGender(),
             image
+        );
+    }
+
+    public static FixRoomRequest toFixRoomRequest(ApiFixRoomRequest request) {
+        return new FixRoomRequest(
+            request.meetingTime(),
+            request.weekDay(),
+            request.peopleCount(),
+            request.line(),
+            request.station(),
+            request.meetingPlace()
         );
     }
 }
