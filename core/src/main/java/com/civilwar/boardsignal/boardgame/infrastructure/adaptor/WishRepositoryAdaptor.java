@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.boardgame.infrastructure.repository.WishJpaRepository;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -37,5 +38,10 @@ public class WishRepositoryAdaptor implements WishRepository {
     @Override
     public int countWishByUserId(Long userId) {
         return wishJpaRepository.countWishByUserId(userId);
+    }
+
+    @Override
+    public List<Wish> findAllByUserId(Long userId) {
+        return wishJpaRepository.findAllByUserId(userId);
     }
 }

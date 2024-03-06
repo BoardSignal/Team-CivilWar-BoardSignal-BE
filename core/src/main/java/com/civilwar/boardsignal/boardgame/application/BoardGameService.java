@@ -204,4 +204,23 @@ public class BoardGameService {
     public void deleteTip(User user, Long tipId) {
         tipRepository.deleteByTipIdAndUserId(tipId, user.getId());
     }
+
+    @Transactional(readOnly = true)
+    public BoardGamePageResponse<GetAllBoardGamesResponse> getAllWishBoardGames(
+        Long userId,
+        Pageable pageable
+    ) {
+        //찜한 보드게임 아이디 전부 추출
+        List<Long> boardGameIds = wishRepository.findAllByUserId(userId).stream()
+            .map(Wish::getBoardGameId)
+            .toList();
+
+        //보드게임 아이디에 해당하는 보드게임 전체 조회
+        Slice<BoardGame> boardGames = boardGameQueryRepository.findAllInIds(boardGameIds, pageable);
+
+        Slice<GetAllBoardGamesResponse> findBoardGames = boardGames.map(
+            BoardGameMapper::toGetAllBoardGamesResponse); // 응답 dto 형식으로 변환
+
+        return BoardGameMapper.toBoardGamePageRepsonse(findBoardGames);
+    }
 }

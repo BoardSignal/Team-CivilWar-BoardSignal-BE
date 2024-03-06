@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.boardgame.domain.repository;
 
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface WishRepository {
@@ -15,4 +16,6 @@ public interface WishRepository {
     void deleteById(Long wishId);
 
     int countWishByUserId(Long userId);
+
+    List<Wish> findAllByUserId(Long userId);
 }
