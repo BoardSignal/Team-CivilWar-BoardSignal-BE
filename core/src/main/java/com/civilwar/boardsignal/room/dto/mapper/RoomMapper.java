@@ -9,6 +9,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
@@ -124,6 +125,7 @@ public final class RoomMapper {
             participantJpaDto.userId(),
             participantJpaDto.nickname(),
             participantJpaDto.ageGroup().getDescription(),
+            participantJpaDto.profileImageUrl(),
             participantJpaDto.isLeader(),
             participantJpaDto.mannerScore()
         );
@@ -131,5 +133,35 @@ public final class RoomMapper {
 
     public static FixRoomResponse toFixRoomResponse(Room room, MeetingInfo meetingInfo) {
         return new FixRoomResponse(room.getId(), meetingInfo.getId());
+    }
+
+    public static GetEndGameUsersResponse toGetEndGameUserResponse(
+        Room room,
+        List<ParticipantResponse> participants
+    ) {
+        MeetingInfo meetingInfo = room.getMeetingInfo();
+        List<String> categories = room.getRoomCategories().stream()
+            .map(roomCategory -> roomCategory.getCategory().getDescription())
+            .toList();
+
+        return new GetEndGameUsersResponse(
+            room.getId(),
+            room.getTitle(),
+            meetingInfo.getMeetingTime(),
+            meetingInfo.getWeekDay().getDescription(),
+            meetingInfo.getPeopleCount(),
+            meetingInfo.getLine(),
+            meetingInfo.getStation(),
+            meetingInfo.getMeetingPlace(),
+            room.getAllowedGender().getDescription(),
+            room.getMinAge(),
+            room.getMaxAge(),
+            room.getMinParticipants(),
+            room.getMaxParticipants(),
+            categories,
+            room.getCreatedAt(),
+            room.getHeadCount(),
+            participants
+        );
     }
 }
