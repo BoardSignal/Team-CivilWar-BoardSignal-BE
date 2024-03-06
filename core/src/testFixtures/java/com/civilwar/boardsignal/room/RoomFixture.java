@@ -10,6 +10,8 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,6 +28,7 @@ public class RoomFixture {
     public static Room getRoomWithMeetingInfo(LocalDateTime meetingTime, Gender gender)
         throws IOException {
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(meetingTime);
+        ReflectionTestUtils.setField(meetingInfo, "id", 1L);
         Room room = getRoom(gender);
         room.fixRoom(meetingInfo);
 
@@ -101,6 +105,17 @@ public class RoomFixture {
             "2호선",
             "강남역",
             "레드버튼"
+        );
+    }
+
+    public static ParticipantJpaDto getParticipantJpaDto(Long userId, String nickName) {
+        return new ParticipantJpaDto(
+            userId,
+            nickName,
+            AgeGroup.CHILDREN,
+            "https",
+            false,
+            36.4
         );
     }
 
