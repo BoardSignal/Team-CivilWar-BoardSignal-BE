@@ -6,6 +6,7 @@ public record ParticipantJpaDto(
     Long userId,
     String nickname,
     AgeGroup ageGroup,
+    String profileImageUrl,
     Boolean isLeader,
     double mannerScore
 ) {
