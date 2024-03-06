@@ -23,7 +23,9 @@ import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
@@ -236,7 +238,7 @@ class RoomServiceTest {
         Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
-            1L, "김강훈", AgeGroup.TWENTY, true, 99
+            1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
         String place = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
         String time = concat(findRoom.getDaySlot().getDescription(),
@@ -272,7 +274,7 @@ class RoomServiceTest {
         findRoom.fixRoom(meetingInfo);
 
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
-            1L, "김강훈", AgeGroup.TWENTY, true, 99
+            1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
         String place = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
         String time = meetingInfo.getMeetingTime()
@@ -373,5 +375,51 @@ class RoomServiceTest {
         assertThatThrownBy(when)
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[종료된 게임에 참여한 다른 참여자들을 조회할 수 있다.]")
+    void getParticipantsEndGame() throws IOException {
+        User user = UserFixture.getUserFixture("prpr", "https");
+
+        Room room = RoomFixture.getRoomWithMeetingInfo(
+            LocalDateTime.of(2024, 4, 5, 18, 30),
+            Gender.UNION
+        );
+        ReflectionTestUtils.setField(room, "id", 1L);
+
+        ParticipantJpaDto participant1 = RoomFixture.getParticipantJpaDto(1L, "게임대왕");
+        ParticipantJpaDto participant2 = RoomFixture.getParticipantJpaDto(2L, "나는고수");
+
+        given(roomRepository.findById(room.getId()))
+            .willReturn(Optional.of(room));
+
+        given(participantRepository.findParticipantByRoomId(room.getId()))
+            .willReturn(List.of(participant1, participant2));
+
+        GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(
+            user,
+            room.getId()
+        );
+
+        MeetingInfo meeting = room.getMeetingInfo();
+        List<ParticipantResponse> participants = response.participantsInfos();
+
+        assertAll(
+            () -> assertThat(response.roomId()).isEqualTo(room.getId()),
+            () -> assertThat(response.title()).isEqualTo(room.getTitle()),
+            () -> assertThat(response.meetingTime()).isEqualTo(meeting.getMeetingTime().toString()),
+            () -> assertThat(response.weekDay()).isEqualTo(meeting.getWeekDay().getDescription()),
+            () -> assertThat(response.peopleCount()).isEqualTo(meeting.getPeopleCount()),
+            () -> assertThat(response.line()).isEqualTo(meeting.getLine()),
+            () -> assertThat(response.station()).isEqualTo(meeting.getStation()),
+            () -> assertThat(response.meetingPlace()).isEqualTo(meeting.getMeetingPlace()),
+            () -> assertThat(response.allowedGender()).isEqualTo(
+                room.getAllowedGender().getDescription()),
+            () -> assertThat(participants).hasSize(2),
+            () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
+            () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
+        );
+
     }
 }

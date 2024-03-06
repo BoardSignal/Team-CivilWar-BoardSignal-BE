@@ -21,6 +21,7 @@ import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -197,6 +199,22 @@ public class RoomService {
         room.fixRoom(savedMeetingInfo);
 
         return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
+    }
+
+    @Transactional(readOnly = true)
+    public GetEndGameUsersResponse getEndGameUsersResponse(User user, Long roomId) {
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        List<ParticipantResponse> participants = participantRepository.findParticipantByRoomId(
+                roomId)
+            .stream()
+            //본인 제외
+            .filter(participant -> !Objects.equals(participant.userId(), user.getId()))
+            .map(RoomMapper::toParticipantResponse)
+            .toList();
+
+        return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
 
 }
