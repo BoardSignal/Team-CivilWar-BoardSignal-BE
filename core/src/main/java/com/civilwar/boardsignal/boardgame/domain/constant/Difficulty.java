@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.boardgame.domain.constant;
 
-import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
+import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_DIFFICULTY;
 
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public enum Difficulty {
         return Arrays.stream(values())
             .filter(category -> category.isEqual(input))
             .findAny()
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_DIFFICULTY));
     }
 
     private boolean isEqual(String input) {

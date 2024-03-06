@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.room.domain.constants;
 
-import static com.civilwar.boardsignal.boardgame.exception.BoardGameErrorCode.NOT_FOUND_BOARD_GAME;
+import static com.civilwar.boardsignal.room.exception.RoomErrorCode.NOT_FOUND_DAY_SLOT;
 
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public enum DaySlot {
         return Arrays.stream(values())
             .filter(category -> category.isEqual(input))
             .findAny()
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_BOARD_GAME));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_DAY_SLOT));
     }
 
     private boolean isEqual(String input) {

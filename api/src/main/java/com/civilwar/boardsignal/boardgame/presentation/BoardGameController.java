@@ -135,4 +135,17 @@ public class BoardGameController {
         boardGameService.deleteTip(user, tipId);
     }
 
+    @Operation(summary = "보드게임 찜 목록 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/{userId}/wish")
+    public ResponseEntity<BoardGamePageResponse<GetAllBoardGamesResponse>> getAllWishBoardGames(
+        @PathVariable("userId") Long userId,
+        Pageable pageable
+    ) {
+        BoardGamePageResponse<GetAllBoardGamesResponse> response = boardGameService.getAllWishBoardGames(
+            userId, pageable
+        );
+        return ResponseEntity.ok(response);
+    }
+
 }

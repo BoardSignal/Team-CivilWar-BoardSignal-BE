@@ -13,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -73,17 +74,18 @@ public class AuthApiController {
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/logout")
     public ResponseEntity<UserLogoutResponse> logout(
-        @CookieValue(name = REFRESHTOKEN_NAME, required = false) String refreshTokenId,
+        @CookieValue(name = REFRESHTOKEN_NAME) String refreshTokenId,
         HttpServletResponse response
     ) {
-        //로그아웃 처리
-        UserLogoutResponse logout = authService.logout(refreshTokenId);
         //쿠키 제거
         Cookie cookie = new Cookie(REFRESHTOKEN_NAME, null);
         cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
         //로그아웃 성공 시 true 반환
-        return ResponseEntity.ok(logout);
+        return ResponseEntity.ok(authService.logout(refreshTokenId));
     }
 
     @Operation(summary = "현재 로그인 한 사용자 정보 확인 API")
@@ -92,10 +94,16 @@ public class AuthApiController {
     public ResponseEntity<LoginUserInfoResponse> getLoginUserInfo(
         @AuthenticationPrincipal User loginUser) {
 
+        int currentYear = LocalDate.now().getYear();
+        int birthYear = loginUser.getBirth();
+        //로그인 유저 나이
+        int myAge = currentYear - birthYear + 1;
+
         LoginUserInfoResponse loginUserInfoResponse = AuthApiMapper.toLoginUserInfoResponse(
             loginUser.getId(),
             loginUser.getEmail(),
             loginUser.getNickname(),
+            myAge,
             loginUser.getAgeGroup().getDescription(),
             loginUser.getGender().getDescription(),
             loginUser.getIsJoined()
