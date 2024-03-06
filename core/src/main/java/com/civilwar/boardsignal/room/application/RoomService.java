@@ -199,4 +199,21 @@ public class RoomService {
         return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
     }
 
+    @Transactional
+    public void unFixRoom(User user, Long roomId){
+        //방에 존재하는 참가자 인 지 검증
+        boolean isParticipant = participantRepository.existsByUserIdAndRoomId(user.getId(), roomId);
+        if(!isParticipant){
+            throw new NotFoundException(INVALID_PARTICIPANT);
+        }
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        MeetingInfo meetingInfo = room.getMeetingInfo();
+
+        meetingInfoRepository.deleteById(meetingInfo.getId());
+        room.unFixRoom();
+    }
+
 }
