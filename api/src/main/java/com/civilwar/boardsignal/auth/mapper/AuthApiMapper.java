@@ -35,6 +35,7 @@ public final class AuthApiMapper {
         Long id,
         String email,
         String nickname,
+        int age,
         String ageGroup,
         String gender,
         Boolean isJoined
@@ -43,6 +44,7 @@ public final class AuthApiMapper {
             id,
             email,
             nickname,
+            age,
             ageGroup,
             gender,
             isJoined

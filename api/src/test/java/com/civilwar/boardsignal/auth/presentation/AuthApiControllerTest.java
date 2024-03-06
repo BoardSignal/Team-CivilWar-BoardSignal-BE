@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.auth.presentation;
 
+import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,18 +16,24 @@ import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 @DisplayName("[AuthApiController 테스트]")
 class AuthApiControllerTest extends ApiTestSupport {
 
+    private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
     private final String BEARER = "Bearer ";
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+    @MockBean
+    private Supplier<LocalDateTime> nowTime;
 
     @Test
     @DisplayName("[Cookie에 담긴 RefreshToken ID를 통해 AccessToken을 재발급 받는다]")
@@ -36,7 +43,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", token.refreshTokenId());
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, token.refreshTokenId());
 
         //then
         mockMvc.perform(
@@ -55,7 +62,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", token.refreshTokenId());
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, token.refreshTokenId());
 
         //then
         mockMvc.perform(
@@ -74,7 +81,7 @@ class AuthApiControllerTest extends ApiTestSupport {
         userRepository.save(userFixture);
 
         Token token = jwtTokenProvider.createToken(userFixture.getId(), Role.USER);
-        Cookie cookie = new Cookie("RefreshTokenId", "fakeId");
+        Cookie cookie = new Cookie(REFRESHTOKEN_NAME, "fakeId");
 
         //then
         mockMvc.perform(
@@ -88,6 +95,12 @@ class AuthApiControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("[AccessToken의 사용자 정보를 반환한다.]")
     void getLoginUserInfoTest() throws Exception {
+        //given
+        LocalDateTime now = LocalDateTime.of(2024,3,4,9,27,0);
+        given(nowTime.get()).willReturn(now);
+
+        int expectedAge = nowTime.get().getYear() - loginUser.getBirth() + 1;
+
         //then
         mockMvc.perform(get("/api/v1/auth")
                 .header(AUTHORIZATION, accessToken))
@@ -96,7 +109,8 @@ class AuthApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.nickname").value(loginUser.getNickname()))
             .andExpect(jsonPath("$.ageGroup").value(loginUser.getAgeGroup().getDescription()))
             .andExpect(jsonPath("$.gender").value(loginUser.getGender().getDescription()))
-            .andExpect(jsonPath("$.isJoined").value(loginUser.getIsJoined()));
+            .andExpect(jsonPath("$.isJoined").value(loginUser.getIsJoined()))
+            .andExpect(jsonPath("$.age").value(expectedAge));
     }
 
     @Test
@@ -119,8 +133,8 @@ class AuthApiControllerTest extends ApiTestSupport {
         mockMvc.perform(
                 get("/api/v1/users/" + loginUser.getId())
                     .header(AUTHORIZATION, wrongToken))
-            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_INVALID.getMessage()))
-            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_INVALID.getCode()))
+            .andExpect(jsonPath("$.message").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getMessage()))
+            .andExpect(jsonPath("$.code").value(AuthErrorCode.AUTH_TOKEN_MALFORMED.getCode()))
             .andExpect(status().isUnauthorized());
     }
 }
