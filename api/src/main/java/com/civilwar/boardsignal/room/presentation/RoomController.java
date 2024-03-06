@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -102,6 +103,18 @@ public class RoomController {
     ) {
         FixRoomRequest fixRoomRequest = RoomApiMapper.toFixRoomRequest(request);
         FixRoomResponse response = roomService.fixRoom(user, roomId, fixRoomRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "종료된 게임에 참여한 유저 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/end-game/{roomId}")
+    public ResponseEntity<GetEndGameUsersResponse> getEndGameUsers(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
         return ResponseEntity.ok(response);
     }
 }
