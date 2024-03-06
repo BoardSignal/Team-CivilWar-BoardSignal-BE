@@ -3,9 +3,11 @@ package com.civilwar.boardsignal.room.dto.mapper;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
+import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
@@ -125,5 +127,9 @@ public final class RoomMapper {
             participantJpaDto.isLeader(),
             participantJpaDto.mannerScore()
         );
+    }
+
+    public static FixRoomResponse toFixRoomResponse(Room room, MeetingInfo meetingInfo) {
+        return new FixRoomResponse(room.getId(), meetingInfo.getId());
     }
 }

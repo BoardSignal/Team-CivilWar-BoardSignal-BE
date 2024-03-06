@@ -8,6 +8,7 @@ import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.io.IOException;
@@ -86,6 +87,21 @@ public class RoomFixture {
 
     public static Participant getParticipant() {
         return Participant.of(1L, 1L, true);
+    }
+
+    public static Participant getParticipantNotLeader() {
+        return Participant.of(1L, 1L, false);
+    }
+
+    public static FixRoomRequest getFixRoomRequest() {
+        return new FixRoomRequest(
+            LocalDateTime.of(2024, 7, 12, 5, 30),
+            "토요일",
+            5,
+            "2호선",
+            "강남역",
+            "레드버튼"
+        );
     }
 
 }

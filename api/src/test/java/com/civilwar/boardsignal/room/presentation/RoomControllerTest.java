@@ -1,10 +1,12 @@
 package com.civilwar.boardsignal.room.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,13 +15,16 @@ import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
+import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
+import com.civilwar.boardsignal.room.domain.constants.WeekDay;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
@@ -357,7 +362,7 @@ class RoomControllerTest extends ApiTestSupport {
         participantRepository.save(participant);
 
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+            LocalDateTime.of(2024, 2, 26, 20, 3, 59));
         meetingInfoRepository.save(meetingInfo);
         room.fixRoom(meetingInfo);
         roomRepository.save(room);
@@ -395,7 +400,7 @@ class RoomControllerTest extends ApiTestSupport {
         participantRepository.save(participant);
 
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 02, 26, 20, 3, 59));
+            LocalDateTime.of(2024, 2, 26, 20, 3, 59));
         meetingInfoRepository.save(meetingInfo);
         room.fixRoom(meetingInfo);
         roomRepository.save(room);
@@ -416,5 +421,45 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.participantResponse.size()").value(1))
             .andExpect(jsonPath("$.participantResponse[0].nickname")
                 .value("macbook"));
+    }
+
+    @Test
+    @DisplayName("[방장은 모임을 확정시킬 수 있다.]")
+    void fixRoom() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        ApiFixRoomRequest request = new ApiFixRoomRequest(
+            LocalDateTime.of(2024, 3, 31, 5, 30),
+            "수요일",
+            5,
+            "2호선",
+            "강남역",
+            "레드버튼"
+        );
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(participant);
+
+        mockMvc.perform(post("/api/v1/rooms/fix/{roomId}", room.getId())
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.roomId").value(room.getId())
+            );
+
+        Room findRoom = roomRepository.findById(room.getId()).orElseThrow();
+        MeetingInfo meetingInfo = findRoom.getMeetingInfo();
+
+        assertAll(
+            () -> assertThat(findRoom.getStatus()).isEqualTo(RoomStatus.FIX),
+            () -> assertThat(meetingInfo.getMeetingTime()).isEqualTo(request.meetingTime()),
+            () -> assertThat(meetingInfo.getWeekDay()).isEqualTo(WeekDay.of(request.weekDay())),
+            () -> assertThat(meetingInfo.getPeopleCount()).isEqualTo(request.peopleCount()),
+            () -> assertThat(meetingInfo.getLine()).isEqualTo(request.line()),
+            () -> assertThat(meetingInfo.getStation()).isEqualTo(request.station()),
+            () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
+        );
     }
 }

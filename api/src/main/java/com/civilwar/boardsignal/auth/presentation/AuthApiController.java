@@ -62,7 +62,7 @@ public class AuthApiController {
 
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
-            if(cookie.getName().equals(REFRESHTOKEN_NAME)) {
+            if (cookie.getName().equals(REFRESHTOKEN_NAME)) {
                 refreshTokenId = cookie.getValue();
             }
         }

@@ -3,9 +3,12 @@ package com.civilwar.boardsignal.room.presentation;
 import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
@@ -22,6 +25,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,5 +89,19 @@ public class RoomController {
     ) {
         RoomInfoResponse roomInfo = roomService.findRoomInfo(user, roomId);
         return ResponseEntity.ok(roomInfo);
+    }
+
+    @Operation(summary = "모임 확정 API(방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/fix/{roomId}")
+    public ResponseEntity<FixRoomResponse> fixRoom(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId,
+        @RequestBody ApiFixRoomRequest request
+    ) {
+        FixRoomRequest fixRoomRequest = RoomApiMapper.toFixRoomRequest(request);
+        FixRoomResponse response = roomService.fixRoom(user, roomId, fixRoomRequest);
+        return ResponseEntity.ok(response);
     }
 }
