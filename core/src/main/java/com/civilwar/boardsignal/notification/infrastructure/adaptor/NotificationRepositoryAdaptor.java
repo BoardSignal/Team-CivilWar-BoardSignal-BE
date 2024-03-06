@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.notification.domain.constant.NotificationStatus;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.domain.repository.NotificationRepository;
 import com.civilwar.boardsignal.notification.infrastructure.repository.NotificationJpaRepository;
+import com.civilwar.boardsignal.user.domain.entity.User;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -34,5 +35,10 @@ public class NotificationRepositoryAdaptor implements NotificationRepository {
     @Override
     public Notification save(Notification notification) {
         return notificationJpaRepository.save(notification);
+    }
+
+    @Override
+    public Slice<Notification> findAllByUser(User user, Pageable pageable) {
+        return notificationJpaRepository.findAllByUser(user, pageable);
     }
 }

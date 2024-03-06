@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.notification.event;
 
+import com.civilwar.boardsignal.notification.application.FcmService;
 import com.civilwar.boardsignal.notification.application.NotificationService;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +13,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class NotificationEventHandler {
 
-    private final NotificationService notificationService;
+    private final FcmService fcmService; // 외부 api 연동 서비스
+    private final NotificationService notificationService; // 알림 레포지토리 의존 서비스
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendMessage(Notification notification) {
         Notification savedNotification = notificationService.saveNotification(notification);
-        notificationService.sendMessage(savedNotification);
+        fcmService.sendMessage(savedNotification);
     }
 }

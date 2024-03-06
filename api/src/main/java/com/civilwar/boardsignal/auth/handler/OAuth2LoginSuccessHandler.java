@@ -39,7 +39,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             userLoginResponse);
 
         //Cookie -> RefreshToken Id
-        ResponseCookie cookie = ResponseCookie.from(REFRESHTOKEN_NAME, userLoginResponse.token().refreshTokenId())
+        ResponseCookie cookie = ResponseCookie.from(REFRESHTOKEN_NAME,
+                userLoginResponse.token().refreshTokenId())
             .path("/")
             .httpOnly(true)
             .secure(true)
