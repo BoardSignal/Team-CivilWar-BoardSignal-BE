@@ -3,7 +3,9 @@ package com.civilwar.boardsignal.room.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -461,5 +463,31 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getStation()).isEqualTo(request.station()),
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
+    }
+
+    @Test
+    @DisplayName("[방의 참가자는 모임 확정을 취소시킬 수 있다.]")
+    void unFixRoom() throws Exception {
+        //given
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 2, 2, 5, 30)
+        );
+        MeetingInfo savedMeeting = meetingInfoRepository.save(meetingInfo);
+
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        room.fixRoom(savedMeeting);
+        Room savedRoom = roomRepository.save(room);
+
+        Participant participant = Participant.of(loginUser.getId(), savedRoom.getId(), false);
+        participantRepository.save(participant);
+
+        //when
+        mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
+            .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk());
+
+        //then
+        Room findRoom = roomRepository.findById(savedRoom.getId()).orElseThrow();
+        assertThat(findRoom.getMeetingInfo()).isNull();
     }
 }
