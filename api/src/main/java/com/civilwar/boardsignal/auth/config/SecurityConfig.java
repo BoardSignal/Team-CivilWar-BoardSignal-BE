@@ -55,7 +55,7 @@ public class SecurityConfig {
                     //인증
                     "/api/v1/auth/reissue", "/oauth2/authorization/**",
                     "/swagger-ui/**",
-                    "/v3/api-=docs/**",
+                    "/v3/api-docs/**",
                     "/"
                 ).permitAll()
                 .anyRequest().authenticated()
