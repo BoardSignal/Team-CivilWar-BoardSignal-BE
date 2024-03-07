@@ -16,4 +16,9 @@ public class MeetingInfoRepositoryAdaptor implements MeetingInfoRepository {
     public MeetingInfo save(MeetingInfo meetingInfo) {
         return meetingInfoJpaRepository.save(meetingInfo);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        meetingInfoJpaRepository.deleteById(id);
+    }
 }
