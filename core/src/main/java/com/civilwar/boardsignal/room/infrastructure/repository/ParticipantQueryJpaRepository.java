@@ -21,4 +21,6 @@ public interface ParticipantQueryJpaRepository extends JpaRepository<Participant
     List<ParticipantJpaDto> findParticipantByRoomId(@Param("roomId") Long roomId);
 
     Optional<Participant> findByUserIdAndRoomId(Long userId, Long roomId);
+
+    boolean existsByUserIdAndRoomId(Long userId, Long roomId);
 }

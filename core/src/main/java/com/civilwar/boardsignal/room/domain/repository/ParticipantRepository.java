@@ -15,4 +15,6 @@ public interface ParticipantRepository {
     List<ParticipantJpaDto> findParticipantByRoomId(Long roomId);
 
     Optional<Participant> findByUserIdAndRoomId(Long userId, Long roomId);
+
+    boolean existsByUserIdAndRoomId(Long userId, Long roomId);
 }
