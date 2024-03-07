@@ -54,14 +54,14 @@ public class SecurityConfig {
                     "/api/v1/board-games/**",
                     //인증
                     "/api/v1/auth/reissue", "/oauth2/authorization/**",
-                    "/swagger-ui/index.html#/",
+                    "/swagger-ui/index.html",
                     "/"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             //인증 안 된 사용자 접근 시 예외 처리
-//            .exceptionHandling(configurer -> configurer
-//                .authenticationEntryPoint(authenticationEntryPoint))
+            .exceptionHandling(configurer -> configurer
+                .authenticationEntryPoint(authenticationEntryPoint))
             //Jwt 관련 예외 처리
             .addFilterBefore(
                 jwtExceptionHandlerFilter,
