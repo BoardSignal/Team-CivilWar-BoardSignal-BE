@@ -60,8 +60,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             //인증 안 된 사용자 접근 시 예외 처리
-            .exceptionHandling(configurer -> configurer
-                .authenticationEntryPoint(authenticationEntryPoint))
+//            .exceptionHandling(configurer -> configurer
+//                .authenticationEntryPoint(authenticationEntryPoint))
             //Jwt 관련 예외 처리
             .addFilterBefore(
                 jwtExceptionHandlerFilter,
