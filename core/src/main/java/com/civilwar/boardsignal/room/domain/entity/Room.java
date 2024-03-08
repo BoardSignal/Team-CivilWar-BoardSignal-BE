@@ -174,7 +174,6 @@ public class Room extends BaseEntity {
     public void increaseHeadCount() {
         this.headCount++;
     }
-
     public void decreaseHeadCount() {
         this.headCount--;
     }

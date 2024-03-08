@@ -84,7 +84,7 @@ public class RoomService {
     @Transactional
     public ParticipantRoomResponse participateRoom(User user, Long roomId) {
 
-        //참여 여부 확인 -> 참여하고 있다면 예외
+        //참여 여부 확인
         if (participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
             throw new ValidationException(RoomErrorCode.ALREADY_PARTICIPANT);
         }
@@ -259,7 +259,7 @@ public class RoomService {
 
         return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
-
+  
     @Transactional
     public void unFixRoom(User user, Long roomId) {
         //방에 존재하는 참가자 인 지 검증

@@ -145,7 +145,7 @@ public class RoomController {
         GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
         return ResponseEntity.ok(response);
     }
-
+  
     @Operation(summary = "모임 확정 취소 API")
     @ApiResponse(useReturnTypeSchema = true)
     @DeleteMapping("/unfix/{roomId}")

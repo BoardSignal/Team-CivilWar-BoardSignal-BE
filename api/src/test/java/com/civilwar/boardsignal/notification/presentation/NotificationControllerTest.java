@@ -30,14 +30,14 @@ class NotificationControllerTest extends ApiTestSupport {
             "https~",
             "제목1",
             "내용1",
-            "/api/v1"
+            1L
         );
         Notification notification2 = Notification.of(
             loginUser,
             "https~",
             "제목2",
             "내용2",
-            "/api/v1"
+            null
         );
 
         notificationFirst = notificationRepository.save(notification1);
@@ -56,8 +56,10 @@ class NotificationControllerTest extends ApiTestSupport {
             .andExpectAll(
                 status().isOk(),
                 jsonPath("$.notificationsInfos[0].notificationId").value(notificationFirst.getId()),
+                jsonPath("$.notificationsInfos[0].roomId").value(notificationFirst.getRoomID()),
                 jsonPath("$.notificationsInfos[1].notificationId").value(
                     notificationSecond.getId()),
+                jsonPath("$.notificationsInfos[1].roomId").value(notificationSecond.getRoomID()),
                 jsonPath("$.size").value(10),
                 jsonPath("$.hasNext").value(false)
             );

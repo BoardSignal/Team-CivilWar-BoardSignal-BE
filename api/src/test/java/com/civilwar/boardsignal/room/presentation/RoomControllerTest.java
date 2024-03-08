@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.room.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -465,7 +466,7 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
     }
-
+  
     @Test
     @DisplayName("[종료된 게임에 같이 참여한 참여자들을 조회할 수 있다.]")
     void getParticipantsEndGame() throws Exception {
@@ -523,7 +524,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
-                .header(AUTHORIZATION, accessToken))
+            .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
         //then
