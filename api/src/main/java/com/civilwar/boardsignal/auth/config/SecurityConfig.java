@@ -54,7 +54,10 @@ public class SecurityConfig {
                     "/api/v1/board-games/**",
                     //인증
                     "/api/v1/auth/reissue", "/oauth2/authorization/**",
+                    //스웨거
                     "/swagger-ui/index.html#/",
+                    //웹소켓
+                    "/ws/**",
                     "/"
                 ).permitAll()
                 .anyRequest().authenticated()
