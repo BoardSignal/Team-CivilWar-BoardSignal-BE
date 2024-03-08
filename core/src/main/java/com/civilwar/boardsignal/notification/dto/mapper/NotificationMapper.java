@@ -15,7 +15,8 @@ public class NotificationMapper {
             notification.getId(),
             notification.getTitle(),
             notification.getBody(),
-            notification.getImageUrl()
+            notification.getImageUrl(),
+            notification.getRoomID()
         );
     }
 
