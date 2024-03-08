@@ -122,7 +122,7 @@ public class Room extends BaseEntity {
             RoomCategory roomCategory = RoomCategory.of(this, category);
             this.roomCategories.add(roomCategory);
         });
-        this.headCount = 0;
+        this.headCount = 1;
     }
 
     public static Room of(
@@ -169,5 +169,9 @@ public class Room extends BaseEntity {
     public void unFixRoom(){
         this.meetingInfo = null;
         this.status = RoomStatus.NON_FIX;
+    }
+
+    public void increaseHeadCount() {
+        this.headCount++;
     }
 }
