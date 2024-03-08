@@ -4,7 +4,8 @@ public record NotificationResponse(
     Long notificationId,
     String title,
     String body,
-    String imageUrl
+    String imageUrl,
+    Long roomId
 ) {
 
 }
