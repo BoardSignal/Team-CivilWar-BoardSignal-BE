@@ -27,16 +27,19 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -562,5 +565,60 @@ class RoomControllerTest extends ApiTestSupport {
                     ValidationException.class))
             .andExpect(status().is4xxClientError());
         assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[방장은 모임을 삭제하며, 관련 데이터들도 삭제한다]")
+    void deleteRoomTest() throws Exception {
+        //given
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        userRepository.save(user);
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        Participant leader = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leader);
+        room.increaseHeadCount();
+        Participant notLeader = Participant.of(user.getId(), room.getId(), false);
+        participantRepository.save(notLeader);
+        room.increaseHeadCount();
+
+        //when
+        mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
+            .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk());
+
+        //then
+        List<ParticipantJpaDto> participants = participantRepository.findParticipantByRoomId(
+            room.getId());
+        Optional<Room> optionalRoom = roomRepository.findById(room.getId());
+
+        assertThat(participants).isEmpty();
+        assertThat(optionalRoom).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사용자가 모임 삭제를 할 수 없다]")
+    void deleteRoomTest2() throws Exception {
+        //given
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        userRepository.save(user);
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        Participant leader = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(leader);
+        room.increaseHeadCount();
+        Participant notLeader = Participant.of(user.getId(), room.getId(), true);
+        participantRepository.save(notLeader);
+        room.increaseHeadCount();
+
+        //then
+        mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
     }
 }
