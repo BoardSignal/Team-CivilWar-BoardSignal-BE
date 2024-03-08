@@ -1,6 +1,5 @@
 package com.civilwar.boardsignal.notification.infrastructure.adaptor;
 
-import com.civilwar.boardsignal.notification.domain.constant.NotificationStatus;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.domain.repository.NotificationRepository;
 import com.civilwar.boardsignal.notification.infrastructure.repository.NotificationJpaRepository;
@@ -20,11 +19,6 @@ public class NotificationRepositoryAdaptor implements NotificationRepository {
     @Override
     public Optional<Notification> findById(Long id) {
         return notificationJpaRepository.findById(id);
-    }
-
-    @Override
-    public Optional<Notification> findByStatus(NotificationStatus status) {
-        return notificationJpaRepository.findByStatus(status);
     }
 
     @Override
