@@ -5,11 +5,9 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
 
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
-import com.civilwar.boardsignal.notification.domain.repository.NotificationRepository;
 import com.civilwar.boardsignal.notification.dto.request.NotificationTestRequest;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.entity.UserFcmToken;
-import com.civilwar.boardsignal.user.domain.repository.UserFcmTokenRepository;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
@@ -35,9 +33,6 @@ public class FcmService {
     private static final String PROJECT_ID = "boardsignal-71515";
 
     private static final String GOOGLE_API_SUFFIX = "/messages:send";
-
-    private final UserFcmTokenRepository userFcmTokenRepository;
-    private final NotificationRepository notificationRepository;
 
     private String getAccessToken() throws IOException {
         final GoogleCredentials googleCredentials = GoogleCredentials
