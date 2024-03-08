@@ -81,10 +81,10 @@ public class RoomService {
     }
 
     @Transactional
-    public ParticipantRoomResponse participateRoom(Long userId, Long roomId) {
+    public ParticipantRoomResponse participateRoom(User user, Long roomId) {
 
         //참여 여부 확인
-        if (participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+        if (participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
             throw new ValidationException(RoomErrorCode.ALREADY_PARTICIPANT);
         }
 
@@ -94,7 +94,7 @@ public class RoomService {
         findRoom.increaseHeadCount();
 
         //참여 정보 저장
-        Participant participant = Participant.of(userId, roomId, false);
+        Participant participant = Participant.of(user.getId(), roomId, false);
         participantRepository.save(participant);
 
         return new ParticipantRoomResponse(findRoom.getHeadCount());

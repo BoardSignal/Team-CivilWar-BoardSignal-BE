@@ -64,7 +64,7 @@ public class RoomController {
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(user.getId(),
+        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(user,
             roomId);
 
         return ResponseEntity.ok(participantRoomResponse);
