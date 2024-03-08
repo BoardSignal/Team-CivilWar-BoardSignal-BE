@@ -166,7 +166,7 @@ public class Room extends BaseEntity {
         this.status = RoomStatus.FIX;
     }
 
-    public void unFixRoom(){
+    public void unFixRoom() {
         this.meetingInfo = null;
         this.status = RoomStatus.NON_FIX;
     }
