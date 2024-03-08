@@ -3,7 +3,6 @@ package com.civilwar.boardsignal.room.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -587,7 +586,6 @@ class RoomControllerTest extends ApiTestSupport {
     @DisplayName("[해당 방에 참여하지 않은 사용자는 방 나가기 요청을 보낼 수 없다]")
     void exitRoomTest2() throws Exception {
         //given
-        //총 2명 참여 중
         Room room = RoomFixture.getRoom(Gender.MALE);
         roomRepository.save(room);
 
