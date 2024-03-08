@@ -40,6 +40,10 @@ dependencies {
 
     //JsonObject
     implementation group: 'org.json', name: 'json', version: '20231013'
+
+    //aws S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'javax.xml.bind:jaxb-api:2.2.4'
 }
 
 bootJar { enabled = false }
