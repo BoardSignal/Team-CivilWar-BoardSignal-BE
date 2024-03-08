@@ -11,6 +11,7 @@ import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -55,6 +56,20 @@ public class RoomController {
 
         return ResponseEntity.ok(createRoomResponse);
     }
+
+    @Operation(summary = "방 참여 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/in/{roomId}")
+    public ResponseEntity<ParticipantRoomResponse> participantRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(user.getId(),
+            roomId);
+
+        return ResponseEntity.ok(participantRoomResponse);
+    }
+
 
     @Operation(summary = "내가 이전에 참여한 모임 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
