@@ -35,3 +35,15 @@ jwt:
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.orm.jdbc.bind: trace
+cloud:
+  aws:
+    s3:
+      bucket: boardsignal-image # {버킷명}
+    credentials:
+      access-key: AKIAXYKJUM6MLCQFJFHC
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
