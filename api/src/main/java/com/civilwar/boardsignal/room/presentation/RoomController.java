@@ -8,6 +8,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -68,6 +69,18 @@ public class RoomController {
             roomId);
 
         return ResponseEntity.ok(participantRoomResponse);
+    }
+
+    @Operation(summary = "방 나가기 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/out/{roomId}")
+    public ResponseEntity<ExitRoomResponse> exitRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+
+        return ResponseEntity.ok(exitRoomResponse);
     }
 
 
