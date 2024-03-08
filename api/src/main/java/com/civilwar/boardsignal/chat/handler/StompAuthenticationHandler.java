@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.chat.handler;
 
-import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
@@ -24,8 +24,7 @@ public class StompAuthenticationHandler implements ChannelInterceptor {
         if (StringUtils.hasText(token)) {
             String accessToken = token.split(" ")[1];
             jwtTokenProvider.validateToken(accessToken);
-        }
-        else{
+        } else {
             throw new ValidationException(AuthErrorCode.AUTH_REQUIRED);
         }
     }
@@ -38,7 +37,7 @@ public class StompAuthenticationHandler implements ChannelInterceptor {
         StompCommand command = accessor.getCommand();
 
         //첫 연결이거나 메시지를 보낼 때 검증
-        if(command == StompCommand.CONNECT || command == StompCommand.SEND) {
+        if (command == StompCommand.CONNECT || command == StompCommand.SEND) {
             //AccessToken 검증
             String token = accessor.getFirstNativeHeader(AUTHORIZATION);
             validateHeader(token);

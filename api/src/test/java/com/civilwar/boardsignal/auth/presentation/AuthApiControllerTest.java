@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.auth.presentation;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -96,7 +96,7 @@ class AuthApiControllerTest extends ApiTestSupport {
     @DisplayName("[AccessToken의 사용자 정보를 반환한다.]")
     void getLoginUserInfoTest() throws Exception {
         //given
-        LocalDateTime now = LocalDateTime.of(2024,3,4,9,27,0);
+        LocalDateTime now = LocalDateTime.of(2024, 3, 4, 9, 27, 0);
         given(nowTime.get()).willReturn(now);
 
         int expectedAge = nowTime.get().getYear() - loginUser.getBirth() + 1;

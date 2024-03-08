@@ -1,7 +1,7 @@
 package com.civilwar.boardsignal.chat.domain.entity;
 
-import static jakarta.persistence.EnumType.*;
-import static lombok.AccessLevel.*;
+import static jakarta.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PRIVATE;
 
 import com.civilwar.boardsignal.chat.domain.constant.MessageType;
 import com.civilwar.boardsignal.common.base.BaseEntity;

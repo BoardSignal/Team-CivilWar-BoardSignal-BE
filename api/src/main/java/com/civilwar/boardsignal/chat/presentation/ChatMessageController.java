@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.chat.presentation;
 
-import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
 import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
