@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.room.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 
@@ -26,6 +27,7 @@ import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
@@ -46,6 +48,7 @@ import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -421,5 +424,50 @@ class RoomServiceTest {
             () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
         );
 
+    }
+
+    @Test
+    @DisplayName("[사용자 2명이 방에 참여하면 참여자 수가 2명 늘어난다]")
+    void participantTest() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        Long participantUserId2 = 51L;
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            false);
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId2, roomId)).willReturn(
+            false);
+
+        //when
+        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(
+            participantUserId, roomId);
+        ParticipantRoomResponse participantRoomResponse2 = roomService.participateRoom(
+            participantUserId2, roomId);
+
+        //then
+        verify(participantRepository, times(2)).save(any(Participant.class));
+        assertThat(participantRoomResponse2.headCount()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("[모임에 중복으로 참여할 수 없다]")
+    void participantTest2() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            true);
+
+        //then
+        assertThatThrownBy(
+            () -> roomService.participateRoom(participantUserId, roomId)).isInstanceOf(
+                ValidationException.class)
+            .hasMessage(RoomErrorCode.ALREADY_PARTICIPANT.getMessage());
     }
 }
