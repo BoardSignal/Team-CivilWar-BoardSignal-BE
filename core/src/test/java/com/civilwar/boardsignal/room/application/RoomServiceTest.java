@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -424,7 +424,6 @@ class RoomServiceTest {
             () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
             () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
         );
-
     }
 
     @Test
@@ -432,7 +431,11 @@ class RoomServiceTest {
     void participantTest() throws IOException {
         //given
         Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
         Long participantUserId2 = 51L;
+        User user2 = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user2, "id", participantUserId2);
         Long roomId = 1L;
         Room room = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(room, "id", roomId);
@@ -444,9 +447,9 @@ class RoomServiceTest {
 
         //when
         ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(
-            participantUserId, roomId);
+            user, roomId);
         ParticipantRoomResponse participantRoomResponse2 = roomService.participateRoom(
-            participantUserId2, roomId);
+            user2, roomId);
 
         //then
         verify(participantRepository, times(2)).save(any(Participant.class));
@@ -458,6 +461,8 @@ class RoomServiceTest {
     void participantTest2() throws IOException {
         //given
         Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
         Long roomId = 1L;
         Room room = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(room, "id", roomId);
@@ -466,7 +471,7 @@ class RoomServiceTest {
 
         //then
         assertThatThrownBy(
-            () -> roomService.participateRoom(participantUserId, roomId)).isInstanceOf(
+            () -> roomService.participateRoom(user, roomId)).isInstanceOf(
                 ValidationException.class)
             .hasMessage(RoomErrorCode.ALREADY_PARTICIPANT.getMessage());
     }
