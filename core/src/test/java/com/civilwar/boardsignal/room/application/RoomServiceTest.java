@@ -431,7 +431,11 @@ class RoomServiceTest {
     void participantTest() throws IOException {
         //given
         Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
         Long participantUserId2 = 51L;
+        User user2 = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user2, "id", participantUserId2);
         Long roomId = 1L;
         Room room = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(room, "id", roomId);
@@ -443,9 +447,9 @@ class RoomServiceTest {
 
         //when
         ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(
-            participantUserId, roomId);
+            user, roomId);
         ParticipantRoomResponse participantRoomResponse2 = roomService.participateRoom(
-            participantUserId2, roomId);
+            user2, roomId);
 
         //then
         verify(participantRepository, times(2)).save(any(Participant.class));
@@ -457,16 +461,17 @@ class RoomServiceTest {
     void participantTest2() throws IOException {
         //given
         Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
         Long roomId = 1L;
         Room room = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(room, "id", roomId);
-        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
         given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
             true);
 
         //then
         assertThatThrownBy(
-            () -> roomService.participateRoom(participantUserId, roomId)).isInstanceOf(
+            () -> roomService.participateRoom(user, roomId)).isInstanceOf(
                 ValidationException.class)
             .hasMessage(RoomErrorCode.ALREADY_PARTICIPANT.getMessage());
     }
