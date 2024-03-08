@@ -42,4 +42,9 @@ public class ParticipantRepositoryAdaptor implements ParticipantRepository {
     public boolean existsByUserIdAndRoomId(Long userId, Long roomId) {
         return participantQueryJpaRepository.existsByUserIdAndRoomId(userId, roomId);
     }
+
+    @Override
+    public void deleteParticipantsByRoomId(Long roomId) {
+        participantJpaRepository.deleteParticipantsByRoomId(roomId);
+    }
 }
