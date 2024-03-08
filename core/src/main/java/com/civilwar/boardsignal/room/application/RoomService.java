@@ -217,12 +217,12 @@ public class RoomService {
 
         return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
-  
+
     @Transactional
-    public void unFixRoom(User user, Long roomId){
+    public void unFixRoom(User user, Long roomId) {
         //방에 존재하는 참가자 인 지 검증
         boolean isParticipant = participantRepository.existsByUserIdAndRoomId(user.getId(), roomId);
-        if(!isParticipant){
+        if (!isParticipant) {
             throw new NotFoundException(INVALID_PARTICIPANT);
         }
 
