@@ -3,7 +3,6 @@ package com.civilwar.boardsignal.room.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
@@ -464,7 +464,7 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
     }
-  
+
     @Test
     @DisplayName("[종료된 게임에 같이 참여한 참여자들을 조회할 수 있다.]")
     void getParticipantsEndGame() throws Exception {
@@ -503,6 +503,7 @@ class RoomControllerTest extends ApiTestSupport {
                 jsonPath("$.participantsInfos[0].profileImageUrl").value(user.getProfileImageUrl())
             );
     }
+
     @Test
     @DisplayName("[방의 참가자는 모임 확정을 취소시킬 수 있다.]")
     void unFixRoom() throws Exception {
@@ -521,11 +522,45 @@ class RoomControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
-            .header(AUTHORIZATION, accessToken))
+                .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
         //then
         Room findRoom = roomRepository.findById(savedRoom.getId()).orElseThrow();
         assertThat(findRoom.getMeetingInfo()).isNull();
+    }
+
+    @Test
+    @DisplayName("[사용자는 방에 참여할 수 있다]")
+    void participantRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(2));
+    }
+
+    @Test
+    @DisplayName("[이미 참여되어 있는 사용자는 참여할 수 없다]")
+    void participantRoomTest2() throws Exception {
+        //given
+        //총 2명 참여 중
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(2);
     }
 }

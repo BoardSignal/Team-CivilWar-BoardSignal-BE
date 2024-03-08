@@ -23,8 +23,10 @@ import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
+import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.time.LocalDateTime;
@@ -76,6 +78,26 @@ public class RoomService {
         participantRepository.save(participant);
 
         return RoomMapper.toCreateRoomResponse(savedRoom);
+    }
+
+    @Transactional
+    public ParticipantRoomResponse participateRoom(User user, Long roomId) {
+
+        //참여 여부 확인
+        if (participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
+            throw new ValidationException(RoomErrorCode.ALREADY_PARTICIPANT);
+        }
+
+        //참여 인원 수 증가
+        Room findRoom = roomRepository.findByIdWithLock(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        findRoom.increaseHeadCount();
+
+        //참여 정보 저장
+        Participant participant = Participant.of(user.getId(), roomId, false);
+        participantRepository.save(participant);
+
+        return new ParticipantRoomResponse(findRoom.getHeadCount());
     }
 
     @Transactional(readOnly = true)
@@ -217,12 +239,12 @@ public class RoomService {
 
         return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
-  
+
     @Transactional
-    public void unFixRoom(User user, Long roomId){
+    public void unFixRoom(User user, Long roomId) {
         //방에 존재하는 참가자 인 지 검증
         boolean isParticipant = participantRepository.existsByUserIdAndRoomId(user.getId(), roomId);
-        if(!isParticipant){
+        if (!isParticipant) {
             throw new NotFoundException(INVALID_PARTICIPANT);
         }
 

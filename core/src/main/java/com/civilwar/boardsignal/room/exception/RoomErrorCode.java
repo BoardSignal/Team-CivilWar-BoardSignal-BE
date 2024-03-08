@@ -14,7 +14,8 @@ public enum RoomErrorCode implements ErrorCode {
     INVALID_WEEKDAY("요일 형식이 잘못 되었습니다", "R_003"),
     IS_NOT_LEADER("방장이 아닙니다", "R_004"),
     NOT_FOUND_TIME_SLOT("시간대 값이 잘못 되었습니다.", "R_005"),
-    NOT_FOUND_DAY_SLOT("날짜 값이 잘못 되었습니다.", "R_006");
+    NOT_FOUND_DAY_SLOT("날짜 값이 잘못 되었습니다.", "R_006"),
+    ALREADY_PARTICIPANT("이미 모임에 참여하였습니다", "R_007");
 
 
     private final String message;
