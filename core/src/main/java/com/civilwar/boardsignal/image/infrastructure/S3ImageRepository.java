@@ -15,25 +15,26 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class S3ImageRepository implements ImageRepository {
 
-    private final AmazonS3 amazonS3Client;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+//    private final AmazonS3 amazonS3Client;
+//
+//    @Value("${cloud.aws.s3.bucket}")
+//    private String bucket;
 
     @Override
     public String save(MultipartFile image) {
-        String originalFilename = image.getOriginalFilename();
-        String convertName = "upload/" + originalFilename;
-
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(image.getSize());
-        metadata.setContentType(image.getContentType());
-
-        try {
-            amazonS3Client.putObject(bucket, convertName, image.getInputStream(), metadata);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return amazonS3Client.getUrl(bucket, originalFilename).toString();
+//        String originalFilename = image.getOriginalFilename();
+//        String convertName = "upload/" + originalFilename;
+//
+//        ObjectMetadata metadata = new ObjectMetadata();
+//        metadata.setContentLength(image.getSize());
+//        metadata.setContentType(image.getContentType());
+//
+//        try {
+//            amazonS3Client.putObject(bucket, convertName, image.getInputStream(), metadata);
+//        } catch (IOException e) {
+//            log.error(e.getMessage());
+//        }
+//        return amazonS3Client.getUrl(bucket, originalFilename).toString();
+        return "temp";
     }
 }
