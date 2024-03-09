@@ -9,6 +9,7 @@ import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -71,6 +72,17 @@ public class RoomController {
         return ResponseEntity.ok(participantRoomResponse);
     }
 
+    @Operation(summary = "방 나가기 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/out/{roomId}")
+    public ResponseEntity<ExitRoomResponse> exitRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+
+        return ResponseEntity.ok(exitRoomResponse);
+    }
 
     @Operation(summary = "내가 이전에 참여한 모임 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
@@ -134,7 +146,7 @@ public class RoomController {
         GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
         return ResponseEntity.ok(response);
     }
-
+  
     @Operation(summary = "모임 확정 취소 API")
     @ApiResponse(useReturnTypeSchema = true)
     @DeleteMapping("/unfix/{roomId}")

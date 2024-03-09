@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
@@ -569,6 +570,40 @@ class RoomControllerTest extends ApiTestSupport {
                     ValidationException.class))
             .andExpect(status().is4xxClientError());
         assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[사용자는 참여한 방을 나갈 수 있다]")
+    void exitRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(1));
+    }
+
+    @Test
+    @DisplayName("[해당 방에 참여하지 않은 사용자는 방 나가기 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    NotFoundException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(1);
     }
 
     @Test

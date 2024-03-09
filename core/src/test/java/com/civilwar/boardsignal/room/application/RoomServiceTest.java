@@ -24,6 +24,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -475,6 +476,54 @@ class RoomServiceTest {
             () -> roomService.participateRoom(user, roomId)).isInstanceOf(
                 ValidationException.class)
             .hasMessage(RoomErrorCode.ALREADY_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[사용자 3명 중 1명이 모임에서 나가면 현재 참여자는 2명이 된다]")
+    void exitRoomTest() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        room.increaseHeadCount();
+        room.increaseHeadCount();
+
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            true);
+
+        //when
+        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+
+        //then
+        verify(participantRepository, times(1))
+            .deleteByUserIdAndRoomId(participantUserId, roomId);
+        assertThat(exitRoomResponse.headCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[참여하지 않은 사용자는 해당 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            false);
+
+        //then
+        assertThatThrownBy(
+            () -> roomService.exitRoom(user, roomId)).isInstanceOf(
+                NotFoundException.class)
+            .hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
     }
 
     @Test
