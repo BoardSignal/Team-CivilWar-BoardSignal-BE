@@ -17,6 +17,7 @@ import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
@@ -223,7 +224,6 @@ public class RoomService {
         return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
     }
 
-
     @Transactional(readOnly = true)
     public GetEndGameUsersResponse getEndGameUsersResponse(User user, Long roomId) {
         Room room = roomRepository.findById(roomId)
@@ -257,4 +257,25 @@ public class RoomService {
         room.unFixRoom();
     }
 
+    @Transactional
+    public void kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
+        //방장 여부 확인
+        Participant leaderInfo = participantRepository.findByUserIdAndRoomId(leader.getId(),
+                kickOutUserRequest.roomId())
+            .orElseThrow(() -> new ValidationException(IS_NOT_LEADER));
+
+        //방장이 아니라면 불가
+        if(!leaderInfo.isLeader()) {
+            throw new ValidationException(IS_NOT_LEADER);
+        }
+
+        //추방자 정보
+        Participant kickOutUser = participantRepository.findByUserIdAndRoomId(
+                kickOutUserRequest.userId(),
+                kickOutUserRequest.roomId())
+            .orElseThrow(() -> new ValidationException(INVALID_PARTICIPANT));
+
+        //추방
+        participantRepository.deleteById(kickOutUser.getId());
+    }
 }
