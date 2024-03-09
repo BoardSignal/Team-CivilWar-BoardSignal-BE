@@ -44,6 +44,11 @@ public class ParticipantRepositoryAdaptor implements ParticipantRepository {
     }
 
     @Override
+    public void deleteByUserIdAndRoomId(Long userId, Long roomId) {
+        participantJpaRepository.deleteParticipantByUserIdAndRoomId(userId, roomId);
+    }
+
+    @Override
     public void deleteParticipantsByRoomId(Long roomId) {
         participantJpaRepository.deleteParticipantsByRoomId(roomId);
     }

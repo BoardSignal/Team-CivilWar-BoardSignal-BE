@@ -18,5 +18,7 @@ public interface ParticipantRepository {
 
     boolean existsByUserIdAndRoomId(Long userId, Long roomId);
 
+    void deleteByUserIdAndRoomId(Long userId, Long roomId);
+
     void deleteParticipantsByRoomId(Long roomId);
 }

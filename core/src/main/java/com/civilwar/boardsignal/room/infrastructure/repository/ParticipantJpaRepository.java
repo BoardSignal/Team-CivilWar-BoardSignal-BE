@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ParticipantJpaRepository extends JpaRepository<Participant, Long> {
 
-    void deleteParticipantsByRoomId(Long roomId);
+    void deleteParticipantByUserIdAndRoomId(Long userId, Long roomId);
 
+    void deleteParticipantsByRoomId(Long roomId);
 }

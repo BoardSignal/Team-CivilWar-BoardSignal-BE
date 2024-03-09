@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
@@ -34,7 +35,6 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -568,6 +568,40 @@ class RoomControllerTest extends ApiTestSupport {
     }
 
     @Test
+    @DisplayName("[사용자는 참여한 방을 나갈 수 있다]")
+    void exitRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(1));
+    }
+
+    @Test
+    @DisplayName("[해당 방에 참여하지 않은 사용자는 방 나가기 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    NotFoundException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("[방장은 모임을 삭제하며, 관련 데이터들도 삭제한다]")
     void deleteRoomTest() throws Exception {
         //given
@@ -585,7 +619,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
-            .header(AUTHORIZATION, accessToken))
+                .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
         //then
