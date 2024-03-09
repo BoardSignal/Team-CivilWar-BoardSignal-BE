@@ -1,4 +1,0 @@
-rootProject.name = 'boardsignal'
-include 'core'
-include 'api'
-
