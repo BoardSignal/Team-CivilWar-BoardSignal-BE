@@ -19,6 +19,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -98,6 +99,25 @@ public class RoomService {
         participantRepository.save(participant);
 
         return new ParticipantRoomResponse(findRoom.getHeadCount());
+    }
+
+    @Transactional
+    public ExitRoomResponse exitRoom(User user, Long roomId) {
+
+        //참여 여부 확인 -> 참여하고 있지 않다면 예외
+        if (!participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
+            throw new NotFoundException(INVALID_PARTICIPANT);
+        }
+
+        //참여 인원 수 감소
+        Room findRoom = roomRepository.findByIdWithLock(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        findRoom.decreaseHeadCount();
+
+        //참여 정보 삭제
+        participantRepository.deleteByUserIdAndRoomId(user.getId(), roomId);
+
+        return new ExitRoomResponse(findRoom.getHeadCount());
     }
 
     @Transactional(readOnly = true)
@@ -239,7 +259,7 @@ public class RoomService {
 
         return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
-
+  
     @Transactional
     public void unFixRoom(User user, Long roomId) {
         //방에 존재하는 참가자 인 지 검증

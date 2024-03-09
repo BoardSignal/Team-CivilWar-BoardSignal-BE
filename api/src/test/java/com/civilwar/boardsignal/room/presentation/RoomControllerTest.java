@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
@@ -464,7 +465,7 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
     }
-
+  
     @Test
     @DisplayName("[종료된 게임에 같이 참여한 참여자들을 조회할 수 있다.]")
     void getParticipantsEndGame() throws Exception {
@@ -522,7 +523,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
-                .header(AUTHORIZATION, accessToken))
+            .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
         //then
@@ -562,5 +563,39 @@ class RoomControllerTest extends ApiTestSupport {
                     ValidationException.class))
             .andExpect(status().is4xxClientError());
         assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[사용자는 참여한 방을 나갈 수 있다]")
+    void exitRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(1));
+    }
+
+    @Test
+    @DisplayName("[해당 방에 참여하지 않은 사용자는 방 나가기 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    NotFoundException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(1);
     }
 }
