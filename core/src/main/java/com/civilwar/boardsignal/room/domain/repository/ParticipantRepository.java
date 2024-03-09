@@ -12,9 +12,13 @@ public interface ParticipantRepository {
 
     void saveAll(Collection<Participant> participants);
 
+    List<Participant> findAll();
+
     List<ParticipantJpaDto> findParticipantByRoomId(Long roomId);
 
     Optional<Participant> findByUserIdAndRoomId(Long userId, Long roomId);
 
     boolean existsByUserIdAndRoomId(Long userId, Long roomId);
+
+    void deleteById(Long id);
 }
