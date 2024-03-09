@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.civilwar.boardsignal.auth.domain.TokenProvider;
+import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
@@ -27,12 +29,15 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
+import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,6 +71,8 @@ class RoomControllerTest extends ApiTestSupport {
     private ParticipantRepository participantRepository;
     @Autowired
     private MeetingInfoJpaRepository meetingInfoRepository;
+    @Autowired
+    private TokenProvider tokenProvider;
     @MockBean
     private Supplier<LocalDateTime> nowTime;
 
@@ -562,5 +569,88 @@ class RoomControllerTest extends ApiTestSupport {
                     ValidationException.class))
             .andExpect(status().is4xxClientError());
         assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[방장은 참가자를 추방할 수 있다]")
+    void kickOutTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notLeader = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notLeader);
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+        Participant userInfo = Participant.of(notLeader.getId(), room.getId(), false);
+        participantRepository.save(userInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), notLeader.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+            .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect(status().isOk());
+
+        List<Participant> result = participantRepository.findAll();
+
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람은 추방할 수 없다]")
+    void kickOutTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notLeader = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notLeader);
+        Token notLeaderToken = tokenProvider.createToken(notLeader.getId(), Role.USER);
+        String notLeaderAccessToken = "Bearer " + notLeaderToken.accessToken();
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+        Participant notLeaderInfo = Participant.of(notLeader.getId(), room.getId(), false);
+        participantRepository.save(notLeaderInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), loginUser.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+                .header(AUTHORIZATION, notLeaderAccessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect((result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                ValidationException.class))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("[참가자가 아닌 사람을 추방할 수 없다]")
+    void kickOutTest3() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notParticipant = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notParticipant);
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), notParticipant.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect((result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                ValidationException.class))
+            .andExpect(status().is4xxClientError());
     }
 }
