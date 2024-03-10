@@ -11,6 +11,8 @@ api/src/main/resources/application-api.yml
 core/src/main/resources/firebase.json
 core/src/main/generated
 api/src/main/generated
+core/src/test/resources/application.yml
+api/src/test/resources/application.yml
 
 ### STS ###
 .apt_generated
