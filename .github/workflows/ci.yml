@@ -2,7 +2,7 @@ name: CI with Gradle
 
 on:
   pull_request:
-    branches: [ "main", "dev", "fix/#102" ]
+    branches: [ "main", "dev" ]
 
 permissions:
   contents: read
