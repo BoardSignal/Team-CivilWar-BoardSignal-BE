@@ -26,6 +26,7 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ class UserApiControllerTest extends ApiTestSupport {
     private WishRepository wishRepository;
 
     @Test
+    @Disabled(value = "s3 test disabled")
     @DisplayName("[회원은 정보를 수정 할 수 있다]")
     void joinUserTest() throws Exception {
 

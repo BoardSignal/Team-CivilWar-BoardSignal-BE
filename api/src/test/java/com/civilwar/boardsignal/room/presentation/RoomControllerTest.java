@@ -41,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ class RoomControllerTest extends ApiTestSupport {
     private Supplier<LocalDateTime> nowTime;
 
     @Test
+    @Disabled(value = "s3 test disabled")
     @DisplayName("[사용자는 방을 생성할 수 있다.]")
     void createRoom() throws Exception {
         ApiCreateRoomRequest request = new ApiCreateRoomRequest(
@@ -121,6 +123,7 @@ class RoomControllerTest extends ApiTestSupport {
     }
 
     @Test
+    @Disabled(value = "s3 test disabled")
     @DisplayName("[방 생성 시 이성 허용이 불가능하면, 방장의 성별이 방의 저장된다.]")
     void createRoom2() throws Exception {
         ApiCreateRoomRequest request = new ApiCreateRoomRequest(
