@@ -2,7 +2,7 @@ name: CI with Gradle
 
 on:
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "main", "dev", "fix/#102" ]
 
 permissions:
   contents: read
@@ -21,6 +21,16 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: API 모듈 TEST YML 파일 생성
+        run: |
+          mkdir -p ./api/src/test/resources
+          echo "${{ secrets.APPLICATION_API_TEST_YML }}" > ./api/src/test/resources/application.yml
+
+      - name: CORE 모듈 YML 파일 생성
+        run: |
+         mkdir -p ./core/src/test/resources
+         echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
 
       # 빌드
       - name: Build with Gradle
