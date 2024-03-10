@@ -1,0 +1,44 @@
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: authorization-uri
+            token-uri: token-uri
+            user-info-uri: user-info-uri
+            user-name-attribute: user-name-attribute
+        registration:
+          kakao:
+            client-id: client-id
+            client-secret: client-secret
+            client-authentication-method: client-authentication-method
+            redirect-uri: redirect-uri
+            authorization-grant-type: authorization-grant-type
+            client-name: kakao
+            scope: scope
+
+jwt:
+  client-secret: fdflsjhflkwejfblkjhvuixochvuhsofiuesafbidsfab223411
+  access-expiry-time: 240000
+  refresh-expiry-time: 240000
+cloud:
+  aws:
+    s3:
+      bucket: boardsignal-image # {버킷명}
+    credentials:
+      access-key: AKIAXYKJUM6MLCQFJFHC
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
