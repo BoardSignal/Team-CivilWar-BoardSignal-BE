@@ -156,4 +156,15 @@ public class RoomController {
     ) {
         roomService.unFixRoom(user, roomId);
     }
+
+    @Operation(summary = "모임 삭제 API (방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/{roomId}")
+    public void deleteRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        roomService.deleteRoom(user, roomId);
+    }
+
 }

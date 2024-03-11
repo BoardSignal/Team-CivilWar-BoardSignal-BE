@@ -138,4 +138,9 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     public Optional<Room> findByIdWithLock(Long id) {
         return roomJpaRepository.findByIdWithLock(id);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        roomJpaRepository.deleteById(id);
+    }
 }

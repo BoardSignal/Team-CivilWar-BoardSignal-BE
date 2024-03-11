@@ -7,4 +7,5 @@ public interface ParticipantJpaRepository extends JpaRepository<Participant, Lon
 
     void deleteParticipantByUserIdAndRoomId(Long userId, Long roomId);
 
+    void deleteParticipantsByRoomId(Long roomId);
 }

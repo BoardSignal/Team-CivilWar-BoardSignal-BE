@@ -280,4 +280,22 @@ public class RoomService {
         room.unFixRoom();
     }
 
+    @Transactional
+    public void deleteRoom(User user, Long roomId) {
+        //방장 여부 확인
+        Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
+            .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
+
+        if(!participant.isLeader()) {
+            throw new ValidationException(IS_NOT_LEADER);
+        }
+
+        //참가자 정보 삭제
+        participantRepository.deleteParticipantsByRoomId(roomId);
+
+        //todo 채팅 기록 삭제
+
+        //모임 삭제
+        roomRepository.deleteById(roomId);
+    }
 }

@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -431,6 +431,7 @@ class RoomServiceTest {
             () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
             () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
         );
+
     }
 
     @Test
@@ -529,5 +530,47 @@ class RoomServiceTest {
             () -> roomService.exitRoom(user, roomId)).isInstanceOf(
                 NotFoundException.class)
             .hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장이 모임을 삭제하면 관련 데이터들을 함께 삭제한다]")
+    void deleteRoomTest() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, true);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //when
+        roomService.deleteRoom(user, roomId);
+
+        //then
+        verify(participantRepository, times(1)).deleteParticipantsByRoomId(roomId);
+        verify(roomRepository, times(1)).deleteById(roomId);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람이 해당 기능을 수행하면 예외가 발생한다]")
+    void deleteRoomTest2() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //then
+        assertThatThrownBy(() -> roomService.deleteRoom(user, roomId)).isInstanceOf(
+                ValidationException.class)
+            .hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
     }
 }
