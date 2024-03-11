@@ -6,10 +6,12 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-//@Component
+@Component
+@Profile(value = "dev")
 @Slf4j
 public class FcmConfig {
 
