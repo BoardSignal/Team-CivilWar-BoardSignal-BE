@@ -61,7 +61,7 @@ public class FcmService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION, "Bearer " + getAccessToken());
         headers.add(CONTENT_TYPE, "application/json; charset=utf-8");
-        headers.add(CONTENT_LENGTH, "0");
+        headers.setContentLength(0);
 
         JSONObject content = new JSONObject();
         content.put("title", title);
