@@ -34,6 +34,6 @@ public class S3ImageRepository implements ImageRepository {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-        return amazonS3Client.getUrl(bucket, originalFilename).toString();
+        return amazonS3Client.getUrl(bucket, convertName).toString();
     }
 }
