@@ -58,11 +58,6 @@ public class FcmService {
         String body,
         String imageUrl
     ) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(AUTHORIZATION, "Bearer " + getAccessToken());
-        headers.add(CONTENT_TYPE, "application/json; charset=utf-8");
-        headers.setContentLength(0);
-
         JSONObject content = new JSONObject();
         content.put("title", title);
         content.put("body", body);
@@ -77,6 +72,11 @@ public class FcmService {
 
         String requestBody = result.toString();
         log.info("Request Body : {}", requestBody);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION, "Bearer " + getAccessToken());
+        headers.add(CONTENT_TYPE, "application/json; charset=utf-8");
+        headers.setContentLength(requestBody.length());
 
         return new HttpEntity<>(requestBody, headers);
     }
@@ -102,7 +102,6 @@ public class FcmService {
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
-
             //Google Api로 알림 전송 요청
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.exchange(
@@ -138,6 +137,7 @@ public class FcmService {
                 return statusCode.series() == Series.SERVER_ERROR;
             }
         });
+        log.info("content length : {}", requestEntity.getHeaders());
 
         ResponseEntity<String> response = restTemplate.exchange(
             GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
