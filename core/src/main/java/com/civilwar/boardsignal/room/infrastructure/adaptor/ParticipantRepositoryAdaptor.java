@@ -29,6 +29,11 @@ public class ParticipantRepositoryAdaptor implements ParticipantRepository {
     }
 
     @Override
+    public List<Participant> findAll() {
+        return participantQueryJpaRepository.findAll();
+    }
+
+    @Override
     public List<ParticipantJpaDto> findParticipantByRoomId(Long roomId) {
         return participantQueryJpaRepository.findParticipantByRoomId(roomId);
     }
@@ -51,5 +56,10 @@ public class ParticipantRepositoryAdaptor implements ParticipantRepository {
     @Override
     public void deleteParticipantsByRoomId(Long roomId) {
         participantJpaRepository.deleteParticipantsByRoomId(roomId);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        participantJpaRepository.deleteById(id);
     }
 }

@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -23,6 +23,7 @@ import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -431,7 +432,6 @@ class RoomServiceTest {
             () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
             () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
         );
-
     }
 
     @Test
@@ -572,5 +572,94 @@ class RoomServiceTest {
         assertThatThrownBy(() -> roomService.deleteRoom(user, roomId)).isInstanceOf(
                 ValidationException.class)
             .hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장은 참가자를 추방할 수 있다.]")
+    void kickOutTest1() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long userId = 51L;
+        User user = UserFixture.getUserFixture2("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Long userInfoId = 2L;
+        Participant userInfo = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(userInfo, "id", userInfoId);
+
+        given(participantRepository.findByUserIdAndRoomId(leaderId, roomId)).willReturn(
+            Optional.of(leaderInfo));
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
+            Optional.of(userInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, userId);
+
+        //when
+        roomService.kickOutUser(leader, kickOutUserRequest);
+
+        //then
+        verify(participantRepository,times(1)).deleteById(userInfoId);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람은 추방할 수 없다]")
+    void kickOutTest2() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long userId = 51L;
+        User user = UserFixture.getUserFixture2("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Long userInfoId = 2L;
+        Participant userInfo = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(userInfo, "id", userInfoId);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
+            Optional.of(userInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, leaderId);
+
+        //then
+        assertThatThrownBy(() -> roomService.kickOutUser(user, kickOutUserRequest)).isInstanceOf(
+            ValidationException.class).hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[참가자가 아닌 사람을 추방할 수 없다]")
+    void kickOutTest3() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long anotherUserId = 51L;
+
+        given(participantRepository.findByUserIdAndRoomId(leaderId, roomId)).willReturn(
+            Optional.of(leaderInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, anotherUserId);
+
+        //then
+        assertThatThrownBy(() -> roomService.kickOutUser(leader, kickOutUserRequest)).isInstanceOf(
+            ValidationException.class).hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
     }
 }

@@ -6,6 +6,7 @@ import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
@@ -167,4 +168,15 @@ public class RoomController {
         roomService.deleteRoom(user, roomId);
     }
 
+
+    @Operation(summary = "참가자 추방 API (방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/kick")
+    public void kickOut(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @RequestBody KickOutUserRequest kickOutUserRequest
+    ) {
+        roomService.kickOutUser(user, kickOutUserRequest);
+    }
 }
