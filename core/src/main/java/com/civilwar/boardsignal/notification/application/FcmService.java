@@ -32,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class FcmService {
 
+
     private static final String FIREBASE_CONFIG_PATH = "firebase.json";
 
     private static final String GOOGLE_API_PREFIX = "https://fcm.googleapis.com/v1/projects/";
@@ -44,7 +45,6 @@ public class FcmService {
         final GoogleCredentials googleCredentials = GoogleCredentials
             .fromStream(new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream())
             .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
-
         googleCredentials.refreshIfExpired();
         String tokenValue = googleCredentials.getAccessToken().getTokenValue();
         log.info("token : {}", tokenValue);
