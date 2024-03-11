@@ -1,7 +1,6 @@
 package com.civilwar.boardsignal.common.config;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
             .allowedOriginPatterns("*")
-            .allowedHeaders(AUTHORIZATION, CONTENT_TYPE, CONTENT_LENGTH)
+            .allowedHeaders(AUTHORIZATION, CONTENT_TYPE)
             .allowedMethods("GET", "POST", "PUT", "DELETE")
             .allowCredentials(true)
             .maxAge(3600);

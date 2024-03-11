@@ -121,7 +121,6 @@ public class FcmService {
             notification.title(),
             notification.body(),
             notification.imageUrl());
-        log.info("request body : {}", requestEntity);
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -140,7 +139,6 @@ public class FcmService {
             String.class
         );
 
-        log.info("Response Body : {}", response);
 
         if(response.getStatusCode() == HttpStatusCode.valueOf(404)){
             return response.toString();
