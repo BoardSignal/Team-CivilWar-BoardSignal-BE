@@ -4,11 +4,11 @@ import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -157,6 +157,17 @@ public class RoomController {
     ) {
         roomService.unFixRoom(user, roomId);
     }
+
+    @Operation(summary = "모임 삭제 API (방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/{roomId}")
+    public void deleteRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        roomService.deleteRoom(user, roomId);
+    }
+
 
     @Operation(summary = "참가자 추방 API (방장용)")
     @ApiResponse(useReturnTypeSchema = true)

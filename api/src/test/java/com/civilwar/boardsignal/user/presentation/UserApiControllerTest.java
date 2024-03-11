@@ -121,7 +121,7 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.gender").value(loginUser.getGender().getDescription()))
             .andExpect(jsonPath("$.ageGroup").value(loginUser.getAgeGroup().getDescription()))
             .andExpect(jsonPath("$.profileImageUrl").value(loginUser.getProfileImageUrl()))
-            .andExpect(jsonPath("$.mannerScore").value(loginUser.getMannerScore()))
+            .andExpect(jsonPath("$.signalTemperature").value(loginUser.getMannerScore()))
             .andExpect(jsonPath("$.wishCount").value(2))
             .andExpect(jsonPath("$.reviews[0].content").value(
                 ReviewContent.TIME_COMMITMENT.getDescription()))
@@ -162,7 +162,7 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.gender").value(anotherUser.getGender().getDescription()))
             .andExpect(jsonPath("$.ageGroup").value(anotherUser.getAgeGroup().getDescription()))
             .andExpect(jsonPath("$.profileImageUrl").value(anotherUser.getProfileImageUrl()))
-            .andExpect(jsonPath("$.mannerScore").value(anotherUser.getMannerScore()))
+            .andExpect(jsonPath("$.signalTemperature").value(anotherUser.getMannerScore()))
             .andExpect(jsonPath("$.wishCount").value(2))
             .andExpect(jsonPath("$.reviews[0].content").value(
                 ReviewContent.TIME_COMMITMENT.getDescription()))

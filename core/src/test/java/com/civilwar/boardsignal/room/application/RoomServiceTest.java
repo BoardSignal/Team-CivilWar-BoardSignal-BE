@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -20,10 +20,10 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -260,8 +260,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
-        assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
+        assertThat(roomInfo.startTime()).isEqualTo(findRoom.getStartTime());
+        assertThat(roomInfo.subwayLine()).isEqualTo(findRoom.getSubwayLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(findRoom.getSubwayStation());
+        assertThat(roomInfo.place()).isEqualTo(findRoom.getPlaceName());
         assertThat(roomInfo.isLeader()).isTrue();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
@@ -281,9 +285,8 @@ class RoomServiceTest {
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
             1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
-        String place = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
         String time = meetingInfo.getMeetingTime()
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 
         given(roomRepository.findById(1L)).willReturn(Optional.of(findRoom));
         given(participantRepository.findParticipantByRoomId(findRoom.getId()))
@@ -296,8 +299,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
         assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.subwayLine()).isEqualTo(meetingInfo.getLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(meetingInfo.getStation());
+        assertThat(roomInfo.place()).isEqualTo(meetingInfo.getMeetingPlace());
         assertThat(roomInfo.isLeader()).isFalse();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
@@ -425,7 +432,6 @@ class RoomServiceTest {
             () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
             () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
         );
-
     }
 
     @Test
@@ -524,6 +530,48 @@ class RoomServiceTest {
             () -> roomService.exitRoom(user, roomId)).isInstanceOf(
                 NotFoundException.class)
             .hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장이 모임을 삭제하면 관련 데이터들을 함께 삭제한다]")
+    void deleteRoomTest() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, true);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //when
+        roomService.deleteRoom(user, roomId);
+
+        //then
+        verify(participantRepository, times(1)).deleteParticipantsByRoomId(roomId);
+        verify(roomRepository, times(1)).deleteById(roomId);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람이 해당 기능을 수행하면 예외가 발생한다]")
+    void deleteRoomTest2() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //then
+        assertThatThrownBy(() -> roomService.deleteRoom(user, roomId)).isInstanceOf(
+                ValidationException.class)
+            .hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
     }
 
     @Test

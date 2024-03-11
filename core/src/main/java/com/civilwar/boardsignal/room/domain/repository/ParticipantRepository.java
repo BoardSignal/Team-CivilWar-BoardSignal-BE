@@ -22,5 +22,7 @@ public interface ParticipantRepository {
 
     void deleteByUserIdAndRoomId(Long userId, Long roomId);
 
+    void deleteParticipantsByRoomId(Long roomId);
+
     void deleteById(Long id);
 }

@@ -1,4 +1,4 @@
-package com.civilwar.boardsignal.room.dto.response;
+package com.civilwar.boardsignal.room.dto.request;
 
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -6,8 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 public record CreateRoomRequest(
     String roomTitle,
     String description,
-    int minPartipants,
-    int maxPartipants,
+    int minParticipants,
+    int maxParticipants,
     String day,
     String time,
     String startTime,
