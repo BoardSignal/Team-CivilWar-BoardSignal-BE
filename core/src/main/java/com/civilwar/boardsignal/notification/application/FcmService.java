@@ -69,6 +69,7 @@ public class FcmService {
         result.put("message", message);
 
         String requestBody = result.toString();
+        log.info("Request Body : {}", requestBody);
 
         return new HttpEntity<>(requestBody, headers);
     }
@@ -129,6 +130,8 @@ public class FcmService {
             requestEntity,
             String.class
         );
+
+        log.info("Response Body : {}", response);
 
         if(response.getStatusCode() == HttpStatusCode.valueOf(404)){
             return response.toString();
