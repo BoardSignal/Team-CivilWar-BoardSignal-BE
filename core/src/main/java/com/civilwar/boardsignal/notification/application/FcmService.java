@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -28,7 +29,7 @@ public class FcmService {
 
     private static final String FIREBASE_CONFIG_PATH = "firebase.json";
 
-    private static final String GOOGLE_API_PREFIX = "https://fcm.googleapis.com/v1/projects";
+    private static final String GOOGLE_API_PREFIX = "https://fcm.googleapis.com/v1/projects/";
 
     private static final String PROJECT_ID = "boardsignal-71515";
 
@@ -121,12 +122,17 @@ public class FcmService {
             log.error(e.getMessage());
         }
         RestTemplate restTemplate = new RestTemplate();
+
         ResponseEntity<String> response = restTemplate.exchange(
             GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
             POST,
             requestEntity,
             String.class
         );
+
+        if(response.getStatusCode() == HttpStatusCode.valueOf(404)){
+            return response.toString();
+        }
 
         return response.toString();
     }
