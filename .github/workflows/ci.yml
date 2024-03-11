@@ -29,8 +29,8 @@ jobs:
 
       - name: CORE 모듈 YML 파일 생성
         run: |
-         mkdir -p ./core/src/test/resources
-         echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
+          mkdir -p ./core/src/test/resources
+          echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
 
       # 빌드
       - name: Build with Gradle
