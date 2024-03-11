@@ -1,4 +1,4 @@
-package com.civilwar.boardsignal.room.dto.response;
+package com.civilwar.boardsignal.room.dto.request;
 
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
