@@ -47,7 +47,11 @@ public class FcmService {
             .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
         googleCredentials.refreshIfExpired();
         String tokenValue = googleCredentials.getAccessToken().getTokenValue();
-        log.info("token : {}", tokenValue);
+
+        String json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().toString();
+        log.info("firebase.json : {}", json);
+
+
         return tokenValue;
     }
 
@@ -121,8 +125,7 @@ public class FcmService {
             notification.title(),
             notification.body(),
             notification.imageUrl());
-        log.info("header : {}", requestEntity.getHeaders());
-        log.info("body : {}", requestEntity.getBody());
+
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
