@@ -33,7 +33,7 @@ public class NotificationController {
 
     //test용
     @PostMapping
-    public ResponseEntity<String> notificationTest(NotificationTestRequest request) {
+    public ResponseEntity<String> notificationTest(@RequestBody NotificationTestRequest request) {
         String response = fcmService.sendMessageTest(request);
         return ResponseEntity.ok(response);
     }
