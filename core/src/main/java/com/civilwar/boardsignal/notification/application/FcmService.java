@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.entity.UserFcmToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class FcmService {
         googleCredentials.refreshIfExpired();
         String tokenValue = googleCredentials.getAccessToken().getTokenValue();
 
-        int json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().read();
+        byte[] json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().readAllBytes();
         log.info("firebase.json : {}", json);
 
 
@@ -61,16 +62,16 @@ public class FcmService {
         String body,
         String imageUrl
     ) throws IOException {
-        JSONObject content = new JSONObject();
+        JSONObject content = new JSONObject(new LinkedHashMap<>());
         content.put("title", title);
         content.put("body", body);
         content.put("image", imageUrl);
 
-        JSONObject message = new JSONObject();
-        message.put("notification", content);
+        JSONObject message = new JSONObject(new LinkedHashMap<>());
         message.put("token", targetToken);
+        message.put("notification", content);
 
-        JSONObject result = new JSONObject();
+        JSONObject result = new JSONObject(new LinkedHashMap<>());
         result.put("message", message);
 
         String requestBody = result.toString();
@@ -79,7 +80,6 @@ public class FcmService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION, "Bearer " + getAccessToken());
         headers.add(CONTENT_TYPE, "application/json; charset=utf-8");
-        headers.setContentLength(requestBody.length());
 
         return new HttpEntity<>(requestBody, headers);
     }
