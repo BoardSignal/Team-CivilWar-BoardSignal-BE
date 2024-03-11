@@ -1,7 +1,6 @@
 package com.civilwar.boardsignal.notification.application;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -102,6 +101,7 @@ public class FcmService {
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
+            log.info("request entity : {}", requestEntity);
             //Google Api로 알림 전송 요청
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.exchange(
