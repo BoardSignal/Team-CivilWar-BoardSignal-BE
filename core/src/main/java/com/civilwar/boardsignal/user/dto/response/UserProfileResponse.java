@@ -10,7 +10,7 @@ public record UserProfileResponse(
     String gender,
     String ageGroup,
     String profileImageUrl,
-    double mannerScore,
+    double signalTemperature,
     List<UserReviewResponse> reviews,
     int wishCount,
     Boolean isProfileManager

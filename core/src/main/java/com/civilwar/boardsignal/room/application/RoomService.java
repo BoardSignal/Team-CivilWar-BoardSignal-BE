@@ -15,10 +15,10 @@ import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -166,22 +166,25 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public RoomInfoResponse findRoomInfo(User user, Long roomId) {
-        //1. 모임 정보 & 모임 확정 정보 (MeetingInfo)
+        //1. 모임 정보
         Room findRoom = roomRepository.findById(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //1-1. 모임 시간 & 장소 정보 추출
-        String resultPlace = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
-        String resultTime = concat(findRoom.getDaySlot().getDescription(),
-            findRoom.getTimeSlot().getDescription());
+        String time = concat(findRoom.getDaySlot().getDescription(), findRoom.getTimeSlot().getDescription());
+        String startTime = findRoom.getStartTime();
+        String subwayLine = findRoom.getSubwayLine();
+        String subwayStation = findRoom.getSubwayStation();
+        String place = findRoom.getPlaceName();
 
         //2. 모임 확정 여부 확인
         //모임 확정이라면 -> 모임 확정 시간 장소 정보로 제공
         if (findRoom.getStatus().equals(RoomStatus.FIX)) {
             MeetingInfo meetingInfo = findRoom.getMeetingInfo();
-            resultTime = meetingInfo.getMeetingTime()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            resultPlace = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
+            startTime = meetingInfo.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            subwayLine = meetingInfo.getLine();
+            subwayStation = meetingInfo.getStation();
+            place = meetingInfo.getMeetingPlace();
         }
 
         //3. 방 참가자 정보
@@ -206,7 +209,7 @@ public class RoomService {
                 .orElse(false);
         }
 
-        return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader,
+        return RoomMapper.toRoomInfoResponse(findRoom, time, startTime, subwayLine, subwayStation, place, isLeader,
             participants);
     }
 
@@ -259,7 +262,7 @@ public class RoomService {
 
         return RoomMapper.toGetEndGameUserResponse(room, participants);
     }
-  
+
     @Transactional
     public void unFixRoom(User user, Long roomId) {
         //방에 존재하는 참가자 인 지 검증
