@@ -33,16 +33,9 @@ jobs:
           mkdir -p ./core/src/main/resources
           echo "${{ secrets.APPLICATION_CORE_YML }}" > ./core/src/main/resources/application-core.yml
 
-#      - name: FIREBASE JSON 생성
-#        id: create-json
-#        uses: jsdaniell/create-json@v1.2.3
-#        with:
-#          name: "./core/src/main/resources/firebase.json"
-#          json: ${{ secrets.FIREBASE_JSON }}
       - name: FCM 시크릿키 생성
         run: |
           echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > ./core/src/main/resources/firebase.json
-#          echo "${{ secrets.FIREBASE_JSON }}" > ./core/src/main/resources/firebase.json
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
