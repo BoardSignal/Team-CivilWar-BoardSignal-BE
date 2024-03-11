@@ -137,7 +137,6 @@ public class FcmService {
                 return statusCode.series() == Series.SERVER_ERROR;
             }
         });
-        log.info("content length : {}", requestEntity.getHeaders());
 
         ResponseEntity<String> response = restTemplate.exchange(
             GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
