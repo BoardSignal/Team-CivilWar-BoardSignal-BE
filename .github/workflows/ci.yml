@@ -34,7 +34,7 @@ jobs:
 
       - name: FCM 시크릿키 생성
         run: |
-          echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > ./core/src/main/resources/firebase.json
+          echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > ./core/src/test/resources/firebase.json
 
       # 빌드
       - name: Build with Gradle
