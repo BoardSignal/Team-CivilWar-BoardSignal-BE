@@ -259,8 +259,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
-        assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
+        assertThat(roomInfo.startTime()).isEqualTo(findRoom.getStartTime());
+        assertThat(roomInfo.subwayLine()).isEqualTo(findRoom.getSubwayLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(findRoom.getSubwayStation());
+        assertThat(roomInfo.place()).isEqualTo(findRoom.getPlaceName());
         assertThat(roomInfo.isLeader()).isTrue();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
@@ -280,9 +284,8 @@ class RoomServiceTest {
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
             1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
-        String place = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
         String time = meetingInfo.getMeetingTime()
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 
         given(roomRepository.findById(1L)).willReturn(Optional.of(findRoom));
         given(participantRepository.findParticipantByRoomId(findRoom.getId()))
@@ -295,8 +298,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
         assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.subwayLine()).isEqualTo(meetingInfo.getLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(meetingInfo.getStation());
+        assertThat(roomInfo.place()).isEqualTo(meetingInfo.getMeetingPlace());
         assertThat(roomInfo.isLeader()).isFalse();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }

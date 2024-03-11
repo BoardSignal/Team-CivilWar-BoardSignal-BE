@@ -334,16 +334,18 @@ class RoomControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
             .andExpect(jsonPath("$.startTime").value(
-                room.getDaySlot().getDescription()
-                    + " " + room.getTimeSlot().getDescription()))
+                room.getStartTime()))
+            .andExpect(jsonPath("$.subwayLine").value(room.getSubwayLine()))
+            .andExpect(jsonPath("$.subwayStation").value(room.getSubwayStation()))
+            .andExpect(jsonPath("$.place").value(room.getPlaceName()
+            ))
             .andExpect(jsonPath("$.minParticipants").value(3))
             .andExpect(jsonPath("$.maxParticipants").value(6))
             .andExpect(jsonPath("$.isFix").value("미확정"))
             .andExpect(jsonPath("$.isLeader").value(true))
-            .andExpect(jsonPath("$.place").value(
-                room.getSubwayStation() + " " + room.getPlaceName()
-            ))
             .andExpect(jsonPath("$.allowedGender").value(Gender.UNION.getDescription()))
             .andExpect(jsonPath("$.participantResponse[0].isLeader")
                 .value(true))
@@ -374,13 +376,14 @@ class RoomControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
             .andExpect(jsonPath("$.startTime").value(
                 meetingInfo.getMeetingTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
-            .andExpect(jsonPath("$.place").value(
-                meetingInfo.getStation()
-                    + " " + meetingInfo.getMeetingPlace()
-            ))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
+            .andExpect(jsonPath("$.subwayLine").value(meetingInfo.getLine()))
+            .andExpect(jsonPath("$.subwayStation").value(meetingInfo.getStation()))
+            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))
             .andExpect(jsonPath("$.isFix").value("확정"))
             .andExpect(jsonPath("$.isLeader").value(false))
             .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
@@ -411,13 +414,14 @@ class RoomControllerTest extends ApiTestSupport {
         mockMvc.perform(get("/api/v1/rooms/" + room.getId()))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
             .andExpect(jsonPath("$.startTime").value(
                 meetingInfo.getMeetingTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
-            .andExpect(jsonPath("$.place").value(
-                meetingInfo.getStation()
-                    + " " + meetingInfo.getMeetingPlace()
-            ))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
+            .andExpect(jsonPath("$.subwayLine").value(meetingInfo.getLine()))
+            .andExpect(jsonPath("$.subwayStation").value(meetingInfo.getStation()))
+            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))
             .andExpect(jsonPath("$.isFix").value("확정"))
             .andExpect(jsonPath("$.isLeader").value(false))
             .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
@@ -465,7 +469,7 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
     }
-  
+
     @Test
     @DisplayName("[종료된 게임에 같이 참여한 참여자들을 조회할 수 있다.]")
     void getParticipantsEndGame() throws Exception {
@@ -523,7 +527,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
-            .header(AUTHORIZATION, accessToken))
+                .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
         //then
