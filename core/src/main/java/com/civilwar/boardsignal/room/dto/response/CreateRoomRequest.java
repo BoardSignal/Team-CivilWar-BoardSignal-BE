@@ -6,8 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 public record CreateRoomRequest(
     String roomTitle,
     String description,
-    int minPartipants,
-    int maxPartipants,
+    int minParticipants,
+    int maxParticipants,
     String day,
     String time,
     String startTime,

@@ -37,8 +37,8 @@ public final class RoomMapper {
         return Room.of(
             request.roomTitle(),
             request.description(),
-            request.minPartipants(),
-            request.maxPartipants(),
+            request.minParticipants(),
+            request.maxParticipants(),
             request.place(),
             request.subwayLine(),
             request.subwayStation(),
