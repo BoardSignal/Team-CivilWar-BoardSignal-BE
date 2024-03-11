@@ -44,7 +44,7 @@ public class SecurityConfig {
             .anonymous(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(registry -> registry
                 //알림
-                .requestMatchers(HttpMethod.POST, "/api/v1/notifications").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/notifications").permitAll()
                 .requestMatchers(
                     new AntPathRequestMatcher("/api/v1/rooms/my/end-games")).authenticated()
                 .requestMatchers(HttpMethod.GET,

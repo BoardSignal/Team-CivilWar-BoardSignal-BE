@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,8 @@ public class NotificationController {
 
     //test용
     @PostMapping
-    public ResponseEntity<String> notificationTest(@RequestBody NotificationTestRequest request) {
+    public ResponseEntity<String> notificationTest(@RequestBody NotificationTestRequest request)
+        throws IOException {
         String response = fcmService.sendMessageTest(request);
         return ResponseEntity.ok(response);
     }

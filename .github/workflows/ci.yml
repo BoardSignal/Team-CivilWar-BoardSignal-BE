@@ -32,6 +32,10 @@ jobs:
           mkdir -p ./core/src/test/resources
           echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
 
+      - name: FCM 시크릿키 생성
+        run: |
+          echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > ./core/src/test/resources/firebase.json
+
       # 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
