@@ -105,7 +105,6 @@ public class FcmService {
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
-            log.info("request entity : {}", requestEntity);
             //Google Api로 알림 전송 요청
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.exchange(
