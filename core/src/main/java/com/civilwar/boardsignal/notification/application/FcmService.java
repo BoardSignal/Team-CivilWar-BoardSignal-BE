@@ -132,7 +132,8 @@ public class FcmService {
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
             public boolean hasError(ClientHttpResponse response) throws IOException {
-                HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(response.getStatusCode().toString()));
+//                HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(response.getStatusCode().toString()));
+                HttpStatus statusCode = (HttpStatus) response.getStatusCode();
                 return statusCode.series() == Series.SERVER_ERROR;
             }
         });
