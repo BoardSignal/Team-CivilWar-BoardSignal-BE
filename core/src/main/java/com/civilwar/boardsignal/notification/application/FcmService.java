@@ -115,19 +115,14 @@ public class FcmService {
     }
 
     //test용(개발단계에서만 있고 제거 예정)
-    public String sendMessageTest(NotificationTestRequest notification) {
-        HttpEntity<String> requestEntity = null;
+    public String sendMessageTest(NotificationTestRequest notification) throws IOException {
+        HttpEntity<String> requestEntity = getHttpEntity(
+            notification.targetToken(),
+            notification.title(),
+            notification.body(),
+            notification.imageUrl());
+        log.info("request body : {}", requestEntity);
 
-        try {
-            requestEntity = getHttpEntity(
-                notification.targetToken(),
-                notification.title(),
-                notification.body(),
-                notification.imageUrl()
-            );
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
