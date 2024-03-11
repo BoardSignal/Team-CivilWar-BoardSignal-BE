@@ -15,21 +15,27 @@ import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
+import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -74,6 +80,45 @@ public class RoomService {
         participantRepository.save(participant);
 
         return RoomMapper.toCreateRoomResponse(savedRoom);
+    }
+
+    @Transactional
+    public ParticipantRoomResponse participateRoom(User user, Long roomId) {
+
+        //참여 여부 확인
+        if (participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
+            throw new ValidationException(RoomErrorCode.ALREADY_PARTICIPANT);
+        }
+
+        //참여 인원 수 증가
+        Room findRoom = roomRepository.findByIdWithLock(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        findRoom.increaseHeadCount();
+
+        //참여 정보 저장
+        Participant participant = Participant.of(user.getId(), roomId, false);
+        participantRepository.save(participant);
+
+        return new ParticipantRoomResponse(findRoom.getHeadCount());
+    }
+
+    @Transactional
+    public ExitRoomResponse exitRoom(User user, Long roomId) {
+
+        //참여 여부 확인 -> 참여하고 있지 않다면 예외
+        if (!participantRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
+            throw new NotFoundException(INVALID_PARTICIPANT);
+        }
+
+        //참여 인원 수 감소
+        Room findRoom = roomRepository.findByIdWithLock(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        findRoom.decreaseHeadCount();
+
+        //참여 정보 삭제
+        participantRepository.deleteByUserIdAndRoomId(user.getId(), roomId);
+
+        return new ExitRoomResponse(findRoom.getHeadCount());
     }
 
     @Transactional(readOnly = true)
@@ -122,22 +167,25 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public RoomInfoResponse findRoomInfo(User user, Long roomId) {
-        //1. 모임 정보 & 모임 확정 정보 (MeetingInfo)
+        //1. 모임 정보
         Room findRoom = roomRepository.findById(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //1-1. 모임 시간 & 장소 정보 추출
-        String resultPlace = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
-        String resultTime = concat(findRoom.getDaySlot().getDescription(),
-            findRoom.getTimeSlot().getDescription());
+        String time = concat(findRoom.getDaySlot().getDescription(), findRoom.getTimeSlot().getDescription());
+        String startTime = findRoom.getStartTime();
+        String subwayLine = findRoom.getSubwayLine();
+        String subwayStation = findRoom.getSubwayStation();
+        String place = findRoom.getPlaceName();
 
         //2. 모임 확정 여부 확인
         //모임 확정이라면 -> 모임 확정 시간 장소 정보로 제공
         if (findRoom.getStatus().equals(RoomStatus.FIX)) {
             MeetingInfo meetingInfo = findRoom.getMeetingInfo();
-            resultTime = meetingInfo.getMeetingTime()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            resultPlace = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
+            startTime = meetingInfo.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            subwayLine = meetingInfo.getLine();
+            subwayStation = meetingInfo.getStation();
+            place = meetingInfo.getMeetingPlace();
         }
 
         //3. 방 참가자 정보
@@ -162,7 +210,7 @@ public class RoomService {
                 .orElse(false);
         }
 
-        return RoomMapper.toRoomInfoResponse(findRoom, resultTime, resultPlace, isLeader,
+        return RoomMapper.toRoomInfoResponse(findRoom, time, startTime, subwayLine, subwayStation, place, isLeader,
             participants);
     }
 
@@ -199,4 +247,77 @@ public class RoomService {
         return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
     }
 
+
+    @Transactional(readOnly = true)
+    public GetEndGameUsersResponse getEndGameUsersResponse(User user, Long roomId) {
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        List<ParticipantResponse> participants = participantRepository.findParticipantByRoomId(
+                roomId)
+            .stream()
+            //본인 제외
+            .filter(participant -> !Objects.equals(participant.userId(), user.getId()))
+            .map(RoomMapper::toParticipantResponse)
+            .toList();
+
+        return RoomMapper.toGetEndGameUserResponse(room, participants);
+    }
+
+    @Transactional
+    public void unFixRoom(User user, Long roomId) {
+        //방에 존재하는 참가자 인 지 검증
+        boolean isParticipant = participantRepository.existsByUserIdAndRoomId(user.getId(), roomId);
+        if (!isParticipant) {
+            throw new NotFoundException(INVALID_PARTICIPANT);
+        }
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        MeetingInfo meetingInfo = room.getMeetingInfo();
+
+        meetingInfoRepository.deleteById(meetingInfo.getId());
+        room.unFixRoom();
+    }
+
+    @Transactional
+    public void deleteRoom(User user, Long roomId) {
+        //방장 여부 확인
+        Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
+            .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
+
+        if(!participant.isLeader()) {
+            throw new ValidationException(IS_NOT_LEADER);
+        }
+
+        //참가자 정보 삭제
+        participantRepository.deleteParticipantsByRoomId(roomId);
+
+        //todo 채팅 기록 삭제
+
+        //모임 삭제
+        roomRepository.deleteById(roomId);
+    }
+    @Transactional
+    public void kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
+        //방장 여부 확인
+        Participant leaderInfo = participantRepository.findByUserIdAndRoomId(leader.getId(),
+                kickOutUserRequest.roomId())
+            .orElseThrow(() -> new ValidationException(IS_NOT_LEADER));
+
+        //방장이 아니라면 불가
+        if(!leaderInfo.isLeader()) {
+            throw new ValidationException(IS_NOT_LEADER);
+        }
+
+        //추방자 정보
+        Participant kickOutUser = participantRepository.findByUserIdAndRoomId(
+                kickOutUserRequest.userId(),
+                kickOutUserRequest.roomId())
+            .orElseThrow(() -> new ValidationException(INVALID_PARTICIPANT));
+
+        //추방
+        participantRepository.deleteById(kickOutUser.getId());
+    }
 }

@@ -4,6 +4,7 @@ public record ParticipantResponse(
     Long userId,
     String nickname,
     String ageGroup,
+    String profileImageUrl,
     Boolean isLeader,
     double mannerScore
 ) {

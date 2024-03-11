@@ -12,7 +12,7 @@ public interface ParticipantQueryJpaRepository extends JpaRepository<Participant
 
     @Query(
         "select new com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto("
-            + "u.id, u.nickname, u.ageGroup, p.isLeader, u.mannerScore"
+            + "u.id, u.nickname, u.ageGroup, u.profileImageUrl, p.isLeader, u.mannerScore"
             + ") "
             + "from Participant as p "
             + "join User as u "
@@ -21,4 +21,6 @@ public interface ParticipantQueryJpaRepository extends JpaRepository<Participant
     List<ParticipantJpaDto> findParticipantByRoomId(@Param("roomId") Long roomId);
 
     Optional<Participant> findByUserIdAndRoomId(Long userId, Long roomId);
+
+    boolean existsByUserIdAndRoomId(Long userId, Long roomId);
 }

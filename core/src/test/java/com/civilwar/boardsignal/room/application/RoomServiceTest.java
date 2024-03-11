@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -18,12 +20,17 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
@@ -236,7 +243,7 @@ class RoomServiceTest {
         Room findRoom = RoomFixture.getRoom(Gender.UNION);
         ReflectionTestUtils.setField(findRoom, "id", 1L);
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
-            1L, "김강훈", AgeGroup.TWENTY, true, 99
+            1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
         String place = concat(findRoom.getSubwayStation(), findRoom.getPlaceName());
         String time = concat(findRoom.getDaySlot().getDescription(),
@@ -253,8 +260,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
-        assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
+        assertThat(roomInfo.startTime()).isEqualTo(findRoom.getStartTime());
+        assertThat(roomInfo.subwayLine()).isEqualTo(findRoom.getSubwayLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(findRoom.getSubwayStation());
+        assertThat(roomInfo.place()).isEqualTo(findRoom.getPlaceName());
         assertThat(roomInfo.isLeader()).isTrue();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
@@ -272,11 +283,10 @@ class RoomServiceTest {
         findRoom.fixRoom(meetingInfo);
 
         List<ParticipantJpaDto> participantJpaDtos = List.of(new ParticipantJpaDto(
-            1L, "김강훈", AgeGroup.TWENTY, true, 99
+            1L, "김강훈", AgeGroup.TWENTY, "https", true, 99
         ));
-        String place = concat(meetingInfo.getStation(), meetingInfo.getMeetingPlace());
         String time = meetingInfo.getMeetingTime()
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 
         given(roomRepository.findById(1L)).willReturn(Optional.of(findRoom));
         given(participantRepository.findParticipantByRoomId(findRoom.getId()))
@@ -289,8 +299,12 @@ class RoomServiceTest {
         assertThat(roomInfo.roomId()).isEqualTo(findRoom.getId());
         assertThat(roomInfo.title()).isEqualTo(findRoom.getTitle());
         assertThat(roomInfo.description()).isEqualTo(findRoom.getDescription());
+        assertThat(roomInfo.time()).isEqualTo(
+            findRoom.getDaySlot().getDescription() + " " + findRoom.getTimeSlot().getDescription());
         assertThat(roomInfo.startTime()).isEqualTo(time);
-        assertThat(roomInfo.place()).isEqualTo(place);
+        assertThat(roomInfo.subwayLine()).isEqualTo(meetingInfo.getLine());
+        assertThat(roomInfo.subwayStation()).isEqualTo(meetingInfo.getStation());
+        assertThat(roomInfo.place()).isEqualTo(meetingInfo.getMeetingPlace());
         assertThat(roomInfo.isLeader()).isFalse();
         assertThat(roomInfo.participantResponse().get(0).nickname()).isEqualTo("김강훈");
     }
@@ -373,5 +387,279 @@ class RoomServiceTest {
         assertThatThrownBy(when)
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[종료된 게임에 참여한 다른 참여자들을 조회할 수 있다.]")
+    void getParticipantsEndGame() throws IOException {
+        User user = UserFixture.getUserFixture("prpr", "https");
+
+        Room room = RoomFixture.getRoomWithMeetingInfo(
+            LocalDateTime.of(2024, 4, 5, 18, 30),
+            Gender.UNION
+        );
+        ReflectionTestUtils.setField(room, "id", 1L);
+
+        ParticipantJpaDto participant1 = RoomFixture.getParticipantJpaDto(1L, "게임대왕");
+        ParticipantJpaDto participant2 = RoomFixture.getParticipantJpaDto(2L, "나는고수");
+
+        given(roomRepository.findById(room.getId()))
+            .willReturn(Optional.of(room));
+
+        given(participantRepository.findParticipantByRoomId(room.getId()))
+            .willReturn(List.of(participant1, participant2));
+
+        GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(
+            user,
+            room.getId()
+        );
+
+        MeetingInfo meeting = room.getMeetingInfo();
+        List<ParticipantResponse> participants = response.participantsInfos();
+
+        assertAll(
+            () -> assertThat(response.roomId()).isEqualTo(room.getId()),
+            () -> assertThat(response.title()).isEqualTo(room.getTitle()),
+            () -> assertThat(response.meetingTime()).isEqualTo(meeting.getMeetingTime().toString()),
+            () -> assertThat(response.weekDay()).isEqualTo(meeting.getWeekDay().getDescription()),
+            () -> assertThat(response.peopleCount()).isEqualTo(meeting.getPeopleCount()),
+            () -> assertThat(response.line()).isEqualTo(meeting.getLine()),
+            () -> assertThat(response.station()).isEqualTo(meeting.getStation()),
+            () -> assertThat(response.meetingPlace()).isEqualTo(meeting.getMeetingPlace()),
+            () -> assertThat(response.allowedGender()).isEqualTo(
+                room.getAllowedGender().getDescription()),
+            () -> assertThat(participants).hasSize(2),
+            () -> assertThat(participants.get(0).userId()).isEqualTo(participant1.userId()),
+            () -> assertThat(participants.get(1).userId()).isEqualTo(participant2.userId())
+        );
+    }
+
+    @Test
+    @DisplayName("[사용자 2명이 방에 참여하면 참여자 수가 2명 늘어난다]")
+    void participantTest() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+        Long participantUserId2 = 51L;
+        User user2 = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user2, "id", participantUserId2);
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            false);
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId2, roomId)).willReturn(
+            false);
+
+        //when
+        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(
+            user, roomId);
+        ParticipantRoomResponse participantRoomResponse2 = roomService.participateRoom(
+            user2, roomId);
+
+        //then
+        verify(participantRepository, times(2)).save(any(Participant.class));
+        assertThat(participantRoomResponse2.headCount()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("[모임에 중복으로 참여할 수 없다]")
+    void participantTest2() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            true);
+
+        //then
+        assertThatThrownBy(
+            () -> roomService.participateRoom(user, roomId)).isInstanceOf(
+                ValidationException.class)
+            .hasMessage(RoomErrorCode.ALREADY_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[사용자 3명 중 1명이 모임에서 나가면 현재 참여자는 2명이 된다]")
+    void exitRoomTest() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        room.increaseHeadCount();
+        room.increaseHeadCount();
+
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            true);
+
+        //when
+        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+
+        //then
+        verify(participantRepository, times(1))
+            .deleteByUserIdAndRoomId(participantUserId, roomId);
+        assertThat(exitRoomResponse.headCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[참여하지 않은 사용자는 해당 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws IOException {
+        //given
+        Long participantUserId = 50L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", participantUserId);
+
+        Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        ReflectionTestUtils.setField(room, "id", roomId);
+        given(participantRepository.existsByUserIdAndRoomId(participantUserId, roomId)).willReturn(
+            false);
+
+        //then
+        assertThatThrownBy(
+            () -> roomService.exitRoom(user, roomId)).isInstanceOf(
+                NotFoundException.class)
+            .hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장이 모임을 삭제하면 관련 데이터들을 함께 삭제한다]")
+    void deleteRoomTest() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, true);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //when
+        roomService.deleteRoom(user, roomId);
+
+        //then
+        verify(participantRepository, times(1)).deleteParticipantsByRoomId(roomId);
+        verify(roomRepository, times(1)).deleteById(roomId);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람이 해당 기능을 수행하면 예외가 발생한다]")
+    void deleteRoomTest2() {
+        //given
+        Long roomId = 1L;
+        Long userId = 2L;
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Participant participant = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(participant, "id", 1L);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId))
+            .willReturn(Optional.of(participant));
+
+        //then
+        assertThatThrownBy(() -> roomService.deleteRoom(user, roomId)).isInstanceOf(
+                ValidationException.class)
+            .hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[방장은 참가자를 추방할 수 있다.]")
+    void kickOutTest1() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long userId = 51L;
+        User user = UserFixture.getUserFixture2("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Long userInfoId = 2L;
+        Participant userInfo = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(userInfo, "id", userInfoId);
+
+        given(participantRepository.findByUserIdAndRoomId(leaderId, roomId)).willReturn(
+            Optional.of(leaderInfo));
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
+            Optional.of(userInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, userId);
+
+        //when
+        roomService.kickOutUser(leader, kickOutUserRequest);
+
+        //then
+        verify(participantRepository,times(1)).deleteById(userInfoId);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람은 추방할 수 없다]")
+    void kickOutTest2() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long userId = 51L;
+        User user = UserFixture.getUserFixture2("providerId", "testURL");
+        ReflectionTestUtils.setField(user, "id", userId);
+        Long userInfoId = 2L;
+        Participant userInfo = Participant.of(userId, roomId, false);
+        ReflectionTestUtils.setField(userInfo, "id", userInfoId);
+
+        given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
+            Optional.of(userInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, leaderId);
+
+        //then
+        assertThatThrownBy(() -> roomService.kickOutUser(user, kickOutUserRequest)).isInstanceOf(
+            ValidationException.class).hasMessage(RoomErrorCode.IS_NOT_LEADER.getMessage());
+    }
+
+    @Test
+    @DisplayName("[참가자가 아닌 사람을 추방할 수 없다]")
+    void kickOutTest3() {
+        //given
+        Long roomId = 1L;
+
+        Long leaderId = 50L;
+        User leader = UserFixture.getUserFixture("providerId", "testURL");
+        ReflectionTestUtils.setField(leader, "id", leaderId);
+        Long leaderInfoId = 1L;
+        Participant leaderInfo = Participant.of(leaderId, roomId, true);
+        ReflectionTestUtils.setField(leaderInfo, "id", leaderInfoId);
+
+        Long anotherUserId = 51L;
+
+        given(participantRepository.findByUserIdAndRoomId(leaderId, roomId)).willReturn(
+            Optional.of(leaderInfo));
+
+        KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, anotherUserId);
+
+        //then
+        assertThatThrownBy(() -> roomService.kickOutUser(leader, kickOutUserRequest)).isInstanceOf(
+            ValidationException.class).hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
     }
 }

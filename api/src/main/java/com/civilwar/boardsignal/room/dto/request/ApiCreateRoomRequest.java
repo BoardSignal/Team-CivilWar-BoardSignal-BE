@@ -3,7 +3,7 @@ package com.civilwar.boardsignal.room.dto.request;
 import java.util.List;
 
 public record ApiCreateRoomRequest(
-    String roomTitle,
+    String title,
     String description,
     int minParticipants,
     int maxParticipants,

@@ -55,7 +55,8 @@ public class SecurityConfig {
                     //인증
                     "/api/v1/auth/reissue", "/oauth2/authorization/**",
                     //스웨거
-                    "/swagger-ui/index.html#/",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
                     //웹소켓
                     "/ws/**",
                     "/"

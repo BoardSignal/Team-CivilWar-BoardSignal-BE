@@ -39,14 +39,14 @@ class NotificationServiceTest {
             "https",
             "제목1",
             "내용1",
-            "/api/v1/~~"
+            1L
         );
         Notification notification2 = Notification.of(
             user,
             "https",
             "제목2",
             "내용2",
-            "/api/v1/~~"
+            null
         );
         PageRequest pageRequest = PageRequest.of(0, 5);
 
@@ -61,8 +61,10 @@ class NotificationServiceTest {
         assertAll(
             () -> assertThat(contents.get(0).title()).isEqualTo(notification1.getTitle()),
             () -> assertThat(contents.get(0).body()).isEqualTo(notification1.getBody()),
+            () -> assertThat(contents.get(0).roomId()).isEqualTo(notification1.getRoomID()),
             () -> assertThat(contents.get(1).title()).isEqualTo(notification2.getTitle()),
-            () -> assertThat(contents.get(1).body()).isEqualTo(notification2.getBody())
+            () -> assertThat(contents.get(1).body()).isEqualTo(notification2.getBody()),
+            () -> assertThat(contents.get(1).roomId()).isEqualTo(notification2.getRoomID())
         );
     }
 

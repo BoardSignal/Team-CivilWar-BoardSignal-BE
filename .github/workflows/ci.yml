@@ -22,6 +22,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: API 모듈 TEST YML 파일 생성
+        run: |
+          mkdir -p ./api/src/test/resources
+          echo "${{ secrets.APPLICATION_API_TEST_YML }}" > ./api/src/test/resources/application.yml
+
+      - name: CORE 모듈 YML 파일 생성
+        run: |
+          mkdir -p ./core/src/test/resources
+          echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
+
       # 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0

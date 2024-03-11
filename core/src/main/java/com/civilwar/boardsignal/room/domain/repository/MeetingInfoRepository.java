@@ -6,4 +6,6 @@ public interface MeetingInfoRepository {
 
     MeetingInfo save(MeetingInfo meetingInfo);
 
+    void deleteById(Long id);
+
 }

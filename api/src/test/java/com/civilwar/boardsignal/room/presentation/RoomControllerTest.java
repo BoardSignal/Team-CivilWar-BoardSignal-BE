@@ -4,13 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.civilwar.boardsignal.auth.domain.TokenProvider;
+import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
@@ -25,9 +30,12 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
+import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.FileInputStream;
@@ -35,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +73,8 @@ class RoomControllerTest extends ApiTestSupport {
     private ParticipantRepository participantRepository;
     @Autowired
     private MeetingInfoJpaRepository meetingInfoRepository;
+    @Autowired
+    private TokenProvider tokenProvider;
     @MockBean
     private Supplier<LocalDateTime> nowTime;
 
@@ -331,16 +342,16 @@ class RoomControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
-            .andExpect(jsonPath("$.startTime").value(
-                room.getDaySlot().getDescription()
-                    + " " + room.getTimeSlot().getDescription()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
+            .andExpect(jsonPath("$.startTime").value(room.getStartTime()))
+            .andExpect(jsonPath("$.subwayLine").value(room.getSubwayLine()))
+            .andExpect(jsonPath("$.subwayStation").value(room.getSubwayStation()))
+            .andExpect(jsonPath("$.place").value(room.getPlaceName()))
             .andExpect(jsonPath("$.minParticipants").value(3))
             .andExpect(jsonPath("$.maxParticipants").value(6))
             .andExpect(jsonPath("$.isFix").value("미확정"))
             .andExpect(jsonPath("$.isLeader").value(true))
-            .andExpect(jsonPath("$.place").value(
-                room.getSubwayStation() + " " + room.getPlaceName()
-            ))
             .andExpect(jsonPath("$.allowedGender").value(Gender.UNION.getDescription()))
             .andExpect(jsonPath("$.participantResponse[0].isLeader")
                 .value(true))
@@ -371,13 +382,14 @@ class RoomControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
             .andExpect(jsonPath("$.startTime").value(
                 meetingInfo.getMeetingTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
-            .andExpect(jsonPath("$.place").value(
-                meetingInfo.getStation()
-                    + " " + meetingInfo.getMeetingPlace()
-            ))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
+            .andExpect(jsonPath("$.subwayLine").value(meetingInfo.getLine()))
+            .andExpect(jsonPath("$.subwayStation").value(meetingInfo.getStation()))
+            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))
             .andExpect(jsonPath("$.isFix").value("확정"))
             .andExpect(jsonPath("$.isLeader").value(false))
             .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
@@ -408,13 +420,14 @@ class RoomControllerTest extends ApiTestSupport {
         mockMvc.perform(get("/api/v1/rooms/" + room.getId()))
             .andExpect(jsonPath("$.roomId").value(room.getId()))
             .andExpect(jsonPath("$.title").value(room.getTitle()))
+            .andExpect(jsonPath("$.time").value(
+                room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription()))
             .andExpect(jsonPath("$.startTime").value(
                 meetingInfo.getMeetingTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
-            .andExpect(jsonPath("$.place").value(
-                meetingInfo.getStation()
-                    + " " + meetingInfo.getMeetingPlace()
-            ))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
+            .andExpect(jsonPath("$.subwayLine").value(meetingInfo.getLine()))
+            .andExpect(jsonPath("$.subwayStation").value(meetingInfo.getStation()))
+            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))
             .andExpect(jsonPath("$.isFix").value("확정"))
             .andExpect(jsonPath("$.isLeader").value(false))
             .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
@@ -461,5 +474,278 @@ class RoomControllerTest extends ApiTestSupport {
             () -> assertThat(meetingInfo.getStation()).isEqualTo(request.station()),
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
         );
+    }
+
+    @Test
+    @DisplayName("[종료된 게임에 같이 참여한 참여자들을 조회할 수 있다.]")
+    void getParticipantsEndGame() throws Exception {
+        //given
+        User user = UserFixture.getUserFixture2("provider", "https");
+        userRepository.save(user);
+
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 2, 2, 5, 30)
+        );
+        MeetingInfo savedMeeting = meetingInfoRepository.save(meetingInfo);
+
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        room.fixRoom(savedMeeting);
+        Room savedRoom = roomRepository.save(room);
+
+        Participant participant1 = Participant.of(loginUser.getId(), savedRoom.getId(), false);
+        Participant participant2 = Participant.of(user.getId(), savedRoom.getId(), false);
+        participantRepository.save(participant1);
+        participantRepository.save(participant2);
+
+        //then
+        mockMvc.perform(get("/api/v1/rooms/end-game/{roomId}", savedRoom.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.roomId").value(savedRoom.getId()),
+                jsonPath("title").value(savedRoom.getTitle()),
+                jsonPath("$.meetingTime").value(meetingInfo.getMeetingTime().toString()),
+                jsonPath("$.weekDay").value(meetingInfo.getWeekDay().getDescription()),
+                jsonPath("$.peopleCount").value(meetingInfo.getPeopleCount()),
+                jsonPath("$.participantsInfos[0].userId").value(user.getId()),
+                jsonPath("$.participantsInfos[0].nickname").value(user.getNickname()),
+                jsonPath("$.participantsInfos[0].ageGroup").value(
+                    user.getAgeGroup().getDescription()),
+                jsonPath("$.participantsInfos[0].profileImageUrl").value(user.getProfileImageUrl())
+            );
+    }
+
+    @Test
+    @DisplayName("[방의 참가자는 모임 확정을 취소시킬 수 있다.]")
+    void unFixRoom() throws Exception {
+        //given
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 2, 2, 5, 30)
+        );
+        MeetingInfo savedMeeting = meetingInfoRepository.save(meetingInfo);
+
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        room.fixRoom(savedMeeting);
+        Room savedRoom = roomRepository.save(room);
+
+        Participant participant = Participant.of(loginUser.getId(), savedRoom.getId(), false);
+        participantRepository.save(participant);
+
+        //when
+        mockMvc.perform(delete("/api/v1/rooms/unfix/{roomId}", savedRoom.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk());
+
+        //then
+        Room findRoom = roomRepository.findById(savedRoom.getId()).orElseThrow();
+        assertThat(findRoom.getMeetingInfo()).isNull();
+    }
+
+    @Test
+    @DisplayName("[사용자는 방에 참여할 수 있다]")
+    void participantRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(2));
+    }
+
+    @Test
+    @DisplayName("[이미 참여되어 있는 사용자는 참여할 수 없다]")
+    void participantRoomTest2() throws Exception {
+        //given
+        //총 2명 참여 중
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[사용자는 참여한 방을 나갈 수 있다]")
+    void exitRoomTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(participant);
+        room.increaseHeadCount();
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(jsonPath("$.headCount").value(1));
+    }
+
+    @Test
+    @DisplayName("[해당 방에 참여하지 않은 사용자는 방 나가기 요청을 보낼 수 없다]")
+    void exitRoomTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.MALE);
+        roomRepository.save(room);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/out/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    NotFoundException.class))
+            .andExpect(status().is4xxClientError());
+        assertThat(room.getHeadCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("[방장은 모임을 삭제하며, 관련 데이터들도 삭제한다]")
+    void deleteRoomTest() throws Exception {
+        //given
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        userRepository.save(user);
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        Participant leader = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leader);
+        room.increaseHeadCount();
+        Participant notLeader = Participant.of(user.getId(), room.getId(), false);
+        participantRepository.save(notLeader);
+        room.increaseHeadCount();
+
+        //when
+        mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(status().isOk());
+
+        //then
+        List<ParticipantJpaDto> participants = participantRepository.findParticipantByRoomId(
+            room.getId());
+        Optional<Room> optionalRoom = roomRepository.findById(room.getId());
+
+        assertThat(participants).isEmpty();
+        assertThat(optionalRoom).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사용자가 모임 삭제를 할 수 없다]")
+    void deleteRoomTest2() throws Exception {
+        //given
+        User user = UserFixture.getUserFixture("providerId", "testURL");
+        userRepository.save(user);
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        Participant leader = Participant.of(loginUser.getId(), room.getId(), false);
+        participantRepository.save(leader);
+        room.increaseHeadCount();
+        Participant notLeader = Participant.of(user.getId(), room.getId(), true);
+        participantRepository.save(notLeader);
+        room.increaseHeadCount();
+
+        //then
+        mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
+                .header(AUTHORIZATION, accessToken))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("[방장은 참가자를 추방할 수 있다]")
+    void kickOutTest() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notLeader = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notLeader);
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+        Participant userInfo = Participant.of(notLeader.getId(), room.getId(), false);
+        participantRepository.save(userInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), notLeader.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect(status().isOk());
+
+        List<Participant> result = participantRepository.findAll();
+
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("[방장이 아닌 사람은 추방할 수 없다]")
+    void kickOutTest2() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notLeader = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notLeader);
+        Token notLeaderToken = tokenProvider.createToken(notLeader.getId(), Role.USER);
+        String notLeaderAccessToken = "Bearer " + notLeaderToken.accessToken();
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+        Participant notLeaderInfo = Participant.of(notLeader.getId(), room.getId(), false);
+        participantRepository.save(notLeaderInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), loginUser.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+                .header(AUTHORIZATION, notLeaderAccessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("[참가자가 아닌 사람을 추방할 수 없다]")
+    void kickOutTest3() throws Exception {
+        //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        User notParticipant = UserFixture.getUserFixture2("providerId", "testURL");
+        userRepository.save(notParticipant);
+
+        Participant leaderInfo = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(leaderInfo);
+
+        KickOutUserRequest request = new KickOutUserRequest(room.getId(), notParticipant.getId());
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/kick")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
     }
 }

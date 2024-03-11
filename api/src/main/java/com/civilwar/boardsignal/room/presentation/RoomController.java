@@ -4,12 +4,16 @@ import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -22,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,6 +57,31 @@ public class RoomController {
         CreateRoomResponse createRoomResponse = roomService.createRoom(user, createRoomRequest);
 
         return ResponseEntity.ok(createRoomResponse);
+    }
+
+    @Operation(summary = "방 참여 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/in/{roomId}")
+    public ResponseEntity<ParticipantRoomResponse> participantRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(user,
+            roomId);
+
+        return ResponseEntity.ok(participantRoomResponse);
+    }
+
+    @Operation(summary = "방 나가기 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/out/{roomId}")
+    public ResponseEntity<ExitRoomResponse> exitRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+
+        return ResponseEntity.ok(exitRoomResponse);
     }
 
     @Operation(summary = "내가 이전에 참여한 모임 조회 API")
@@ -103,5 +133,50 @@ public class RoomController {
         FixRoomRequest fixRoomRequest = RoomApiMapper.toFixRoomRequest(request);
         FixRoomResponse response = roomService.fixRoom(user, roomId, fixRoomRequest);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "종료된 게임에 참여한 유저 조회 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/end-game/{roomId}")
+    public ResponseEntity<GetEndGameUsersResponse> getEndGameUsers(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
+        return ResponseEntity.ok(response);
+    }
+  
+    @Operation(summary = "모임 확정 취소 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/unfix/{roomId}")
+    public void unFixRoom(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        roomService.unFixRoom(user, roomId);
+    }
+
+    @Operation(summary = "모임 삭제 API (방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @DeleteMapping("/{roomId}")
+    public void deleteRoom(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId
+    ) {
+        roomService.deleteRoom(user, roomId);
+    }
+
+
+    @Operation(summary = "참가자 추방 API (방장용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/kick")
+    public void kickOut(
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal User user,
+        @RequestBody KickOutUserRequest kickOutUserRequest
+    ) {
+        roomService.kickOutUser(user, kickOutUserRequest);
     }
 }

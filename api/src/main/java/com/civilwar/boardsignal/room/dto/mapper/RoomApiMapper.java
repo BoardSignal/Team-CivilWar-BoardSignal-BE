@@ -3,7 +3,7 @@ package com.civilwar.boardsignal.room.dto.mapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +16,7 @@ public final class RoomApiMapper {
         ApiCreateRoomRequest request
     ) {
         return new CreateRoomRequest(
-            request.time(),
+            request.title(),
             request.description(),
             request.minParticipants(),
             request.maxParticipants(),

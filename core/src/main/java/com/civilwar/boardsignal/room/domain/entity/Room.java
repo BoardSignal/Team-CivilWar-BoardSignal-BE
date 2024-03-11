@@ -91,12 +91,12 @@ public class Room extends BaseEntity {
         @NonNull String description,
         int minParticipants,
         int maxParticipants,
-        @NonNull String placeName,
+        String placeName,
         @NonNull String subwayLine,
         @NonNull String subwayStation,
         @NonNull DaySlot daySlot,
         @NonNull TimeSlot timeSlot,
-        @NonNull String startTime,
+        String startTime,
         int minAge,
         int maxAge,
         @NonNull String imageUrl,
@@ -122,7 +122,7 @@ public class Room extends BaseEntity {
             RoomCategory roomCategory = RoomCategory.of(this, category);
             this.roomCategories.add(roomCategory);
         });
-        this.headCount = 0;
+        this.headCount = 1;
     }
 
     public static Room of(
@@ -164,5 +164,17 @@ public class Room extends BaseEntity {
     public void fixRoom(MeetingInfo meetingInfo) {
         this.meetingInfo = meetingInfo;
         this.status = RoomStatus.FIX;
+    }
+
+    public void unFixRoom() {
+        this.meetingInfo = null;
+        this.status = RoomStatus.NON_FIX;
+    }
+
+    public void increaseHeadCount() {
+        this.headCount++;
+    }
+    public void decreaseHeadCount() {
+        this.headCount--;
     }
 }

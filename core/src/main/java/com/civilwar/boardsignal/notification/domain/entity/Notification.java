@@ -2,7 +2,6 @@ package com.civilwar.boardsignal.notification.domain.entity;
 
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 
-import com.civilwar.boardsignal.notification.domain.constant.NotificationStatus;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,9 +34,6 @@ public class Notification {
     @JoinColumn(name = "NOTIFICATION_USER_ID", foreignKey = @ForeignKey(NO_CONSTRAINT))
     private User user;
 
-    @Column(name = "NOTIFICATION_STATUS")
-    private NotificationStatus status;
-
     @Column(name = "NOTIFICATION_IMAGE_URL")
     private String imageUrl;
 
@@ -47,8 +43,8 @@ public class Notification {
     @Column(name = "NOTIFICATION_BODY")
     private String body;
 
-    @Column(name = "NOTIFICATION_REDIRECT_URL")
-    private String redirectUrl;
+    @Column(name = "NOTIFICATION_ROOM_ID")
+    private Long roomID;
 
     @Builder(access = AccessLevel.PRIVATE)
     private Notification(
@@ -56,14 +52,13 @@ public class Notification {
         String imageUrl,
         @NonNull String title,
         @NonNull String body,
-        String redirectUrl
+        Long roomID
     ) {
         this.user = user;
-        this.status = NotificationStatus.READY;
         this.imageUrl = imageUrl;
         this.title = title;
         this.body = body;
-        this.redirectUrl = redirectUrl;
+        this.roomID = roomID;
     }
 
     public static Notification of(
@@ -71,14 +66,14 @@ public class Notification {
         String imageUrl,
         String title,
         String body,
-        String redirectUrl
+        Long roomId
     ) {
         return Notification.builder()
             .user(user)
             .imageUrl(imageUrl)
             .title(title)
             .body(body)
-            .redirectUrl(redirectUrl)
+            .roomID(roomId)
             .build();
     }
 }

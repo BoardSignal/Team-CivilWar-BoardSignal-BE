@@ -133,4 +133,14 @@ public class RoomRepositoryAdaptor implements RoomRepository {
         }
         return new SliceImpl<>(rooms, pageable, hasNext);
     }
+
+    @Override
+    public Optional<Room> findByIdWithLock(Long id) {
+        return roomJpaRepository.findByIdWithLock(id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        roomJpaRepository.deleteById(id);
+    }
 }

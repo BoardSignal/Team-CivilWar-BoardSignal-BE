@@ -19,4 +19,8 @@ public interface RoomRepository {
     List<Room> findMyFixRoom(Long userId);
 
     Slice<Room> findAll(RoomSearchCondition roomSearchCondition, Pageable pageable);
+
+    Optional<Room> findByIdWithLock(Long id);
+
+    void deleteById(Long id);
 }

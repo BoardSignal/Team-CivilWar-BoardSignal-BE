@@ -8,7 +8,10 @@ public record RoomInfoResponse(
     Long roomId,
     String title,
     String description,
+    String time,
     String startTime,
+    String subwayLine,
+    String subwayStation,
     String place,
     int minAge,
     int maxAge,
@@ -20,7 +23,7 @@ public record RoomInfoResponse(
     String allowedGender,
     List<String> categories,
     List<ParticipantResponse> participantResponse,
-    @JsonFormat(pattern = "MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime createdAt
 
 ) {
