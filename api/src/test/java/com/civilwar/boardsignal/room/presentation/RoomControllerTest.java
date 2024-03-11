@@ -389,10 +389,7 @@ class RoomControllerTest extends ApiTestSupport {
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
             .andExpect(jsonPath("$.subwayLine").value(meetingInfo.getLine()))
             .andExpect(jsonPath("$.subwayStation").value(meetingInfo.getStation()))
-            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))            .andExpect(jsonPath("$.place").value(
-                meetingInfo.getStation()
-                    + " " + meetingInfo.getMeetingPlace()
-            ))
+            .andExpect(jsonPath("$.place").value(meetingInfo.getMeetingPlace()))
             .andExpect(jsonPath("$.isFix").value("확정"))
             .andExpect(jsonPath("$.isLeader").value(false))
             .andExpect(jsonPath("$.allowedGender").value(Gender.MALE.getDescription()))
