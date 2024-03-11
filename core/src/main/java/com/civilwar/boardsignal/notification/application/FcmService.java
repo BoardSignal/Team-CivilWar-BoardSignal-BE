@@ -67,8 +67,8 @@ public class FcmService {
         content.put("image", imageUrl);
 
         JSONObject message = new JSONObject();
-        message.put("token", targetToken);
         message.put("notification", content);
+        message.put("token", targetToken);
 
         JSONObject result = new JSONObject();
         result.put("message", message);
