@@ -48,7 +48,7 @@ public class FcmService {
         googleCredentials.refreshIfExpired();
         String tokenValue = googleCredentials.getAccessToken().getTokenValue();
 
-        String json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().toString();
+        int json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().read();
         log.info("firebase.json : {}", json);
 
 
