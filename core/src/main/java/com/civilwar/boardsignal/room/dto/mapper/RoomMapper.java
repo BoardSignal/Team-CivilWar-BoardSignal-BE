@@ -94,6 +94,9 @@ public final class RoomMapper {
     public static RoomInfoResponse toRoomInfoResponse(
         Room room,
         String time,
+        String startTime,
+        String subwayLine,
+        String subwayStation,
         String place,
         Boolean isLeader,
         List<ParticipantResponse> participants
@@ -103,6 +106,9 @@ public final class RoomMapper {
             room.getTitle(),
             room.getDescription(),
             time,
+            startTime,
+            subwayLine,
+            subwayStation,
             place,
             room.getMinAge(),
             room.getMaxAge(),
