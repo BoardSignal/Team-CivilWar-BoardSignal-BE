@@ -39,7 +39,7 @@ jobs:
         with:
           name: "firebase.json"
           json: ${{ secrets.FIREBASE_JSON }}
-          dir: './core/src/main/resources/'
+          dir: 'core/src/main/resources/'
 #      - name: FCM 시크릿키 생성
 #        run: |
 #          mkdir -p ./core/src/main/resources
