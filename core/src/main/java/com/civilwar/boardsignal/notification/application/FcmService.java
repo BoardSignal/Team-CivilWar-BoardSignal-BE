@@ -17,9 +17,14 @@ import org.json.JSONObject;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatus.Series;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -123,6 +128,14 @@ public class FcmService {
             log.error(e.getMessage());
         }
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(response.getStatusCode().toString()));
+                return statusCode.series() == Series.SERVER_ERROR;
+            }
+        });
 
         ResponseEntity<String> response = restTemplate.exchange(
             GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
