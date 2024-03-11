@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.notification.application;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -60,6 +61,7 @@ public class FcmService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION, "Bearer " + getAccessToken());
         headers.add(CONTENT_TYPE, "application/json; charset=utf-8");
+        headers.add(CONTENT_LENGTH, "2000");
 
         JSONObject content = new JSONObject();
         content.put("title", title);
@@ -132,7 +134,6 @@ public class FcmService {
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
             public boolean hasError(ClientHttpResponse response) throws IOException {
-//                HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(response.getStatusCode().toString()));
                 HttpStatus statusCode = (HttpStatus) response.getStatusCode();
                 return statusCode.series() == Series.SERVER_ERROR;
             }
