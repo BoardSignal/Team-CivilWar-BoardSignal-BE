@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {
 
-    private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
+    private static final String REFRESHTOKEN_NAME = "RefreshToken_Id";
     private final AuthService authService;
 
     @Operation(summary = "카카오 로그인 API", description = "웹 페이지를 통한 로그인")
@@ -102,7 +102,9 @@ public class AuthApiController {
         LoginUserInfoResponse loginUserInfoResponse = AuthApiMapper.toLoginUserInfoResponse(
             loginUser.getId(),
             loginUser.getEmail(),
+            loginUser.getName(),
             loginUser.getNickname(),
+            loginUser.getBirth(),
             myAge,
             loginUser.getAgeGroup().getDescription(),
             loginUser.getGender().getDescription(),
