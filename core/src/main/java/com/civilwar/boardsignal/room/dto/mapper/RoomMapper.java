@@ -61,13 +61,15 @@ public final class RoomMapper {
         List<String> categories = room.getRoomCategories().stream()
             .map(roomCategory -> roomCategory.getCategory().getDescription())
             .toList();
+        String time =
+            room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription();
 
         return new GetAllRoomResponse(
             room.getId(),
             room.getTitle(),
             room.getDescription(),
             room.getSubwayStation(),
-            room.getStartTime(),
+            time,
             room.getMinAge(),
             room.getMaxAge(),
             room.getAllowedGender().getDescription(),
