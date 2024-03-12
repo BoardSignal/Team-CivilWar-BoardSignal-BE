@@ -16,9 +16,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // 클라이언트 인증 핸들러
-//    private final StompAuthenticationHandler stompAuthenticationHandler;
+    private final StompAuthenticationHandler stompAuthenticationHandler;
     // WebSocket 내 예외 핸들러
-//    private final StompExceptionHandler stompExceptionHandler;
+    private final StompExceptionHandler stompExceptionHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             .setAllowedOriginPatterns("*")
             .withSockJS();
         //예외 핸들러 등록
-//        registry.setErrorHandler(stompExceptionHandler);
+        registry.setErrorHandler(stompExceptionHandler);
     }
 
     @Override
@@ -42,6 +42,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     //클라이언트 -> 서버 요청 시, 인증 핸들러 등록
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.interceptors(stompAuthenticationHandler);
+        registration.interceptors(stompAuthenticationHandler);
     }
 }
