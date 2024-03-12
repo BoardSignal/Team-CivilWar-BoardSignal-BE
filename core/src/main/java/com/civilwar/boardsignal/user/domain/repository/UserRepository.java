@@ -20,4 +20,6 @@ public interface UserRepository {
     boolean existsUserByProviderId(String providerId);
 
     List<User> findAllInIds(List<Long> ids);
+
+    Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined);
 }
