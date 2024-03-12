@@ -6,13 +6,16 @@ import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.UserModifyRequest;
+import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import com.civilwar.boardsignal.user.dto.response.UserModifyResponse;
 import com.civilwar.boardsignal.user.dto.response.UserProfileResponse;
 import com.civilwar.boardsignal.user.dto.response.UserReviewResponse;
+import com.civilwar.boardsignal.user.dto.response.ValidNicknameResponse;
 import com.civilwar.boardsignal.user.exception.UserErrorCode;
 import com.civilwar.boardsignal.user.facade.UserReviewFacade;
 import com.civilwar.boardsignal.user.mapper.UserMapper;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +67,28 @@ public class UserService {
 
         return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount,
             isProfileManager);
+    }
+
+    @Transactional(readOnly = true)
+    public ValidNicknameResponse isExistNickname(ValidNicknameRequest validNicknameRequest, User loginUser) {
+        Boolean isNotValid;
+
+        //검증 닉네임을 가진, 회원가입(true)된 사용자 조회
+        Optional<User> optionalUser = userRepository.findByNicknameAndIsJoined(
+            validNicknameRequest.nickname(), true);
+
+        //존재하지 않는다면 - 중복 X (true) 반환
+        if (optionalUser.isEmpty()) {
+            isNotValid = true;
+        }
+        else {
+            //검증 닉네임이 회원이 자신이라면 - 중복 X (true) 반환
+            //검증 닉네임이 타인이라면 - 중복 O (false) 반환
+            User findUser = optionalUser.get();
+            isNotValid = findUser.getId().equals(loginUser.getId());
+        }
+
+        return new ValidNicknameResponse(isNotValid);
     }
 
 }

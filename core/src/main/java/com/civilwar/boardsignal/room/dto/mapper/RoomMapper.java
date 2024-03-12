@@ -5,8 +5,8 @@ import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -18,8 +18,10 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RoomMapper {
 
@@ -61,13 +63,17 @@ public final class RoomMapper {
         List<String> categories = room.getRoomCategories().stream()
             .map(roomCategory -> roomCategory.getCategory().getDescription())
             .toList();
+        String time =
+            room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription();
+        String station = String.format("%s(%s)", room.getSubwayStation(), room.getSubwayLine());
+        log.info("{}", station);
 
         return new GetAllRoomResponse(
             room.getId(),
             room.getTitle(),
             room.getDescription(),
-            room.getSubwayStation(),
-            room.getStartTime(),
+            station,
+            time,
             room.getMinAge(),
             room.getMaxAge(),
             room.getAllowedGender().getDescription(),
@@ -154,7 +160,6 @@ public final class RoomMapper {
             room.getId(),
             room.getTitle(),
             meetingInfo.getMeetingTime(),
-            meetingInfo.getWeekDay().getDescription(),
             meetingInfo.getPeopleCount(),
             meetingInfo.getLine(),
             meetingInfo.getStation(),

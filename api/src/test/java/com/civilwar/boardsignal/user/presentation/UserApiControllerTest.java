@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.entity.Wish;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
@@ -23,6 +25,7 @@ import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
+import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -177,5 +180,76 @@ class UserApiControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.reviews[2].score").value(
                 0))
             .andExpect(jsonPath("$.isProfileManager").value(false));
+    }
+
+    @Test
+    @DisplayName("[중복X 닉네임이라면, true 반환]")
+    void validNicknameTest1() throws Exception {
+        //given
+        String notExistName = "절대 중복된 이름 아님";
+        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(notExistName);
+
+        //then
+        mockMvc.perform(post("/api/v1/users/valid")
+            .header(AUTHORIZATION, accessToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(validNicknameRequest)))
+            .andExpect(jsonPath("$.isNotValid").value(true));
+    }
+
+    @Test
+    @DisplayName("[중복O 닉네임이지만, 그 닉네임이 해당 사용자의 닉네임이라면 true 반환]")
+    void validNicknameTest2() throws Exception {
+        //given
+        String existName = loginUser.getName();
+        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        userRepository.save(loginUser);
+        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
+
+        //then
+        mockMvc.perform(post("/api/v1/users/valid")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(validNicknameRequest)))
+            .andExpect(jsonPath("$.isNotValid").value(true));
+    }
+
+    @Test
+    @DisplayName("[중복O 닉네임이지만, 기존 닉네임을 가진 사용자의 회원가입 여부가 false 라면, true 반환]")
+    void validNicknameTest3() throws Exception {
+        //given
+        User anotherUser = UserFixture.getUserFixture("providerId", "testURL");
+        userRepository.save(anotherUser);
+
+        String existName = anotherUser.getName();
+
+        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
+
+        //then
+        mockMvc.perform(post("/api/v1/users/valid")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(validNicknameRequest)))
+            .andExpect(jsonPath("$.isNotValid").value(true));
+    }
+
+    @Test
+    @DisplayName("[중복O 닉네임이라면, false 반환]")
+    void validNicknameTest4() throws Exception {
+        //given
+        User anotherUser = UserFixture.getUserFixture("providerId", "testURL");
+        String existName = anotherUser.getName();
+        userRepository.save(anotherUser);
+        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        userRepository.save(loginUser);
+
+        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
+
+        //then
+        mockMvc.perform(post("/api/v1/users/valid")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(validNicknameRequest)))
+            .andExpect(jsonPath("$.isNotValid").value(true));
     }
 }

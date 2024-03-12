@@ -15,4 +15,6 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.id in :ids")
     List<User> findAllInIds(@Param("ids") List<Long> ids);
+
+    Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined);
 }

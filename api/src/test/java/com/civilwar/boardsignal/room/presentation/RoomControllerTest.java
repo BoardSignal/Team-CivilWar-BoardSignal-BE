@@ -22,7 +22,6 @@ import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
-import com.civilwar.boardsignal.room.domain.constants.WeekDay;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
@@ -30,8 +29,8 @@ import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
-import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
@@ -444,7 +443,6 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
         ApiFixRoomRequest request = new ApiFixRoomRequest(
             LocalDateTime.of(2024, 3, 31, 5, 30),
-            "수요일",
             5,
             "2호선",
             "강남역",
@@ -468,7 +466,6 @@ class RoomControllerTest extends ApiTestSupport {
         assertAll(
             () -> assertThat(findRoom.getStatus()).isEqualTo(RoomStatus.FIX),
             () -> assertThat(meetingInfo.getMeetingTime()).isEqualTo(request.meetingTime()),
-            () -> assertThat(meetingInfo.getWeekDay()).isEqualTo(WeekDay.of(request.weekDay())),
             () -> assertThat(meetingInfo.getPeopleCount()).isEqualTo(request.peopleCount()),
             () -> assertThat(meetingInfo.getLine()).isEqualTo(request.line()),
             () -> assertThat(meetingInfo.getStation()).isEqualTo(request.station()),
@@ -505,7 +502,6 @@ class RoomControllerTest extends ApiTestSupport {
                 jsonPath("$.roomId").value(savedRoom.getId()),
                 jsonPath("title").value(savedRoom.getTitle()),
                 jsonPath("$.meetingTime").value(meetingInfo.getMeetingTime().toString()),
-                jsonPath("$.weekDay").value(meetingInfo.getWeekDay().getDescription()),
                 jsonPath("$.peopleCount").value(meetingInfo.getPeopleCount()),
                 jsonPath("$.participantsInfos[0].userId").value(user.getId()),
                 jsonPath("$.participantsInfos[0].nickname").value(user.getNickname()),
