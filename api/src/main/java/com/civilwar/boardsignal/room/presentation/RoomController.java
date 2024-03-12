@@ -4,11 +4,11 @@ import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -146,7 +146,7 @@ public class RoomController {
         GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
         return ResponseEntity.ok(response);
     }
-  
+
     @Operation(summary = "모임 확정 취소 API")
     @ApiResponse(useReturnTypeSchema = true)
     @DeleteMapping("/unfix/{roomId}")
