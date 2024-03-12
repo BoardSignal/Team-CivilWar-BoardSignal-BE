@@ -34,7 +34,9 @@ public final class AuthApiMapper {
     public static LoginUserInfoResponse toLoginUserInfoResponse(
         Long id,
         String email,
+        String name,
         String nickname,
+        int birth,
         int age,
         String ageGroup,
         String gender,
@@ -43,7 +45,9 @@ public final class AuthApiMapper {
         return new LoginUserInfoResponse(
             id,
             email,
+            name,
             nickname,
+            birth,
             age,
             ageGroup,
             gender,
