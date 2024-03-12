@@ -18,8 +18,10 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RoomMapper {
 
@@ -63,12 +65,14 @@ public final class RoomMapper {
             .toList();
         String time =
             room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription();
+        String station = String.format("%s(%s)", room.getSubwayStation(), room.getSubwayLine());
+        log.info("{}", station);
 
         return new GetAllRoomResponse(
             room.getId(),
             room.getTitle(),
             room.getDescription(),
-            room.getSubwayStation(),
+            station,
             time,
             room.getMinAge(),
             room.getMaxAge(),
