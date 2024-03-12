@@ -1,17 +1,24 @@
 package com.civilwar.boardsignal.notification.presentation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.domain.repository.NotificationRepository;
+import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequest;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -19,6 +26,8 @@ class NotificationControllerTest extends ApiTestSupport {
 
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private Notification notificationFirst;
     private Notification notificationSecond;
@@ -63,6 +72,21 @@ class NotificationControllerTest extends ApiTestSupport {
                 jsonPath("$.size").value(10),
                 jsonPath("$.hasNext").value(false)
             );
+    }
 
+    @Transactional
+    @Test
+    @DisplayName("[사용자의 기기토큰을 저장할 수 있다.]")
+    void saveFcmToken() throws Exception {
+        CreateFcmTokenReequest request = new CreateFcmTokenReequest("token");
+        mockMvc.perform(post("/api/v1/notifications/token")
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tokenId").value(1));
+
+        User user = userRepository.findById(loginUser.getId()).orElseThrow();
+        assertThat(user.getUserFcmTokens()).hasSize(1);
     }
 }
