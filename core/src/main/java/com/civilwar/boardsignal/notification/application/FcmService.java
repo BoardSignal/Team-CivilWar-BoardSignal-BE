@@ -52,7 +52,6 @@ public class FcmService {
         byte[] json = new ClassPathResource(FIREBASE_CONFIG_PATH).getInputStream().readAllBytes();
         log.info("firebase.json : {}", json);
 
-
         return tokenValue;
     }
 
@@ -142,10 +141,7 @@ public class FcmService {
             String.class
         );
 
-
-
-
-        if(response.getStatusCode() == HttpStatusCode.valueOf(404)){
+        if (response.getStatusCode() == HttpStatusCode.valueOf(404)) {
             return response.toString();
         }
 

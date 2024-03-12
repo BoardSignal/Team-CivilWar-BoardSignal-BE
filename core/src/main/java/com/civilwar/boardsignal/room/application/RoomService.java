@@ -15,11 +15,11 @@ import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
-import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -172,7 +172,8 @@ public class RoomService {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //1-1. 모임 시간 & 장소 정보 추출
-        String time = concat(findRoom.getDaySlot().getDescription(), findRoom.getTimeSlot().getDescription());
+        String time = concat(findRoom.getDaySlot().getDescription(),
+            findRoom.getTimeSlot().getDescription());
         String startTime = findRoom.getStartTime();
         String subwayLine = findRoom.getSubwayLine();
         String subwayStation = findRoom.getSubwayStation();
@@ -182,7 +183,8 @@ public class RoomService {
         //모임 확정이라면 -> 모임 확정 시간 장소 정보로 제공
         if (findRoom.getStatus().equals(RoomStatus.FIX)) {
             MeetingInfo meetingInfo = findRoom.getMeetingInfo();
-            startTime = meetingInfo.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            startTime = meetingInfo.getMeetingTime()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
             subwayLine = meetingInfo.getLine();
             subwayStation = meetingInfo.getStation();
             place = meetingInfo.getMeetingPlace();
@@ -210,7 +212,8 @@ public class RoomService {
                 .orElse(false);
         }
 
-        return RoomMapper.toRoomInfoResponse(findRoom, time, startTime, subwayLine, subwayStation, place, isLeader,
+        return RoomMapper.toRoomInfoResponse(findRoom, time, startTime, subwayLine, subwayStation,
+            place, isLeader,
             participants);
     }
 
@@ -234,7 +237,6 @@ public class RoomService {
 
         MeetingInfo meetingInfo = MeetingInfo.of(
             request.meetingTime(),
-            request.weekDay(),
             request.peopleCount(),
             request.line(),
             request.station(),
@@ -287,7 +289,7 @@ public class RoomService {
         Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
             .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
 
-        if(!participant.isLeader()) {
+        if (!participant.isLeader()) {
             throw new ValidationException(IS_NOT_LEADER);
         }
 
@@ -299,6 +301,7 @@ public class RoomService {
         //모임 삭제
         roomRepository.deleteById(roomId);
     }
+
     @Transactional
     public void kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
         //방장 여부 확인
@@ -307,7 +310,7 @@ public class RoomService {
             .orElseThrow(() -> new ValidationException(IS_NOT_LEADER));
 
         //방장이 아니라면 불가
-        if(!leaderInfo.isLeader()) {
+        if (!leaderInfo.isLeader()) {
             throw new ValidationException(IS_NOT_LEADER);
         }
 
