@@ -4,8 +4,10 @@ import com.civilwar.boardsignal.user.application.UserService;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import com.civilwar.boardsignal.user.dto.request.UserModifyRequest;
+import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import com.civilwar.boardsignal.user.dto.response.UserModifyResponse;
 import com.civilwar.boardsignal.user.dto.response.UserProfileResponse;
+import com.civilwar.boardsignal.user.dto.response.ValidNicknameResponse;
 import com.civilwar.boardsignal.user.mapper.UserApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,6 +62,18 @@ public class UserApiController {
             loginUser);
 
         return ResponseEntity.ok(userProfileResponse);
+    }
+
+    @Operation(summary = "닉네임 중복 체크 API")
+    @ApiResponse(useReturnTypeSchema = true)
+    @PostMapping("/valid")
+    public ResponseEntity<ValidNicknameResponse> validNickname(
+        @Parameter(hidden = true) @AuthenticationPrincipal User loginUser,
+        @RequestBody ValidNicknameRequest validNicknameRequest
+    ) {
+        ValidNicknameResponse response = userService.isExistNickname(validNicknameRequest,
+            loginUser);
+        return ResponseEntity.ok(response);
     }
 
 }

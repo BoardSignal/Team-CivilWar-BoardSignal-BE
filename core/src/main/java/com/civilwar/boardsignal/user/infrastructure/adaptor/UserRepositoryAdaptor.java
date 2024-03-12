@@ -49,4 +49,9 @@ public class UserRepositoryAdaptor implements UserRepository {
     public List<User> findAllInIds(List<Long> ids) {
         return userJpaRepository.findAllInIds(ids);
     }
+
+    @Override
+    public Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined) {
+        return userJpaRepository.findByNicknameAndIsJoined(nickname, isJoined);
+    }
 }
