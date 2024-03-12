@@ -20,10 +20,10 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
-import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -421,7 +421,6 @@ class RoomServiceTest {
             () -> assertThat(response.roomId()).isEqualTo(room.getId()),
             () -> assertThat(response.title()).isEqualTo(room.getTitle()),
             () -> assertThat(response.meetingTime()).isEqualTo(meeting.getMeetingTime().toString()),
-            () -> assertThat(response.weekDay()).isEqualTo(meeting.getWeekDay().getDescription()),
             () -> assertThat(response.peopleCount()).isEqualTo(meeting.getPeopleCount()),
             () -> assertThat(response.line()).isEqualTo(meeting.getLine()),
             () -> assertThat(response.station()).isEqualTo(meeting.getStation()),
@@ -605,7 +604,7 @@ class RoomServiceTest {
         roomService.kickOutUser(leader, kickOutUserRequest);
 
         //then
-        verify(participantRepository,times(1)).deleteById(userInfoId);
+        verify(participantRepository, times(1)).deleteById(userInfoId);
     }
 
     @Test

@@ -5,8 +5,8 @@ import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
-import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
@@ -154,7 +154,6 @@ public final class RoomMapper {
             room.getId(),
             room.getTitle(),
             meetingInfo.getMeetingTime(),
-            meetingInfo.getWeekDay().getDescription(),
             meetingInfo.getPeopleCount(),
             meetingInfo.getLine(),
             meetingInfo.getStation(),
