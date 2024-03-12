@@ -58,14 +58,15 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     //웹소켓
-                    "/ws/**",
+                    "/ws/chats",
+                    "/ws/chats/**",
                     "/"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-//            //인증 안 된 사용자 접근 시 예외 처리
-//            .exceptionHandling(configurer -> configurer
-//                .authenticationEntryPoint(authenticationEntryPoint))
+            //인증 안 된 사용자 접근 시 예외 처리
+            .exceptionHandling(configurer -> configurer
+                .authenticationEntryPoint(authenticationEntryPoint))
             //Jwt 관련 예외 처리
             .addFilterBefore(
                 jwtExceptionHandlerFilter,
