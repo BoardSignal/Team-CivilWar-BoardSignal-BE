@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/notifications").permitAll()
                 .requestMatchers(
                     new AntPathRequestMatcher("/api/v1/rooms/my/end-games")).authenticated()
+                //웹소켓
+                .requestMatchers(new AntPathRequestMatcher("/ws/chats"),
+                    new AntPathRequestMatcher("/ws/chats/**")).permitAll()
                 .requestMatchers(HttpMethod.GET,
                     //방
                     "/api/v1/rooms/**",
@@ -57,9 +60,6 @@ public class SecurityConfig {
                     //스웨거
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    //웹소켓
-                    "/ws/chats",
-                    "/ws/chats/**",
                     "/"
                 ).permitAll()
                 .anyRequest().authenticated()
