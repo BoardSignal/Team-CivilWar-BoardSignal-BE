@@ -191,9 +191,9 @@ class UserApiControllerTest extends ApiTestSupport {
 
         //then
         mockMvc.perform(post("/api/v1/users/valid")
-            .header(AUTHORIZATION, accessToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(toJson(validNicknameRequest)))
+                .header(AUTHORIZATION, accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(validNicknameRequest)))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 

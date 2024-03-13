@@ -39,6 +39,7 @@ public final class BoardGameMapper {
     public static <T> BoardGamePageResponse<T> toBoardGamePageRepsonse(Slice<T> page) {
         return new BoardGamePageResponse<>(
             page.getContent(),
+            page.getNumber(),
             page.getSize(),
             page.hasNext()
         );

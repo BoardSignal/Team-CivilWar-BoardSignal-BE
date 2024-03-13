@@ -23,6 +23,7 @@ public class NotificationMapper {
     public static <T> NotificationPageResponse<T> toNotificationPageResponse(Slice<T> page) {
         return new NotificationPageResponse<>(
             page.getContent(),
+            page.getNumber(),
             page.getSize(),
             page.hasNext()
         );

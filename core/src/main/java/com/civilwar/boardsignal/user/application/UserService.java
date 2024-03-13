@@ -70,7 +70,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ValidNicknameResponse isExistNickname(ValidNicknameRequest validNicknameRequest, User loginUser) {
+    public ValidNicknameResponse isExistNickname(ValidNicknameRequest validNicknameRequest,
+        User loginUser) {
         Boolean isNotValid;
 
         //검증 닉네임을 가진, 회원가입(true)된 사용자 조회
@@ -80,8 +81,7 @@ public class UserService {
         //존재하지 않는다면 - 중복 X (true) 반환
         if (optionalUser.isEmpty()) {
             isNotValid = true;
-        }
-        else {
+        } else {
             //검증 닉네임이 회원이 자신이라면 - 중복 X (true) 반환
             //검증 닉네임이 타인이라면 - 중복 O (false) 반환
             User findUser = optionalUser.get();

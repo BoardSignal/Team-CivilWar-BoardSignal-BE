@@ -43,7 +43,8 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
         boardGame = BoardGameFixture.getBoardGame(List.of(warGame, familyGame));
         boardGame2 = BoardGameFixture.getBoardGame2(List.of(partyGame));
 
-        boardGameAdaptor.saveAll(List.of(boardGame, boardGame2));
+        boardGameAdaptor.save(boardGame);
+        boardGameAdaptor.save(boardGame2);
     }
 
     @Test
@@ -232,5 +233,27 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
         List<BoardGame> gameList = boardGames.getContent();
 
         assertThat(gameList).contains(boardGame).contains(boardGame2);
+    }
+
+    @Test
+    @DisplayName("[보드게임이 두개 있을 때 offset별로 보드게임을 조회할 수 있다.")
+    void findAllBoardGameWithOffset() {
+        BoardGameSearchCondition condition = new BoardGameSearchCondition(
+            null,
+            null,
+            null
+            , null
+        );
+        PageRequest pageRequest1 = PageRequest.of(0, 1);
+        PageRequest pageRequest2 = PageRequest.of(1, 1);
+        BoardGame findBoardGame1 = boardGameQueryAdaptor.findAll(condition, pageRequest1)
+            .getContent().get(0);
+        BoardGame findBoardGame2 = boardGameQueryAdaptor.findAll(condition, pageRequest2)
+            .getContent().get(0);
+
+        assertThat(findBoardGame1.getTitle()).isEqualTo(boardGame.getTitle());
+        assertThat(findBoardGame2.getTitle()).isEqualTo(boardGame2.getTitle());
+
+
     }
 }
