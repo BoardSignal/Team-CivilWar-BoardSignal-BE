@@ -1,54 +1,33 @@
 package com.civilwar.boardsignal.chat.presentation;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
-import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
-import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
 import com.civilwar.boardsignal.chat.application.ChatMessageService;
-import com.civilwar.boardsignal.chat.dto.ApiChatMessageRequest;
-import com.civilwar.boardsignal.chat.dto.request.ChatMessageRequest;
-import com.civilwar.boardsignal.chat.dto.response.ChatMessageResponse;
-import com.civilwar.boardsignal.chat.mapper.ChatMessageApiMapper;
+import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
+import com.civilwar.boardsignal.chat.dto.response.ChatPageResponse;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ChatMessageController {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final ChatMessageService chatMessageService;
-    private final SimpMessageSendingOperations simpMessageSendingOperations;
 
-    @MessageMapping("/chats/{roomId}")
-    public void sendMessage(
-        @DestinationVariable(value = "roomId") Long roomId,
-        @Header(AUTHORIZATION) String token,
-        @Payload ApiChatMessageRequest apiChatMessageRequest
+    @GetMapping("/api/v1/rooms/chats/{roomId}")
+    public ResponseEntity<ChatPageResponse<ChatMessageDto>> findChatMessages(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        @PathVariable("roomId") Long roomId,
+        Pageable pageable
     ) {
-
-        //AccessToken -> UserId 조회
-        String accessToken = token.split(" ")[1];
-        TokenPayload payLoad = jwtTokenProvider.getPayLoad(accessToken);
-        Long userId = payLoad.userId();
-
-        log.info("roomId = {}, userId = {}, request.content = {}, request.type = {}",
-            roomId, userId, apiChatMessageRequest.content(), apiChatMessageRequest.type());
-
-        //채팅 저장
-        ChatMessageRequest chatMessageRequest = ChatMessageApiMapper.toChatMessageRequest(roomId,
-            userId, apiChatMessageRequest);
-        ChatMessageResponse chatMessageResponse = chatMessageService.recordChat(chatMessageRequest);
-
-        //채팅 전송
-        simpMessageSendingOperations.convertAndSend("/topic/chats/" + roomId, chatMessageResponse);
+        ChatPageResponse<ChatMessageDto> chatMessages = chatMessageService.findChatMessages(user,
+            roomId, pageable);
+        return ResponseEntity.ok(chatMessages);
     }
 
 }
