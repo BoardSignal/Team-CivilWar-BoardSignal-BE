@@ -1,8 +1,10 @@
 package com.civilwar.boardsignal.auth.config;
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
+import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.auth.filter.CustomAuthenticationFilter;
 import com.civilwar.boardsignal.auth.filter.JwtExceptionHandlerFilter;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -29,6 +32,7 @@ public class SecurityConfig {
     private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
     private final UserRepository userRepository;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     private final String[] NEED_AUTHENTICATION = {
         //알림
@@ -61,7 +65,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/v1/rooms/**").authenticated()
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/rooms/**").authenticated()
                     .requestMatchers(NEED_AUTHENTICATION).authenticated()
-                    .requestMatchers("/**").permitAll()
+                    .anyRequest().permitAll()
 //                //알림
 //                .requestMatchers("/api/v1/notifications").permitAll()
 //                .requestMatchers(
@@ -85,7 +89,12 @@ public class SecurityConfig {
             )
             //인증 안 된 사용자 접근 시 예외 처리
             .exceptionHandling(configurer -> configurer
-                .authenticationEntryPoint(authenticationEntryPoint))
+                .authenticationEntryPoint(
+                    (request, response, exception)
+                        -> {throw new ValidationException(AuthErrorCode.AUTH_REQUIRED);}
+                )
+//                .accessDeniedHandler(accessDeniedHandler)
+            )
             //Jwt 관련 예외 처리
             .addFilterBefore(
                 jwtExceptionHandlerFilter,

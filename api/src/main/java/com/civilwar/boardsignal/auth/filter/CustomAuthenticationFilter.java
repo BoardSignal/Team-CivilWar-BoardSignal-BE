@@ -39,7 +39,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             TokenPayload payLoad = tokenProvider.getPayLoad(accessToken);
 
             List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(payLoad.role().name())
+                new SimpleGrantedAuthority(payLoad.role().getRole())
             );
 
             User user = userRepository.findById(payLoad.userId())
