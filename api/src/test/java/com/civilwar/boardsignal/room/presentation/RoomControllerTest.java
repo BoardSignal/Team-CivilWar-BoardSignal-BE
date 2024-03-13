@@ -14,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
+import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
@@ -72,6 +74,8 @@ class RoomControllerTest extends ApiTestSupport {
     private ParticipantRepository participantRepository;
     @Autowired
     private MeetingInfoJpaRepository meetingInfoRepository;
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
     @Autowired
     private TokenProvider tokenProvider;
     @MockBean
@@ -261,7 +265,7 @@ class RoomControllerTest extends ApiTestSupport {
     @DisplayName("[사용자는 모든 조건에 맞는 방을 필터링 하여 조회할 수 있다]")
     void getSearchRoom() throws Exception {
         //given
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Room room = RoomFixture.getRoom(Gender.UNION);
             roomRepository.save(room);
         }
@@ -278,7 +282,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //then
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("size", "100");
+        params.add("size", "10");
         params.add("station", station);
         params.add("time", "평일_오전");
         params.add("category", "파티게임");
@@ -287,7 +291,7 @@ class RoomControllerTest extends ApiTestSupport {
         mockMvc.perform(get("/api/v1/rooms/filter")
                 .header(AUTHORIZATION, accessToken)
                 .params(params))
-            .andExpect(jsonPath("$.size").value(100))
+            .andExpect(jsonPath("$.size").value(10))
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(1));
     }
@@ -617,9 +621,11 @@ class RoomControllerTest extends ApiTestSupport {
         Participant leader = Participant.of(loginUser.getId(), room.getId(), true);
         participantRepository.save(leader);
         room.increaseHeadCount();
+        roomRepository.save(room);
         Participant notLeader = Participant.of(user.getId(), room.getId(), false);
         participantRepository.save(notLeader);
         room.increaseHeadCount();
+        roomRepository.save(room);
 
         //when
         mockMvc.perform(delete("/api/v1/rooms/" + room.getId())
@@ -630,7 +636,9 @@ class RoomControllerTest extends ApiTestSupport {
         List<ParticipantJpaDto> participants = participantRepository.findParticipantByRoomId(
             room.getId());
         Optional<Room> optionalRoom = roomRepository.findById(room.getId());
+        List<ChatMessage> chats = chatMessageRepository.findByRoomId(room.getId());
 
+        assertThat(chats).isEmpty();
         assertThat(participants).isEmpty();
         assertThat(optionalRoom).isEmpty();
     }
