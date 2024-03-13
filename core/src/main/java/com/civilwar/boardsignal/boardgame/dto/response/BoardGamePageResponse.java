@@ -5,6 +5,7 @@ import java.util.List;
 
 public record BoardGamePageResponse<T>(
     List<T> boardGamesInfos,
+    int currentPageNumber,
     int size,
     boolean hasNext
 ) {
