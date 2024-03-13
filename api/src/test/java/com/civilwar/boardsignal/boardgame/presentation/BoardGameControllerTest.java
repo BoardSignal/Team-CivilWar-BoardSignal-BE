@@ -261,7 +261,7 @@ class BoardGameControllerTest extends ApiTestSupport {
 
         //when
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/v1/board-games/{tipId}", savedTip.getId())
+                MockMvcRequestBuilders.delete("/api/v1/board-games/tip/{tipId}", savedTip.getId())
                     .header(AUTHORIZATION, accessToken))
             .andExpect(status().isOk());
 
@@ -341,7 +341,7 @@ class BoardGameControllerTest extends ApiTestSupport {
         Wish wish = Wish.of(loginUser.getId(), boardGame1.getId());
         wishRepository.save(wish);
 
-        mockMvc.perform(get("/api/v1/board-games/{userId}/wish", loginUser.getId())
+        mockMvc.perform(get("/api/v1/board-games/wish/{userId}", loginUser.getId())
                 .params(params)
                 .header(AUTHORIZATION, accessToken))
             .andExpectAll(

@@ -126,7 +126,7 @@ public class BoardGameController {
 
     @Operation(summary = "보드게임 공략 삭제 API")
     @ApiResponse(useReturnTypeSchema = true)
-    @DeleteMapping("/{tipId}")
+    @DeleteMapping("/tip/{tipId}")
     public void deleteTip(
         @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
@@ -137,7 +137,7 @@ public class BoardGameController {
 
     @Operation(summary = "보드게임 찜 목록 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
-    @GetMapping("/{userId}/wish")
+    @GetMapping("/wish/{userId}")
     public ResponseEntity<BoardGamePageResponse<GetAllBoardGamesResponse>> getAllWishBoardGames(
         @PathVariable("userId") Long userId,
         Pageable pageable
