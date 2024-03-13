@@ -25,7 +25,7 @@ public class NotificationEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendMessage(NotificationRequest request) {
         List<User> users = userRepository.findAllInIds(request.userIds());
-        for(User user : users) {
+        for (User user : users) {
             Notification notification = Notification.of(
                 user,
                 request.imageUrl(),

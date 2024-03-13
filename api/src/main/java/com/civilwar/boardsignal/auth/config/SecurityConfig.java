@@ -58,16 +58,18 @@ public class SecurityConfig {
                 configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .anonymous(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(registry -> registry
-                    .requestMatchers(HttpMethod.POST, "/api/v1/rooms/**").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/api/v1/rooms/**").authenticated()
-                    .requestMatchers(NEED_AUTHENTICATION).authenticated()
-                    .anyRequest().permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/rooms/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/rooms/**").authenticated()
+                .requestMatchers(NEED_AUTHENTICATION).authenticated()
+                .anyRequest().permitAll()
             )
             //인증 안 된 사용자 접근 시 예외 처리
             .exceptionHandling(configurer -> configurer
                 .authenticationEntryPoint(
                     (request, response, exception)
-                        -> {throw new ValidationException(AuthErrorCode.AUTH_REQUIRED);}
+                        -> {
+                        throw new ValidationException(AuthErrorCode.AUTH_REQUIRED);
+                    }
                 )
             )
             //Jwt 관련 예외 처리

@@ -237,7 +237,7 @@ class BoardGameQueryRepositoryAdaptorTest extends DataJpaTestSupport {
 
     @Test
     @DisplayName("[보드게임이 두개 있을 때 offset별로 보드게임을 조회할 수 있다.")
-    void findAllBoardGameWithOffset(){
+    void findAllBoardGameWithOffset() {
         BoardGameSearchCondition condition = new BoardGameSearchCondition(
             null,
             null,

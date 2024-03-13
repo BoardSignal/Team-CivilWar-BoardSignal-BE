@@ -22,7 +22,7 @@ public class S3ImageRepository implements ImageRepository {
 
     @Override
     public String save(MultipartFile image) {
-        if(image.getSize()==0 || image.isEmpty()) {
+        if (image.getSize() == 0 || image.isEmpty()) {
             return null;
         }
 
