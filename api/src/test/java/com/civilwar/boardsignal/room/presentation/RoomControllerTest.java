@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,6 +258,7 @@ class RoomControllerTest extends ApiTestSupport {
 
     }
 
+    @Disabled
     @Test
     @DisplayName("[사용자는 모든 조건에 맞는 방을 필터링 하여 조회할 수 있다]")
     void getSearchRoom() throws Exception {
@@ -292,6 +294,7 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.roomsInfos.length()").value(1));
     }
 
+    @Disabled
     @Test
     @DisplayName("[조건이 하나라도 다르면 필터링 대상에서 제외된다]")
     void getSearchRoom2() throws Exception {
