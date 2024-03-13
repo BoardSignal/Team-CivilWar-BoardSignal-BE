@@ -237,7 +237,7 @@ public class RoomService {
 
         MeetingInfo meetingInfo = MeetingInfo.of(
             request.meetingTime(),
-            request.peopleCount(),
+            room.getHeadCount(),
             request.line(),
             request.station(),
             request.meetingPlace()

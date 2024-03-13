@@ -67,9 +67,11 @@ jobs:
             sudo docker stop boardsignal-redis || true
             sudo docker container prune -f
             sudo docker pull redis
-            sudo docker run -d -p 6379:6379 --name boardsignal-redis redis:latest
+            sudo docker run -d -p 6379:6379 --name boardsignal-redis redis:latest \
+            -e TZ=Asia/Seoul
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/boardsignal:server
             docker images
             sudo docker run -d --log-driver=syslog \
+            -e TZ=Asia/Seoul \
             -p 8080:8080 --name boardsignal-server \
             ${{ secrets.DOCKERHUB_USERNAME }}/boardsignal:server

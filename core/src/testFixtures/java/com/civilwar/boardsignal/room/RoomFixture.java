@@ -100,7 +100,6 @@ public class RoomFixture {
     public static FixRoomRequest getFixRoomRequest() {
         return new FixRoomRequest(
             LocalDateTime.of(2024, 7, 12, 5, 30),
-            5,
             "2호선",
             "강남역",
             "레드버튼"

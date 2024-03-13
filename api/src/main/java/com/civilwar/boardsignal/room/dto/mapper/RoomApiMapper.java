@@ -37,7 +37,6 @@ public final class RoomApiMapper {
     public static FixRoomRequest toFixRoomRequest(ApiFixRoomRequest request) {
         return new FixRoomRequest(
             request.meetingTime(),
-            request.peopleCount(),
             request.line(),
             request.station(),
             request.meetingPlace()
