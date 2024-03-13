@@ -1,8 +1,12 @@
 package com.civilwar.boardsignal.notification.event;
 
-import com.civilwar.boardsignal.notification.application.FcmService;
+import com.civilwar.boardsignal.notification.application.FcmSender;
 import com.civilwar.boardsignal.notification.application.NotificationService;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
+import com.civilwar.boardsignal.notification.dto.request.NotificationRequest;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -13,13 +17,24 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class NotificationEventHandler {
 
-    private final FcmService fcmService; // 외부 api 연동 서비스
+    private final FcmSender fcmSender; // 외부 api 연동 서비스
     private final NotificationService notificationService; // 알림 레포지토리 의존 서비스
+    private final UserRepository userRepository;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void sendMessage(Notification notification) {
-        Notification savedNotification = notificationService.saveNotification(notification);
-        fcmService.sendMessage(savedNotification);
+    public void sendMessage(NotificationRequest request) {
+        List<User> users = userRepository.findAllInIds(request.userIds());
+        for(User user : users) {
+            Notification notification = Notification.of(
+                user,
+                request.imageUrl(),
+                request.title(),
+                request.body(),
+                request.roomId()
+            );
+            Notification savedNotification = notificationService.saveNotification(notification);
+            fcmSender.sendMessage(savedNotification);
+        }
     }
 }

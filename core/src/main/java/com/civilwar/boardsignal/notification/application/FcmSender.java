@@ -31,7 +31,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FcmService {
+public class FcmSender {
 
 
     private static final String FIREBASE_CONFIG_PATH = "firebase.json";
