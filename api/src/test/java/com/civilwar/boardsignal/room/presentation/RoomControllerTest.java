@@ -443,7 +443,6 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
         ApiFixRoomRequest request = new ApiFixRoomRequest(
             LocalDateTime.of(2024, 3, 31, 5, 30),
-            5,
             "2호선",
             "강남역",
             "레드버튼"
@@ -466,7 +465,7 @@ class RoomControllerTest extends ApiTestSupport {
         assertAll(
             () -> assertThat(findRoom.getStatus()).isEqualTo(RoomStatus.FIX),
             () -> assertThat(meetingInfo.getMeetingTime()).isEqualTo(request.meetingTime()),
-            () -> assertThat(meetingInfo.getPeopleCount()).isEqualTo(request.peopleCount()),
+            () -> assertThat(meetingInfo.getPeopleCount()).isEqualTo(findRoom.getHeadCount()),
             () -> assertThat(meetingInfo.getLine()).isEqualTo(request.line()),
             () -> assertThat(meetingInfo.getStation()).isEqualTo(request.station()),
             () -> assertThat(meetingInfo.getMeetingPlace()).isEqualTo(request.meetingPlace())
