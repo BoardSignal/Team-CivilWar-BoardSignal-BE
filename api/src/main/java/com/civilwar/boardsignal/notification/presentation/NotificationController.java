@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.notification.presentation;
 
-import com.civilwar.boardsignal.notification.application.FcmService;
+import com.civilwar.boardsignal.notification.application.FcmSender;
 import com.civilwar.boardsignal.notification.application.NotificationService;
 import com.civilwar.boardsignal.notification.dto.request.CreateFcmTokenReequest;
 import com.civilwar.boardsignal.notification.dto.request.NotificationTestRequest;
@@ -29,14 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final FcmService fcmService;
+    private final FcmSender fcmSender;
     private final NotificationService notificationService;
 
     //test용
     @PostMapping
     public ResponseEntity<String> notificationTest(@RequestBody NotificationTestRequest request)
         throws IOException {
-        String response = fcmService.sendMessageTest(request);
+        String response = fcmSender.sendMessageTest(request);
         return ResponseEntity.ok(response);
     }
 
