@@ -31,8 +31,8 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
     private final UserRepository userRepository;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
-    private final AccessDeniedHandler accessDeniedHandler;
+//    private final AuthenticationEntryPoint authenticationEntryPoint;
+//    private final AccessDeniedHandler accessDeniedHandler;
 
     private final String[] NEED_AUTHENTICATION = {
         //알림
