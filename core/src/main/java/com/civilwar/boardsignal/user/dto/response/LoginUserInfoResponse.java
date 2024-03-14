@@ -1,4 +1,6 @@
-package com.civilwar.boardsignal.auth.dto.response;
+package com.civilwar.boardsignal.user.dto.response;
+
+import java.util.List;
 
 public record LoginUserInfoResponse(
     Long id,
@@ -9,7 +11,10 @@ public record LoginUserInfoResponse(
     int age,
     String ageGroup,
     String gender,
-    Boolean isJoined
+    Boolean isJoined,
+    String subwayLine,
+    String subwayStation,
+    List<String> categories
 ) {
 
 }
