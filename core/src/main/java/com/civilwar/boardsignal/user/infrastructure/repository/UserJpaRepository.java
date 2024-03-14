@@ -3,11 +3,15 @@ package com.civilwar.boardsignal.user.infrastructure.repository;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserJpaRepository extends JpaRepository<User, Long> {
+
+    @EntityGraph(attributePaths = {"userCategories"})
+    Optional<User> findUserWithCategoryById(Long id);
 
     Optional<User> findByProviderId(String providerId);
 
