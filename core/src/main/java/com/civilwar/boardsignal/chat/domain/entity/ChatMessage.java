@@ -42,7 +42,7 @@ public class ChatMessage extends BaseEntity {
     private MessageType messageType;
 
     @Builder(access = PRIVATE)
-    public ChatMessage(
+    private ChatMessage(
         @NonNull Long roomId,
         @NonNull Long userId,
         @NonNull String content,

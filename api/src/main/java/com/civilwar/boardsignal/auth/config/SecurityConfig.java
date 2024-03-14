@@ -43,7 +43,9 @@ public class SecurityConfig {
         "/api/v1/reviews/**",
         //방
         "/api/v1/rooms/end-game/**", "/api/v1/rooms/fix/**", "/api/v1/rooms/unfix/**",
-        "/api/v1/rooms/in/**", "/api/v1/rooms/out/**", "/api/v1/rooms/kick", "/api/v1/rooms/my/**"
+        "/api/v1/rooms/in/**", "/api/v1/rooms/out/**", "/api/v1/rooms/kick", "/api/v1/rooms/my/**",
+        //채팅
+        "/api/v1/rooms/chats/**"
     };
 
     @Bean

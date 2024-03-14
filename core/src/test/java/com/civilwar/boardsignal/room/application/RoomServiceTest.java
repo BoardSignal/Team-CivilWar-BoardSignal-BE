@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
@@ -77,6 +78,9 @@ class RoomServiceTest {
 
     @Mock
     private MeetingInfoRepository meetingInfoRepository;
+
+    @Mock
+    private ChatMessageRepository chatMessageRepository;
 
     @InjectMocks
     private RoomService roomService;
@@ -551,6 +555,7 @@ class RoomServiceTest {
         //then
         verify(participantRepository, times(1)).deleteParticipantsByRoomId(roomId);
         verify(roomRepository, times(1)).deleteById(roomId);
+        verify(chatMessageRepository, times(1)).deleteByRoomId(roomId);
     }
 
     @Test

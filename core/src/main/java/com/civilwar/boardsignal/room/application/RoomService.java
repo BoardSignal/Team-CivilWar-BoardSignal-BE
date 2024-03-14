@@ -4,6 +4,7 @@ import static com.civilwar.boardsignal.room.exception.RoomErrorCode.INVALID_PART
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.IS_NOT_LEADER;
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.NOT_FOUND_ROOM;
 
+import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
@@ -51,6 +52,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingInfoRepository meetingInfoRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ImageRepository imageRepository;
     private final Supplier<LocalDateTime> now;
 
@@ -296,7 +298,8 @@ public class RoomService {
         //참가자 정보 삭제
         participantRepository.deleteParticipantsByRoomId(roomId);
 
-        //todo 채팅 기록 삭제
+        //채팅 내역 삭제
+        chatMessageRepository.deleteByRoomId(roomId);
 
         //모임 삭제
         roomRepository.deleteById(roomId);
