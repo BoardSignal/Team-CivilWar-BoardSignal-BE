@@ -5,7 +5,7 @@ import java.util.List;
 public record ChatPageResponse<T>(
 
     List<T> chatList,
-    int page,
+    int currentPageNumber,
     int size,
     boolean hasNext
     ) {
