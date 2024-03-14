@@ -2,10 +2,10 @@ package com.civilwar.boardsignal.auth.presentation;
 
 import com.civilwar.boardsignal.auth.application.AuthService;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
-import com.civilwar.boardsignal.auth.dto.response.LoginUserInfoResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLogoutResponse;
-import com.civilwar.boardsignal.auth.mapper.AuthApiMapper;
+import com.civilwar.boardsignal.user.application.UserService;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.dto.response.LoginUserInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +13,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +32,7 @@ public class AuthApiController {
 
     private static final String REFRESHTOKEN_NAME = "RefreshToken_Id";
     private final AuthService authService;
+    private final UserService userService;
 
     @Operation(summary = "카카오 로그인 API", description = "웹 페이지를 통한 로그인")
     @PostMapping("/login/kakao")
@@ -94,25 +94,9 @@ public class AuthApiController {
     public ResponseEntity<LoginUserInfoResponse> getLoginUserInfo(
         @AuthenticationPrincipal User loginUser) {
 
-        int currentYear = LocalDate.now().getYear();
-        int birthYear = loginUser.getBirth();
-        //로그인 유저 나이
-        int myAge = currentYear - birthYear + 1;
+        LoginUserInfoResponse loginUserInfo = userService.getLoginUserInfo(loginUser);
 
-        LoginUserInfoResponse loginUserInfoResponse = AuthApiMapper.toLoginUserInfoResponse(
-            loginUser.getId(),
-            loginUser.getEmail(),
-            loginUser.getName(),
-            loginUser.getNickname(),
-            loginUser.getBirth(),
-            myAge,
-            loginUser.getAgeGroup().getDescription(),
-            loginUser.getGender().getDescription(),
-            loginUser.getIsJoined()
-        );
-
-        return ResponseEntity.ok(loginUserInfoResponse);
-
+        return ResponseEntity.ok(loginUserInfo);
     }
 
 }

@@ -2,7 +2,9 @@ package com.civilwar.boardsignal.user.mapper;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.dto.response.LoginUserInfoResponse;
 import com.civilwar.boardsignal.user.dto.response.UserModifyResponse;
 import com.civilwar.boardsignal.user.dto.response.UserProfileResponse;
 import com.civilwar.boardsignal.user.dto.response.UserReviewResponse;
@@ -36,6 +38,29 @@ public final class UserMapper {
             reviews,
             wishCount,
             isProfileManager
+        );
+    }
+
+    public static LoginUserInfoResponse toLoginUserInfoResponse(
+        User loginUser,
+        int age,
+        List<Category> categories
+    ) {
+        return new LoginUserInfoResponse(
+            loginUser.getId(),
+            loginUser.getEmail(),
+            loginUser.getName(),
+            loginUser.getNickname(),
+            loginUser.getBirth(),
+            age,
+            loginUser.getAgeGroup().getDescription(),
+            loginUser.getGender().getDescription(),
+            loginUser.getIsJoined(),
+            loginUser.getLine(),
+            loginUser.getStation(),
+            categories.stream()
+                .map(Category::getDescription)
+                .toList()
         );
     }
 

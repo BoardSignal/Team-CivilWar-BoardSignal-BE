@@ -6,7 +6,7 @@ public record ParticipantResponse(
     String ageGroup,
     String profileImageUrl,
     Boolean isLeader,
-    double mannerScore
+    double signalTemperature
 ) {
 
 }
