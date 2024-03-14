@@ -17,4 +17,6 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
     List<User> findAllInIds(@Param("ids") List<Long> ids);
 
     Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined);
+
+    List<User> findByStation(String station);
 }

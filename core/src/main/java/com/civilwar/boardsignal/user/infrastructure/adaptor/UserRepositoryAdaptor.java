@@ -54,4 +54,9 @@ public class UserRepositoryAdaptor implements UserRepository {
     public Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined) {
         return userJpaRepository.findByNicknameAndIsJoined(nickname, isJoined);
     }
+
+    @Override
+    public List<User> findByStation(String station) {
+        return userJpaRepository.findByStation(station);
+    }
 }

@@ -91,4 +91,9 @@ public class UserService {
         return new ValidNicknameResponse(isNotValid);
     }
 
+    @Transactional(readOnly = true)
+    public List<User> getUserByStation(String station) {
+        return userRepository.findByStation(station);
+    }
+
 }
