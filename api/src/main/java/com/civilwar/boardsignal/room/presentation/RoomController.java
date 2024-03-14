@@ -1,6 +1,5 @@
 package com.civilwar.boardsignal.room.presentation;
 
-import com.civilwar.boardsignal.room.application.RoomService;
 import com.civilwar.boardsignal.room.dto.mapper.RoomApiMapper;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
@@ -16,6 +15,7 @@ import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
+import com.civilwar.boardsignal.room.facade.RoomFacade;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,7 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/rooms")
 public class RoomController {
 
-    private final RoomService roomService;
+    private final RoomFacade roomFacade;
 
     @Operation(summary = "방 생성 API")
     @ApiResponse(useReturnTypeSchema = true)
@@ -54,7 +54,7 @@ public class RoomController {
     ) {
         CreateRoomRequest createRoomRequest = RoomApiMapper.toCreateRoomRequest(image, request);
 
-        CreateRoomResponse createRoomResponse = roomService.createRoom(user, createRoomRequest);
+        CreateRoomResponse createRoomResponse = roomFacade.createRoom(user, createRoomRequest);
 
         return ResponseEntity.ok(createRoomResponse);
     }
@@ -66,7 +66,7 @@ public class RoomController {
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(user,
+        ParticipantRoomResponse participantRoomResponse = roomFacade.participateRoom(user,
             roomId);
 
         return ResponseEntity.ok(participantRoomResponse);
@@ -79,7 +79,7 @@ public class RoomController {
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        ExitRoomResponse exitRoomResponse = roomService.exitRoom(user, roomId);
+        ExitRoomResponse exitRoomResponse = roomFacade.exitRoom(user, roomId);
 
         return ResponseEntity.ok(exitRoomResponse);
     }
@@ -92,7 +92,7 @@ public class RoomController {
         Pageable pageable
     ) {
 
-        RoomPageResponse<GetAllRoomResponse> myParticipants = roomService.findMyEndGame(
+        RoomPageResponse<GetAllRoomResponse> myParticipants = roomFacade.findMyEndGame(
             user.getId(), pageable);
 
         return ResponseEntity.ok(myParticipants);
@@ -105,7 +105,7 @@ public class RoomController {
         RoomSearchCondition condition,
         Pageable pageable
     ) {
-        RoomPageResponse<GetAllRoomResponse> rooms = roomService.findRoomBySearch(condition,
+        RoomPageResponse<GetAllRoomResponse> rooms = roomFacade.findRoomBySearch(condition,
             pageable);
         return ResponseEntity.ok(rooms);
     }
@@ -117,7 +117,7 @@ public class RoomController {
         @PathVariable("roomId") Long roomId,
         @AuthenticationPrincipal User user
     ) {
-        RoomInfoResponse roomInfo = roomService.findRoomInfo(user, roomId);
+        RoomInfoResponse roomInfo = roomFacade.findRoomInfo(user, roomId);
         return ResponseEntity.ok(roomInfo);
     }
 
@@ -131,7 +131,7 @@ public class RoomController {
         @RequestBody ApiFixRoomRequest request
     ) {
         FixRoomRequest fixRoomRequest = RoomApiMapper.toFixRoomRequest(request);
-        FixRoomResponse response = roomService.fixRoom(user, roomId, fixRoomRequest);
+        FixRoomResponse response = roomFacade.fixRoom(user, roomId, fixRoomRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -143,7 +143,7 @@ public class RoomController {
         @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        GetEndGameUsersResponse response = roomService.getEndGameUsersResponse(user, roomId);
+        GetEndGameUsersResponse response = roomFacade.getEndGameUsersResponse(user, roomId);
         return ResponseEntity.ok(response);
     }
 
@@ -155,7 +155,7 @@ public class RoomController {
         @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        roomService.unFixRoom(user, roomId);
+        roomFacade.unFixRoom(user, roomId);
     }
 
     @Operation(summary = "모임 삭제 API (방장용)")
@@ -165,7 +165,7 @@ public class RoomController {
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId
     ) {
-        roomService.deleteRoom(user, roomId);
+        roomFacade.deleteRoom(user, roomId);
     }
 
 
@@ -177,6 +177,6 @@ public class RoomController {
         @AuthenticationPrincipal User user,
         @RequestBody KickOutUserRequest kickOutUserRequest
     ) {
-        roomService.kickOutUser(user, kickOutUserRequest);
+        roomFacade.kickOutUser(user, kickOutUserRequest);
     }
 }
