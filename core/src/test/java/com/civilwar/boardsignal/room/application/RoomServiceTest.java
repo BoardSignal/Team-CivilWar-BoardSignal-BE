@@ -340,12 +340,14 @@ class RoomServiceTest {
         FixRoomRequest request = RoomFixture.getFixRoomRequest();
 
         //when
-        FixRoomResponse response = roomService.fixRoom(user, room.getId(), request);
+        Room response = roomService.fixRoom(user, room.getId(), request);
 
         //then
         assertAll(
-            () -> assertThat(response.roomId()).isEqualTo(room.getId()),
-            () -> assertThat(response.meetingInfoId()).isEqualTo(meetingInfo.getId())
+            () -> assertThat(response.getId()).isEqualTo(room.getId()),
+            () -> assertThat(response.getTitle()).isEqualTo(room.getTitle()),
+            () -> assertThat(response.getMeetingInfo().getMeetingPlace())
+                .isEqualTo(meetingInfo.getMeetingPlace())
         );
     }
 
@@ -537,8 +539,9 @@ class RoomServiceTest {
 
     @Test
     @DisplayName("[방장이 모임을 삭제하면 관련 데이터들을 함께 삭제한다]")
-    void deleteRoomTest() {
+    void deleteRoomTest() throws IOException {
         //given
+        Room room = RoomFixture.getRoom(Gender.UNION);
         Long roomId = 1L;
         Long userId = 2L;
         User user = UserFixture.getUserFixture("providerId", "testURL");
@@ -548,6 +551,7 @@ class RoomServiceTest {
 
         given(participantRepository.findByUserIdAndRoomId(userId, roomId))
             .willReturn(Optional.of(participant));
+        given(roomRepository.findById(1L)).willReturn(Optional.of(room));
 
         //when
         roomService.deleteRoom(user, roomId);
@@ -580,9 +584,10 @@ class RoomServiceTest {
 
     @Test
     @DisplayName("[방장은 참가자를 추방할 수 있다.]")
-    void kickOutTest1() {
+    void kickOutTest1() throws IOException {
         //given
         Long roomId = 1L;
+        Room room = RoomFixture.getRoom(Gender.UNION);
 
         Long leaderId = 50L;
         User leader = UserFixture.getUserFixture("providerId", "testURL");
@@ -602,6 +607,7 @@ class RoomServiceTest {
             Optional.of(leaderInfo));
         given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
             Optional.of(userInfo));
+        given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
 
         KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, userId);
 
