@@ -31,11 +31,6 @@ public class UserRepositoryAdaptor implements UserRepository {
     }
 
     @Override
-    public Optional<User> findUserWithCategoryById(Long id) {
-        return userJpaRepository.findUserWithCategoryById(id);
-    }
-
-    @Override
     public List<User> findAll() {
         return userJpaRepository.findAll();
     }

@@ -13,8 +13,6 @@ public interface UserRepository {
 
     Optional<User> findById(Long id);
 
-    Optional<User> findUserWithCategoryById(Long id);
-
     List<User> findAll();
 
     Optional<User> findByProviderId(String providerId);

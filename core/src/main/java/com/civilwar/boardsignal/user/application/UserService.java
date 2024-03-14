@@ -104,7 +104,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public LoginUserInfoResponse getLoginUserInfo(User loginUser) {
-        User loginUserEntity = userRepository.findUserWithCategoryById(loginUser.getId())
+        User loginUserEntity = userRepository.findById(loginUser.getId())
             .orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_USER));
 
         int currentYear = now.get().getYear();
