@@ -99,7 +99,7 @@ public class Room extends BaseEntity {
         String startTime,
         int minAge,
         int maxAge,
-        @NonNull String imageUrl,
+        String imageUrl,
         @NonNull Gender allowedGender,
         @NonNull List<Category> roomCategories
     ) {
