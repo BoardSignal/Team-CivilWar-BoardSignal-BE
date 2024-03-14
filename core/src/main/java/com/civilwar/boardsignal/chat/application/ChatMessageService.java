@@ -40,10 +40,12 @@ public class ChatMessageService {
     }
 
     @Transactional(readOnly = true)
-    public ChatPageResponse<ChatMessageDto> findChatMessages(User user, Long roomId, Pageable pageable) {
+    public ChatPageResponse<ChatMessageDto> findChatMessages(User user, Long roomId,
+        Pageable pageable) {
         //유저가 참여자인지 검증
-        boolean isParticipants = participantRepository.existsByUserIdAndRoomId(user.getId(), roomId);
-        if(!isParticipants) {
+        boolean isParticipants = participantRepository.existsByUserIdAndRoomId(user.getId(),
+            roomId);
+        if (!isParticipants) {
             throw new ValidationException(RoomErrorCode.INVALID_PARTICIPANT);
         }
 

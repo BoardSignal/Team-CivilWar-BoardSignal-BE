@@ -1,6 +1,6 @@
 package com.civilwar.boardsignal.chat.infrastructure.repository;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.civilwar.boardsignal.chat.domain.constant.MessageType;
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
@@ -65,7 +65,7 @@ class ChatMessageJpaRepositoryTest extends DataJpaTestSupport {
 
     @Test
     @DisplayName("[채팅 조회 시, 채팅 메시지와 더불어 페이징 정보가 알맞게 내려온다]")
-    void findChatAllByRoomId(){
+    void findChatAllByRoomId() {
         //given
         Sort createdAt = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(
@@ -88,7 +88,7 @@ class ChatMessageJpaRepositoryTest extends DataJpaTestSupport {
 
     @Test
     @DisplayName("[채팅 조회 시, 채팅 메시지와 더불어 페이징 정보가 알맞게 내려온다2]")
-    void findChatAllByRoomId2(){
+    void findChatAllByRoomId2() {
         //given
         Sort createdAt = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(

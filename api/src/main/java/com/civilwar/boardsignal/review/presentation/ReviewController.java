@@ -1,9 +1,9 @@
 package com.civilwar.boardsignal.review.presentation;
 
-import com.civilwar.boardsignal.review.application.ReviewService;
 import com.civilwar.boardsignal.review.dto.ApiReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.request.ReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.response.ReviewSaveResponse;
+import com.civilwar.boardsignal.review.facade.ReviewFacade;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/reviews")
 public class ReviewController {
 
-    private final ReviewService reviewService;
+    private final ReviewFacade reviewFacade;
 
     @Operation(summary = "리뷰 등록 API")
     @ApiResponse(useReturnTypeSchema = true)
@@ -35,7 +35,7 @@ public class ReviewController {
     ) {
         List<ReviewSaveRequest> reviews = apiReviewSaveRequest.reviews();
 
-        ReviewSaveResponse reviewSaveResponse = reviewService.postReview(reviews, user,
+        ReviewSaveResponse reviewSaveResponse = reviewFacade.postReview(reviews, user,
             roomId);
 
         return ResponseEntity.ok(reviewSaveResponse);
