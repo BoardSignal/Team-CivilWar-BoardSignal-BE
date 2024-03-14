@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.io.IOException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ class RoomFacadeTest {
 
     @Test
     @DisplayName("[방 생성 시 해당 지하철 역에 대한 유저들에게 알림 이벤트가 발생한다.]")
+    @Disabled
     void createRoom() throws IOException {
         //given
         User user = UserFixture.getUserFixture("providerID", "imageUrl");

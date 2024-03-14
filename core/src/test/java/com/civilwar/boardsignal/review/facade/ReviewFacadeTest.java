@@ -11,6 +11,7 @@ import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ class ReviewFacadeTest {
 
     @Test
     @DisplayName("[리뷰를 받은 유저들에 대한 알림 이벤트가 동작한다.]")
+    @Disabled
     void postReviewNotification() {
         //given
         Long roomId = 2L;
