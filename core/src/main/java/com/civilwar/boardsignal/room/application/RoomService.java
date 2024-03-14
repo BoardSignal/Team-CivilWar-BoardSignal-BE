@@ -20,10 +20,11 @@ import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
-import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
@@ -218,7 +219,7 @@ public class RoomService {
     }
 
     @Transactional
-    public FixRoomResponse fixRoom(
+    public Room fixRoom(
         User user,
         Long roomId,
         FixRoomRequest request
@@ -246,7 +247,7 @@ public class RoomService {
         MeetingInfo savedMeetingInfo = meetingInfoRepository.save(meetingInfo);
         room.fixRoom(savedMeetingInfo);
 
-        return RoomMapper.toFixRoomResponse(room, room.getMeetingInfo());
+        return room;
     }
 
 
@@ -284,7 +285,7 @@ public class RoomService {
     }
 
     @Transactional
-    public void deleteRoom(User user, Long roomId) {
+    public DeleteRoomFacadeResponse deleteRoom(User user, Long roomId) {
         //방장 여부 확인
         Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
             .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
@@ -294,19 +295,26 @@ public class RoomService {
         }
 
         //참가자 정보 삭제
+        List<ParticipantJpaDto> participants = participantRepository.findParticipantByRoomId(
+            roomId);
         participantRepository.deleteParticipantsByRoomId(roomId);
 
         //todo 채팅 기록 삭제
 
         //모임 삭제
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM)); // 알림에서 필요한 삭제 전 Room 정보
         roomRepository.deleteById(roomId);
+
+        return new DeleteRoomFacadeResponse(room, participants);
     }
 
     @Transactional
-    public void kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
+    public Room kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
         //방장 여부 확인
+        Long roomId = kickOutUserRequest.roomId();
         Participant leaderInfo = participantRepository.findByUserIdAndRoomId(leader.getId(),
-                kickOutUserRequest.roomId())
+                roomId)
             .orElseThrow(() -> new ValidationException(IS_NOT_LEADER));
 
         //방장이 아니라면 불가
@@ -322,5 +330,14 @@ public class RoomService {
 
         //추방
         participantRepository.deleteById(kickOutUser.getId());
+
+        return roomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
     }
+
+    @Transactional(readOnly = true)
+    public List<ParticipantJpaDto> getParticipants(Long roomId) {
+        return participantRepository.findParticipantByRoomId(roomId);
+    }
+
 }
