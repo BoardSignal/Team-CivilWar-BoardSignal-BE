@@ -8,5 +8,6 @@ public record ChatPageResponse<T>(
     int currentPageNumber,
     int size,
     boolean hasNext
-    ) {
+) {
+
 }

@@ -1,8 +1,8 @@
 package com.civilwar.boardsignal.chat.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,8 +81,9 @@ class ChatMessageControllerTest extends ApiTestSupport {
         mockMvc.perform(get("/api/v1/rooms/chats/" + room.getId())
                 .header(AUTHORIZATION, accessToken)
                 .params(params))
-            .andExpect(result -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
-                ValidationException.class))
+            .andExpect(
+                result -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
             .andExpect(status().is4xxClientError());
     }
 

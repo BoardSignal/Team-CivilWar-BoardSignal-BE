@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.notification.domain.entity;
 
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +24,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "NOTIFICATION_TABLE")
-public class Notification {
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

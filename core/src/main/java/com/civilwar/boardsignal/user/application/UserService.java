@@ -1,15 +1,12 @@
 package com.civilwar.boardsignal.user.application;
 
-import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.user.domain.entity.User;
-import com.civilwar.boardsignal.user.domain.entity.UserCategory;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.UserModifyRequest;
 import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
-import com.civilwar.boardsignal.user.dto.response.LoginUserInfoResponse;
 import com.civilwar.boardsignal.user.dto.response.UserModifyResponse;
 import com.civilwar.boardsignal.user.dto.response.UserProfileResponse;
 import com.civilwar.boardsignal.user.dto.response.UserReviewResponse;
@@ -95,6 +92,11 @@ public class UserService {
         }
 
         return new ValidNicknameResponse(isNotValid);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getUserByStation(String station) {
+        return userRepository.findByStation(station);
     }
 
     @Transactional(readOnly = true)
