@@ -205,6 +205,7 @@ class RoomControllerTest extends ApiTestSupport {
 
         //then
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("page", "0");
         params.add("size", "5");
         mockMvc.perform(get("/api/v1/rooms/my/end-games")
                 .header(AUTHORIZATION, accessToken)
@@ -212,6 +213,43 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(jsonPath("$.roomsInfos.length()").value(5));
+    }
+
+    @Test
+    @DisplayName("[사용자는 자신이 참여했던 모임을 조회할 수 있다.2]")
+    void getMyEndGameTest7() throws Exception {
+        //given
+        LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
+        LocalDateTime before = LocalDateTime.of(2024, 2, 20, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //방 생성
+        for (int i = 0; i < 6; i++) {
+            //방 생성
+            Room room = RoomFixture.getRoom(Gender.UNION);
+            roomRepository.save(room);
+
+            //방 참가
+            Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
+            participantRepository.save(participant);
+
+            //모임 확정
+            MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
+            meetingInfoRepository.save(meetingInfo);
+            room.fixRoom(meetingInfo);
+            roomRepository.save(room);
+        }
+
+        //then
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("page", "1");
+        params.add("size", "5");
+        mockMvc.perform(get("/api/v1/rooms/my/end-games")
+                .header(AUTHORIZATION, accessToken)
+                .params(params))
+            .andExpect(jsonPath("$.size").value(5))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(1));
     }
 
     @Test

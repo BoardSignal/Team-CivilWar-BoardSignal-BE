@@ -25,7 +25,6 @@ import org.springframework.lang.NonNull;
 @Table(name = "REVIEW_TABLE")
 public class Review {
 
-    @BatchSize(size = 10)
     @OneToMany(mappedBy = "review", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     List<ReviewEvaluation> reviewEvaluations = new ArrayList<>();
 

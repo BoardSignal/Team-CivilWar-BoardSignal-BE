@@ -12,12 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface RoomJpaRepository extends JpaRepository<Room, Long> {
 
-    @EntityGraph(attributePaths = {"roomCategories", "meetingInfo"})
+    @EntityGraph(attributePaths = {"meetingInfo"})
     @Override
     Optional<Room> findById(Long roomId);
 
     // 내가 참여한 모든 room 조회 쿼리
-    @EntityGraph(attributePaths = {"roomCategories", "meetingInfo"})
+    @EntityGraph(attributePaths = {"meetingInfo"})
     @Query("select r "
         + "from Room as r "
         + "join Participant as p "

@@ -124,6 +124,7 @@ public class RoomRepositoryAdaptor implements RoomRepository {
             )
             .groupBy(room)
             .orderBy(room.createdAt.desc())
+            .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1L)
             .fetch();
 

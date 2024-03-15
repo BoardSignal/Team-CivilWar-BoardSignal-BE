@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 public interface ReviewJpaRepository extends JpaRepository<Review, Long> {
 
     @Query("select r from Review as r "
-        + "join fetch r.reviewEvaluations "
         + "where r.revieweeId = :userId")
     List<Review> findReviewsByRevieweeId(@Param("userId") Long userId);
 
