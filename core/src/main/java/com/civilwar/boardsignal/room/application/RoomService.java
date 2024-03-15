@@ -143,15 +143,18 @@ public class RoomService {
                 ).toList()
         );
 
-        //3. 내가 한 게임 전체 size > 요구 size -> 다음 페이지 존재
-        if (myEndGame.size() > pageable.getPageSize()) {
-            hasNext = true;
-        }
+        //3. Slicing
+        List<Room> resultList = new ArrayList<>();
+            myEndGame.stream()
+            .skip(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1L)
+            .forEach(resultList::add);
 
-        //4. size 크기만큼 cut
-        List<Room> resultList = myEndGame.stream()
-            .limit(pageable.getPageSize())
-            .toList();
+        //4.
+        if (resultList.size() > pageable.getPageSize()) {
+            hasNext = true;
+            resultList.remove(resultList.size() - 1);
+        }
 
         //5. slice 변환
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
