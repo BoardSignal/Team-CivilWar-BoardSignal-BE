@@ -7,6 +7,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
@@ -82,6 +83,18 @@ public class RoomController {
         ExitRoomResponse exitRoomResponse = roomFacade.exitRoom(user, roomId);
 
         return ResponseEntity.ok(exitRoomResponse);
+    }
+
+    @Operation(summary = "내가 현재 참여하고 있는 모임 조회 API (채팅 목록용)")
+    @ApiResponse(useReturnTypeSchema = true)
+    @GetMapping("/my/games")
+    public ResponseEntity<RoomPageResponse<ChatRoomResponse>> getMyGame(
+        @Parameter(hidden = true) @AuthenticationPrincipal User user,
+        Pageable pageable
+    ){
+        RoomPageResponse<ChatRoomResponse> myGame = roomFacade.findMyGame(user, pageable);
+
+        return ResponseEntity.ok(myGame);
     }
 
     @Operation(summary = "내가 이전에 참여한 모임 조회 API")

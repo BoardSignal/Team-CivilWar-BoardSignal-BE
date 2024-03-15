@@ -9,6 +9,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
@@ -71,6 +72,13 @@ public class RoomFacade {
         Long roomId
     ) {
         return roomService.exitRoom(user, roomId);
+    }
+
+    public RoomPageResponse<ChatRoomResponse> findMyGame(
+        User user,
+        Pageable pageable
+    ) {
+        return roomService.findMyGame(user, pageable);
     }
 
     public RoomPageResponse<GetAllRoomResponse> findMyEndGame(
@@ -159,6 +167,5 @@ public class RoomFacade {
 
         publisher.publishEvent(notificationRequest);
     }
-
 
 }
