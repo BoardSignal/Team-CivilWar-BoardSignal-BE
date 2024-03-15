@@ -38,7 +38,6 @@ import org.springframework.lang.NonNull;
 @Table(name = "ROOM_TABLE")
 public class Room extends BaseEntity {
 
-    @BatchSize(size = 10)
     @OneToMany(mappedBy = "room", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private final List<RoomCategory> roomCategories = new ArrayList<>();
     @Id
