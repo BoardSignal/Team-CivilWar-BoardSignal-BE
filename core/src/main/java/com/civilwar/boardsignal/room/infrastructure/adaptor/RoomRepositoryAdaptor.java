@@ -104,6 +104,11 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
+    public List<Room> findMyGame(Long userId) {
+        return roomJpaRepository.findMyGame(userId);
+    }
+
+    @Override
     public List<Room> findMyFixRoom(Long userId) {
         return roomJpaRepository.findMyFixRoom(userId);
     }
