@@ -382,8 +382,12 @@ public class RoomService {
         //추방
         participantRepository.deleteById(kickOutUser.getId());
 
-        return roomRepository.findById(roomId)
+        //참가자 수 감소
+        Room room = roomRepository.findByIdWithLock(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        room.decreaseHeadCount();
+
+        return room;
     }
 
     @Transactional(readOnly = true)

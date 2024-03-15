@@ -606,7 +606,7 @@ class RoomServiceTest {
             Optional.of(leaderInfo));
         given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
             Optional.of(userInfo));
-        given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
+        given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
 
         KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, userId);
 
