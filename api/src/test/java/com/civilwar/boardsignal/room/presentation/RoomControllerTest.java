@@ -179,6 +179,64 @@ class RoomControllerTest extends ApiTestSupport {
     }
 
     @Test
+    @DisplayName("[사용자는 자신이 참여중인 채팅방을 조회할 수 있다, 이 때 fix 되고 시간이 지난방은 조회되지 않는다]")
+    void getMyGameTest() throws Exception {
+        /**
+         * room1 -> 참가, fix, 시간이 지난 모임,
+         * room2 -> 참가, fix, 시간이 지나지 않은 모임 -> o
+         * room3 -> 참가, unfix -> o
+         * room4 -> 미참가
+         */
+        //given
+        LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
+        LocalDateTime before = LocalDateTime.of(2024, 2, 20, 20, 0, 0);
+        LocalDateTime after = LocalDateTime.of(2024, 2, 22, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //방 4개 중
+        Room room1 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room1);
+        Room room2 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room2);
+        Room room3 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room3);
+        Room room4 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room4);
+
+        //방 3개 참가
+        Participant participant = Participant.of(loginUser.getId(), room1.getId(), true);
+        participantRepository.save(participant);
+        Participant participant2 = Participant.of(loginUser.getId(), room2.getId(), true);
+        participantRepository.save(participant2);
+        Participant participant3 = Participant.of(loginUser.getId(), room3.getId(), true);
+        participantRepository.save(participant3);
+
+        //방 2개 확정
+        MeetingInfo meetingInfo1 = MeetingInfoFixture.getMeetingInfo(before);
+        meetingInfoRepository.save(meetingInfo1);
+        room1.fixRoom(meetingInfo1);
+        roomRepository.save(room1);
+        MeetingInfo meetingInfo2 = MeetingInfoFixture.getMeetingInfo(after);
+        meetingInfoRepository.save(meetingInfo2);
+        room2.fixRoom(meetingInfo2);
+        roomRepository.save(room2);
+
+        //then
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("page", "0");
+        params.add("size", "5");
+        mockMvc.perform(get("/api/v1/rooms/my/games")
+                .header(AUTHORIZATION, accessToken)
+                .params(params))
+            .andExpect(jsonPath("$.currentPageNumber").value(0))
+            .andExpect(jsonPath("$.size").value(5))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(2))
+            .andExpect(jsonPath("$.roomsInfos.[0].id").value(room2.getId()))
+            .andExpect(jsonPath("$.roomsInfos.[1].id").value(room3.getId()));
+    }
+
+    @Test
     @DisplayName("[사용자는 자신이 참여했던 모임을 조회할 수 있다.]")
     void getMyEndGameTest() throws Exception {
         //given
@@ -247,6 +305,7 @@ class RoomControllerTest extends ApiTestSupport {
         mockMvc.perform(get("/api/v1/rooms/my/end-games")
                 .header(AUTHORIZATION, accessToken)
                 .params(params))
+            .andExpect(jsonPath("$.currentPageNumber").value(1))
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(1));

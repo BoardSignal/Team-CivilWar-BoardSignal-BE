@@ -20,6 +20,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
@@ -125,11 +126,50 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
+    public RoomPageResponse<ChatRoomResponse> findMyGame(
+        User user,
+        Pageable pageable
+    ) {
+        boolean hasNext = false;
+
+        //1. 내가 지금까지 참가한 모든 room 조회
+        List<Room> myGame = roomRepository.findMyGame(user.getId());
+
+        //2. 모임 미확정인 방 & 확정이어도 시간이 지나지 않은 방
+        List<Room> myCurrentGame = new ArrayList<>(
+            myGame.stream()
+                .filter(room -> room.getStatus().equals(RoomStatus.NON_FIX)
+                    || room.getMeetingInfo().getMeetingTime().toLocalDate()
+                    .isAfter(now.get().toLocalDate())
+                ).toList()
+        );
+
+        //3. Slicing
+        List<Room> resultList = new ArrayList<>();
+        myCurrentGame.stream()
+            .skip(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1L)
+            .forEach(resultList::add);
+
+        //4.
+        if (resultList.size() > pageable.getPageSize()) {
+            hasNext = true;
+            resultList.remove(resultList.size() - 1);
+        }
+
+        //5. slice 반환
+        Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
+
+        Slice<ChatRoomResponse> resultMap = result.map(RoomMapper::toChatRoomResponse);
+
+        return RoomMapper.toRoomPageResponse(resultMap);
+    }
+
+    @Transactional(readOnly = true)
     public RoomPageResponse<GetAllRoomResponse> findMyEndGame(
         Long userId,
         Pageable pageable
     ) {
-
         boolean hasNext = false;
 
         //1. 내가 참여한 모든 room
@@ -159,7 +199,9 @@ public class RoomService {
         //5. slice 변환
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
 
-        return RoomMapper.toRoomPageResponse(result);
+        Slice<GetAllRoomResponse> resultMap = result.map(RoomMapper::toGetAllRoomResponse);
+
+        return RoomMapper.toRoomPageResponse(resultMap);
     }
 
     @Transactional(readOnly = true)
@@ -168,7 +210,10 @@ public class RoomService {
         Pageable pageable
     ) {
         Slice<Room> findRooms = roomRepository.findAll(roomSearchCondition, pageable);
-        return RoomMapper.toRoomPageResponse(findRooms);
+
+        Slice<GetAllRoomResponse> findRoomsMap = findRooms.map(RoomMapper::toGetAllRoomResponse);
+
+        return RoomMapper.toRoomPageResponse(findRoomsMap);
     }
 
     @Transactional(readOnly = true)
@@ -337,8 +382,12 @@ public class RoomService {
         //추방
         participantRepository.deleteById(kickOutUser.getId());
 
-        return roomRepository.findById(roomId)
+        //참가자 수 감소
+        Room room = roomRepository.findByIdWithLock(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+        room.decreaseHeadCount();
+
+        return room;
     }
 
     @Transactional(readOnly = true)

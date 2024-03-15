@@ -6,6 +6,7 @@ import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
@@ -86,14 +87,13 @@ public final class RoomMapper {
         );
     }
 
-    public static RoomPageResponse<GetAllRoomResponse> toRoomPageResponse(Slice<Room> pages) {
-
-        Slice<GetAllRoomResponse> dto = pages.map(RoomMapper::toGetAllRoomResponse);
+    public static <T> RoomPageResponse<T> toRoomPageResponse(Slice<T> pages) {
 
         return new RoomPageResponse<>(
-            dto.getContent(),
-            dto.getSize(),
-            dto.hasNext()
+            pages.getContent(),
+            pages.getNumber(),
+            pages.getSize(),
+            pages.hasNext()
         );
     }
 
@@ -174,5 +174,13 @@ public final class RoomMapper {
             room.getHeadCount(),
             participants
         );
+    }
+
+    public static ChatRoomResponse toChatRoomResponse(Room room) {
+        return new ChatRoomResponse(
+            room.getId(),
+            room.getTitle(),
+            room.getImageUrl(),
+            room.getHeadCount());
     }
 }

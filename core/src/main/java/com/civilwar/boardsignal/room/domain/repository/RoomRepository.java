@@ -16,6 +16,8 @@ public interface RoomRepository {
 
     Optional<Room> findById(Long id);
 
+    List<Room> findMyGame(Long userId);
+
     List<Room> findMyFixRoom(Long userId);
 
     Slice<Room> findAll(RoomSearchCondition roomSearchCondition, Pageable pageable);
