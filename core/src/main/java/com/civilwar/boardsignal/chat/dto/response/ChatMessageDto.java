@@ -10,7 +10,7 @@ public record ChatMessageDto(
     String userImageUrl,
     String content,
     MessageType type,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'hh:mm:ss[.SSS]")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     LocalDateTime createAt
 ) {
 
