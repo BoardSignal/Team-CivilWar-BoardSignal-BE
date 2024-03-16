@@ -8,9 +8,12 @@ import com.civilwar.boardsignal.chat.dto.response.ChatMessageResponse;
 import com.civilwar.boardsignal.chat.dto.response.ChatPageResponse;
 import com.civilwar.boardsignal.chat.mapper.ChatMessageMapper;
 import com.civilwar.boardsignal.common.exception.ValidationException;
+import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import java.time.LocalDateTime;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatMessageService {
 
+    private final Supplier<LocalDateTime> now;
     private final ChatMessageRepository chatMessageRepository;
     private final ParticipantRepository participantRepository;
 
@@ -53,6 +57,17 @@ public class ChatMessageService {
             pageable);
 
         return ChatMessageMapper.toChatPageResponse(chatByRoomId);
+    }
+
+    @Transactional
+    public LocalDateTime exitChatRoom(Long userId, Long roomId) {
+        Participant participant = participantRepository.findByUserIdAndRoomId(userId, roomId)
+            .orElseThrow(() -> new ValidationException(RoomErrorCode.INVALID_PARTICIPANT));
+
+        LocalDateTime nowTime = now.get();
+        participant.updateLastExit(nowTime);
+
+        return nowTime;
     }
 
 }
