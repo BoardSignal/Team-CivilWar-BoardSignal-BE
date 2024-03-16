@@ -186,14 +186,16 @@ class RoomControllerTest extends ApiTestSupport {
          * room2 -> 참가, fix, 시간이 지나지 않은 모임 -> o
          * room3 -> 참가, unfix -> o
          * room4 -> 미참가
+         * room5 -> 참가, fix, 모임 확정 날짜가 당일인 모임 -> o
          */
         //given
         LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
         LocalDateTime before = LocalDateTime.of(2024, 2, 20, 20, 0, 0);
         LocalDateTime after = LocalDateTime.of(2024, 2, 22, 20, 0, 0);
+        LocalDateTime today = LocalDateTime.of(2024, 2, 21, 18, 0, 0);
         given(nowTime.get()).willReturn(now);
 
-        //방 4개 중
+        //방 5개 중
         Room room1 = RoomFixture.getRoom(Gender.UNION);
         roomRepository.save(room1);
         Room room2 = RoomFixture.getRoom(Gender.UNION);
@@ -202,16 +204,20 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room3);
         Room room4 = RoomFixture.getRoom(Gender.UNION);
         roomRepository.save(room4);
+        Room room5 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room5);
 
-        //방 3개 참가
+        //방 4개 참가
         Participant participant = Participant.of(loginUser.getId(), room1.getId(), true);
         participantRepository.save(participant);
         Participant participant2 = Participant.of(loginUser.getId(), room2.getId(), true);
         participantRepository.save(participant2);
         Participant participant3 = Participant.of(loginUser.getId(), room3.getId(), true);
         participantRepository.save(participant3);
+        Participant participant5 = Participant.of(loginUser.getId(), room5.getId(), true);
+        participantRepository.save(participant5);
 
-        //방 2개 확정
+        //방 3개 확정
         MeetingInfo meetingInfo1 = MeetingInfoFixture.getMeetingInfo(before);
         meetingInfoRepository.save(meetingInfo1);
         room1.fixRoom(meetingInfo1);
@@ -220,6 +226,10 @@ class RoomControllerTest extends ApiTestSupport {
         meetingInfoRepository.save(meetingInfo2);
         room2.fixRoom(meetingInfo2);
         roomRepository.save(room2);
+        MeetingInfo meetingInfo3 = MeetingInfoFixture.getMeetingInfo(today);
+        meetingInfoRepository.save(meetingInfo3);
+        room5.fixRoom(meetingInfo2);
+        roomRepository.save(room5);
 
         //then
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -231,9 +241,10 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.currentPageNumber").value(0))
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(false))
-            .andExpect(jsonPath("$.roomsInfos.length()").value(2))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(3))
             .andExpect(jsonPath("$.roomsInfos.[0].id").value(room2.getId()))
-            .andExpect(jsonPath("$.roomsInfos.[1].id").value(room3.getId()));
+            .andExpect(jsonPath("$.roomsInfos.[1].id").value(room3.getId()))
+            .andExpect(jsonPath("$.roomsInfos.[2].id").value(room5.getId()));
     }
 
     @Test

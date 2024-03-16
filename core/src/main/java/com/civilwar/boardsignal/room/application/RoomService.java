@@ -140,7 +140,7 @@ public class RoomService {
             myGame.stream()
                 .filter(room -> room.getStatus().equals(RoomStatus.NON_FIX)
                     || room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isAfter(now.get().toLocalDate())
+                    .isAfter(now.get().toLocalDate().minusDays(1))
                 ).toList()
         );
 
@@ -185,7 +185,8 @@ public class RoomService {
 
         //3. Slicing
         List<Room> resultList = new ArrayList<>();
-            myEndGame.stream()
+
+        myEndGame.stream()
             .skip(pageable.getOffset())
             .limit(pageable.getPageSize() + 1L)
             .forEach(resultList::add);
