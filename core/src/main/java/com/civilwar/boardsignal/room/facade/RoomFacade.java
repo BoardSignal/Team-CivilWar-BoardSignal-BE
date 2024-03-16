@@ -15,6 +15,7 @@ import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
@@ -81,7 +82,7 @@ public class RoomFacade {
         return roomService.findMyGame(user, pageable);
     }
 
-    public RoomPageResponse<GetAllRoomResponse> findMyEndGame(
+    public RoomPageResponse<GetEndGameResponse> findMyEndGame(
         Long userId,
         Pageable pageable
     ) {
