@@ -1,7 +1,6 @@
 package com.civilwar.boardsignal.common.config;
 
-import com.civilwar.boardsignal.chat.handler.StompAuthenticationHandler;
-import com.civilwar.boardsignal.chat.handler.StompExceptionHandler;
+import com.civilwar.boardsignal.chat.handler.StompLogHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -15,10 +14,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // 클라이언트 인증 핸들러
-    private final StompAuthenticationHandler stompAuthenticationHandler;
-    // WebSocket 내 예외 핸들러
-    private final StompExceptionHandler stompExceptionHandler;
+    // 로그 핸들러
+    private final StompLogHandler stompLogHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -27,8 +24,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             .addEndpoint("/ws/chats")
             .setAllowedOriginPatterns("*")
             .withSockJS();
-        //예외 핸들러 등록
-        registry.setErrorHandler(stompExceptionHandler);
     }
 
     @Override
@@ -39,9 +34,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
     }
 
-    //클라이언트 -> 서버 요청 시, 인증 핸들러 등록
+    //클라이언트 -> 로그 핸들러 등록
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(stompAuthenticationHandler);
+        registration.interceptors(stompLogHandler);
     }
 }
