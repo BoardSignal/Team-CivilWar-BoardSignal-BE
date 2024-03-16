@@ -6,6 +6,7 @@ import com.civilwar.boardsignal.chat.dto.request.ChatMessageRequest;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageResponse;
 import com.civilwar.boardsignal.chat.dto.response.ChatPageResponse;
+import com.civilwar.boardsignal.chat.dto.response.GetChatMessageResponse;
 import com.civilwar.boardsignal.chat.mapper.ChatMessageMapper;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
@@ -44,19 +45,22 @@ public class ChatMessageService {
     }
 
     @Transactional(readOnly = true)
-    public ChatPageResponse<ChatMessageDto> findChatMessages(User user, Long roomId,
+    public ChatPageResponse<GetChatMessageResponse> findChatMessages(User user, Long roomId,
         Pageable pageable) {
-        //유저가 참여자인지 검증
-        boolean isParticipants = participantRepository.existsByUserIdAndRoomId(user.getId(),
-            roomId);
-        if (!isParticipants) {
-            throw new ValidationException(RoomErrorCode.INVALID_PARTICIPANT);
-        }
+
+        //참여자가 채팅 페이지를 나간 시점 조회
+        Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
+            .orElseThrow(() -> new ValidationException(RoomErrorCode.INVALID_PARTICIPANT));
+        LocalDateTime lastExitTime = participant.getLastExit();
 
         Slice<ChatMessageDto> chatByRoomId = chatMessageRepository.findChatAllByRoomId(roomId,
             pageable);
 
-        return ChatMessageMapper.toChatPageResponse(chatByRoomId);
+        Slice<GetChatMessageResponse> chatByRoomIdMap = chatByRoomId.map(
+            chatMessageDto -> ChatMessageMapper.toGetChatMessageResponse(chatMessageDto,
+                lastExitTime));
+
+        return ChatMessageMapper.toChatPageResponse(chatByRoomIdMap);
     }
 
     @Transactional
