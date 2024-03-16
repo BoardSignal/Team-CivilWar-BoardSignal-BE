@@ -27,6 +27,7 @@ import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
@@ -135,11 +136,12 @@ class RoomServiceTest {
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
-        RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
+        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
 
         //then
         assertThat(myEndGame.roomsInfos()).hasSize(5);
+        assertThat(myEndGame.roomsInfos().get(0).fixTime()).isEqualTo(before);
         assertThat(myEndGame.hasNext()).isTrue();
     }
 
@@ -166,7 +168,7 @@ class RoomServiceTest {
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
-        RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
+        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
 
         //then
@@ -197,7 +199,7 @@ class RoomServiceTest {
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
-        RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
+        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
 
         //then
@@ -228,7 +230,7 @@ class RoomServiceTest {
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
         //when
-        RoomPageResponse<GetAllRoomResponse> myEndGame = roomService.findMyEndGame(userId,
+        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
 
         //then
