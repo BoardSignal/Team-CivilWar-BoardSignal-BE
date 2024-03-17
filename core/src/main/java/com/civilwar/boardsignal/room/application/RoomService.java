@@ -103,6 +103,7 @@ public class RoomService {
         //참여 정보 저장
         Participant participant = Participant.of(user.getId(), roomId, false);
         participantRepository.save(participant);
+        participant.updateLastExit(now.get());
 
         return new ParticipantRoomResponse(findRoom.getHeadCount());
     }

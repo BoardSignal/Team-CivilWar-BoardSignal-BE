@@ -1,8 +1,8 @@
 package com.civilwar.boardsignal.chat.presentation;
 
 import com.civilwar.boardsignal.chat.application.ChatMessageService;
-import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatPageResponse;
+import com.civilwar.boardsignal.chat.dto.response.GetChatMessageResponse;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +20,12 @@ public class ChatMessageController {
     private final ChatMessageService chatMessageService;
 
     @GetMapping("/api/v1/rooms/chats/{roomId}")
-    public ResponseEntity<ChatPageResponse<ChatMessageDto>> findChatMessages(
+    public ResponseEntity<ChatPageResponse<GetChatMessageResponse>> findChatMessages(
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         @PathVariable("roomId") Long roomId,
         Pageable pageable
     ) {
-        ChatPageResponse<ChatMessageDto> chatMessages = chatMessageService.findChatMessages(user,
+        ChatPageResponse<GetChatMessageResponse> chatMessages = chatMessageService.findChatMessages(user,
             roomId, pageable);
         return ResponseEntity.ok(chatMessages);
     }

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +32,9 @@ public class Participant {
     @Column(name = "PARTICIPANT_IS_LEADER")
     private boolean isLeader;
 
+    @Column(name = "PARTICIPANT_LAST_EXIT")
+    private LocalDateTime lastExit;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Participant(
         Long userId,
@@ -52,5 +56,9 @@ public class Participant {
             .roomId(roomId)
             .isLeader(isLeader)
             .build();
+    }
+
+    public void updateLastExit(LocalDateTime exitTime) {
+        this.lastExit = exitTime;
     }
 }
