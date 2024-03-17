@@ -12,6 +12,7 @@ import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
@@ -100,12 +101,12 @@ public class RoomController {
     @Operation(summary = "내가 이전에 참여한 모임 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/my/end-games")
-    public ResponseEntity<RoomPageResponse<GetAllRoomResponse>> getMyEndGame(
+    public ResponseEntity<RoomPageResponse<GetEndGameResponse>> getMyEndGame(
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         Pageable pageable
     ) {
 
-        RoomPageResponse<GetAllRoomResponse> myParticipants = roomFacade.findMyEndGame(
+        RoomPageResponse<GetEndGameResponse> myParticipants = roomFacade.findMyEndGame(
             user.getId(), pageable);
 
         return ResponseEntity.ok(myParticipants);

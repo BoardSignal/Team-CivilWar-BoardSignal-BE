@@ -25,6 +25,7 @@ import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
@@ -140,12 +141,13 @@ public class RoomService {
             myGame.stream()
                 .filter(room -> room.getStatus().equals(RoomStatus.NON_FIX)
                     || room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isAfter(now.get().toLocalDate())
+                    .isAfter(now.get().toLocalDate().minusDays(1))
                 ).toList()
         );
 
         //3. Slicing
         List<Room> resultList = new ArrayList<>();
+
         myCurrentGame.stream()
             .skip(pageable.getOffset())
             .limit(pageable.getPageSize() + 1L)
@@ -166,7 +168,7 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public RoomPageResponse<GetAllRoomResponse> findMyEndGame(
+    public RoomPageResponse<GetEndGameResponse> findMyEndGame(
         Long userId,
         Pageable pageable
     ) {
@@ -185,7 +187,8 @@ public class RoomService {
 
         //3. Slicing
         List<Room> resultList = new ArrayList<>();
-            myEndGame.stream()
+
+        myEndGame.stream()
             .skip(pageable.getOffset())
             .limit(pageable.getPageSize() + 1L)
             .forEach(resultList::add);
@@ -199,7 +202,7 @@ public class RoomService {
         //5. slice 변환
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
 
-        Slice<GetAllRoomResponse> resultMap = result.map(RoomMapper::toGetAllRoomResponse);
+        Slice<GetEndGameResponse> resultMap = result.map(RoomMapper::toGetEndGameResponse);
 
         return RoomMapper.toRoomPageResponse(resultMap);
     }

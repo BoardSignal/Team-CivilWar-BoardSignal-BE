@@ -10,6 +10,7 @@ import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
+import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
@@ -84,6 +85,34 @@ public final class RoomMapper {
             categories,
             room.getCreatedAt(),
             room.getHeadCount()
+        );
+    }
+
+    public static GetEndGameResponse toGetEndGameResponse(Room room) {
+        List<String> categories = room.getRoomCategories().stream()
+            .map(roomCategory -> roomCategory.getCategory().getDescription())
+            .toList();
+        String time =
+            room.getDaySlot().getDescription() + " " + room.getTimeSlot().getDescription();
+        String station = String.format("%s(%s)", room.getSubwayStation(), room.getSubwayLine());
+        log.info("{}", station);
+
+        return new GetEndGameResponse(
+            room.getId(),
+            room.getTitle(),
+            room.getDescription(),
+            station,
+            time,
+            room.getMinAge(),
+            room.getMaxAge(),
+            room.getAllowedGender().getDescription(),
+            room.getImageUrl(),
+            room.getMinParticipants(),
+            room.getMaxParticipants(),
+            categories,
+            room.getCreatedAt(),
+            room.getHeadCount(),
+            room.getMeetingInfo().getMeetingTime()
         );
     }
 
