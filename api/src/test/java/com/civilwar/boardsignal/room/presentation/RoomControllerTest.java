@@ -19,6 +19,9 @@ import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
+import com.civilwar.boardsignal.review.ReviewFixture;
+import com.civilwar.boardsignal.review.domain.entity.Review;
+import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
@@ -77,6 +80,8 @@ class RoomControllerTest extends ApiTestSupport {
     private MeetingInfoJpaRepository meetingInfoRepository;
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
     @Autowired
     private TokenProvider tokenProvider;
     @MockBean
@@ -373,6 +378,51 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(0));
 
+    }
+
+    @Test
+    @DisplayName("[사용자는 자신이 참여했던 모임을 조회할 때, 리뷰 반영 여부도 함께 응답한다]")
+    void getMyEndGameTest3() throws Exception {
+        //given
+        LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
+        LocalDateTime before = LocalDateTime.of(2024, 2, 20, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        User anotherUser = userRepository.save(UserFixture.getUserFixture2("providerId", "url"));
+
+        //방 생성
+        Room room = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room);
+
+        //방 참가
+        Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
+        participantRepository.save(participant);
+        Participant.of(anotherUser.getId(), room.getId(), false);
+
+        //모임 확정
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
+        meetingInfoRepository.save(meetingInfo);
+        room.fixRoom(meetingInfo);
+        roomRepository.save(room);
+
+        //리뷰 등록
+        Review review = ReviewFixture.getReviewFixture(loginUser.getId(), anotherUser.getId(),
+            room.getId(), ReviewFixture.getEvaluationFixture());
+        reviewRepository.save(review);
+
+        //then
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("page", "0");
+        params.add("size", "5");
+        mockMvc.perform(get("/api/v1/rooms/my/end-games")
+                .header(AUTHORIZATION, accessToken)
+                .params(params))
+            .andExpect(jsonPath("$.size").value(5))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(1))
+            .andExpect(jsonPath("$.roomsInfos.[0].fixTime").value(
+                before.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
+            .andExpect(jsonPath("$.roomsInfos[0].reviewCompleted").value(true));
     }
 
     @Disabled
