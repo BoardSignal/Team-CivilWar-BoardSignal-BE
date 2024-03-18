@@ -97,6 +97,8 @@ public final class RoomMapper {
         String station = String.format("%s(%s)", room.getSubwayStation(), room.getSubwayLine());
         log.info("{}", station);
 
+        MeetingInfo fixMeetingInfo = room.getMeetingInfo();
+
         return new GetEndGameResponse(
             room.getId(),
             room.getTitle(),
@@ -112,7 +114,10 @@ public final class RoomMapper {
             categories,
             room.getCreatedAt(),
             room.getHeadCount(),
-            room.getMeetingInfo().getMeetingTime()
+            room.getMeetingInfo().getMeetingTime(),
+            fixMeetingInfo.getLine(),
+            fixMeetingInfo.getStation(),
+            fixMeetingInfo.getMeetingPlace()
         );
     }
 

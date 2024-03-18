@@ -21,7 +21,10 @@ public record GetEndGameResponse(
     LocalDateTime createdAt,
     int headCount,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    LocalDateTime fixTime
+    LocalDateTime fixTime,
+    String fixLine,
+    String fixStation,
+    String fixPlace
 ) {
 
 }

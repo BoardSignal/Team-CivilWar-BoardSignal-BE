@@ -281,16 +281,19 @@ class RoomControllerTest extends ApiTestSupport {
                 .params(params))
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(true))
-            .andExpect(jsonPath("$.roomsInfos.length()").value(5));
+            .andExpect(jsonPath("$.roomsInfos.length()").value(5))
+            .andExpect(jsonPath("$.roomsInfos.[0].fixTime").value(
+                before.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))));
     }
 
     @Test
     @DisplayName("[사용자는 자신이 참여했던 모임을 조회할 수 있다.2]")
-    void getMyEndGameTest7() throws Exception {
+    void getMyEndGameTest1() throws Exception {
         //given
         LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
         LocalDateTime before = LocalDateTime.of(2024, 2, 20, 20, 0, 0);
         given(nowTime.get()).willReturn(now);
+        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
 
         //방 생성
         for (int i = 0; i < 6; i++) {
@@ -303,7 +306,6 @@ class RoomControllerTest extends ApiTestSupport {
             participantRepository.save(participant);
 
             //모임 확정
-            MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
             meetingInfoRepository.save(meetingInfo);
             room.fixRoom(meetingInfo);
             roomRepository.save(room);
@@ -319,7 +321,10 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.currentPageNumber").value(1))
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(false))
-            .andExpect(jsonPath("$.roomsInfos.length()").value(1));
+            .andExpect(jsonPath("$.roomsInfos.length()").value(1))
+            .andExpect(jsonPath("$.roomsInfos.[0].fixLine").value(meetingInfo.getLine()))
+            .andExpect(jsonPath("$.roomsInfos.[0].fixStation").value(meetingInfo.getStation()))
+            .andExpect(jsonPath("$.roomsInfos.[0].fixPlace").value(meetingInfo.getMeetingPlace()));
     }
 
     @Test
