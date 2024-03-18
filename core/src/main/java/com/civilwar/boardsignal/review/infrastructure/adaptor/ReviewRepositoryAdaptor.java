@@ -33,4 +33,14 @@ public class ReviewRepositoryAdaptor implements ReviewRepository {
     public List<Review> findReviewsByRevieweeId(Long userId) {
         return reviewJpaRepository.findReviewsByRevieweeId(userId);
     }
+
+    @Override
+    public List<Review> findReviewsByRoomIdsAndReviewer(List<Long> roomIds, Long reviewer) {
+        return reviewJpaRepository.findReviewsByRoomIdsAndReviewer(roomIds, reviewer);
+    }
+
+    @Override
+    public boolean existsReviewByReviewerIdAndRoomId(Long reviewerId, Long roomId) {
+        return reviewJpaRepository.existsReviewByReviewerIdAndRoomId(reviewerId, roomId);
+    }
 }
