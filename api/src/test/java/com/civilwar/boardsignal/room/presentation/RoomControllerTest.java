@@ -570,6 +570,7 @@ class RoomControllerTest extends ApiTestSupport {
         Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
         participantRepository.save(participant);
 
+        given(nowTime.get()).willReturn(request.meetingTime().minusDays(1));
         mockMvc.perform(post("/api/v1/rooms/fix/{roomId}", room.getId())
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)

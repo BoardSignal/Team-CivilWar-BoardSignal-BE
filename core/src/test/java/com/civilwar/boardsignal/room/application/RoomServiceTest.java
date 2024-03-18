@@ -329,6 +329,7 @@ class RoomServiceTest {
             LocalDateTime.of(2024, 7, 31, 5, 30)
         );
         ReflectionTestUtils.setField(meetingInfo, "id", 1L);
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
 
         given(participantRepository.findByUserIdAndRoomId(user.getId(), room.getId()))
             .willReturn(Optional.of(participant));
@@ -336,8 +337,8 @@ class RoomServiceTest {
             .willReturn(Optional.of(room));
         given(meetingInfoRepository.save(any(MeetingInfo.class)))
             .willReturn(meetingInfo);
+        given(time.get()).willReturn(request.meetingTime().minusDays(1));
 
-        FixRoomRequest request = RoomFixture.getFixRoomRequest();
 
         //when
         Room response = roomService.fixRoom(user, room.getId(), request);
@@ -362,6 +363,7 @@ class RoomServiceTest {
 
         given(participantRepository.findByUserIdAndRoomId(any(Long.class), any(Long.class)))
             .willReturn(Optional.empty());
+        given(time.get()).willReturn(request.meetingTime().minusDays(1));
 
         //when
         ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
@@ -385,6 +387,7 @@ class RoomServiceTest {
 
         given(participantRepository.findByUserIdAndRoomId(any(Long.class), any(Long.class)))
             .willReturn(Optional.of(participantNotLeader));
+        given(time.get()).willReturn(request.meetingTime().minusDays(1));
 
         //when
         ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
@@ -671,5 +674,42 @@ class RoomServiceTest {
         //then
         assertThatThrownBy(() -> roomService.kickOutUser(leader, kickOutUserRequest)).isInstanceOf(
             ValidationException.class).hasMessage(RoomErrorCode.INVALID_PARTICIPANT.getMessage());
+    }
+
+    @Test
+    @DisplayName("[모임 확정 시, 확정 시점보다 이전으로 확정하려 할 시 예외가 발생한다.]")
+    void fixRoomBeforeDate(){
+        //given
+        User user = UserFixture.getUserFixture("rprp", "https");
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
+        LocalDateTime today = request.meetingTime().plusDays(1);
+        given(time.get()).willReturn(today);
+
+        //when
+        ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
+
+        //then
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(RoomErrorCode.INVALID_DATE.getMessage());
+    }
+
+    @Test
+    @DisplayName("[모임 확정 시, 확정 시점 7일 이후에 대한 요청이 오면 예외가 발생한다.]")
+    void fixRoomAfterSevenDays(){
+        //given
+        User user = UserFixture.getUserFixture("rprp", "https");
+        FixRoomRequest request = RoomFixture.getFixRoomRequest();
+        LocalDateTime today = request.meetingTime().minusDays(8);
+
+        given(time.get()).willReturn(today);
+
+        //when
+        ThrowingCallable when = () -> roomService.fixRoom(user, 1L, request);
+
+        //then
+        assertThatThrownBy(when)
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining(RoomErrorCode.INVALID_DATE.getMessage());
     }
 }
