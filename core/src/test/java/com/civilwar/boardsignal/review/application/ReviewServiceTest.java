@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
@@ -40,6 +41,7 @@ class ReviewServiceTest {
     private ReviewService reviewService;
 
     @Test
+    @DisplayName("[리뷰를 생성할 수 있다]")
     void postReviewTest() {
         //given
         Long roomId = 2L;
@@ -75,6 +77,8 @@ class ReviewServiceTest {
 
             given(userRepository.findById(i)).willReturn(Optional.of(reviewee));
         }
+        given(reviewRepository.existsReviewByReviewerIdAndRoomId(loginUser.getId(),
+            roomId)).willReturn(false);
 
         //when
         ReviewSaveResponse reviewSaveResponse = reviewService.postReview(reviewSaveRequests,
