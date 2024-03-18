@@ -6,6 +6,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
+import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
@@ -30,6 +31,10 @@ public class RoomRepositoryAdaptor implements RoomRepository {
 
     private final RoomJpaRepository roomJpaRepository;
     private final JPAQueryFactory jpaQueryFactory;
+
+    private BooleanExpression equalsNonFixRoom() {
+        return room.status.eq(RoomStatus.NON_FIX);
+    }
 
     private BooleanExpression equalAllowedOppositeGender(String allowedGender) {
         if (allowedGender == null) {
@@ -125,7 +130,8 @@ public class RoomRepositoryAdaptor implements RoomRepository {
                 containsStation(roomSearchCondition.station()),
                 containsAnyTime(roomSearchCondition.time()),
                 containsCategory(roomSearchCondition.category()),
-                equalAllowedOppositeGender(roomSearchCondition.gender())
+                equalAllowedOppositeGender(roomSearchCondition.gender()),
+                equalsNonFixRoom()
             )
             .groupBy(room)
             .orderBy(room.createdAt.desc())
