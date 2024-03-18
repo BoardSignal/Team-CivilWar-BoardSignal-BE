@@ -26,13 +26,14 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
     List<Room> findMyGame(@Param("userId") Long userId);
 
     // 내가 참여한 fix room 조회 쿼리
-    @EntityGraph(attributePaths = {"meetingInfo"})
     @Query("select r "
         + "from Room as r "
         + "join Participant as p "
         + "on r.id = p.roomId "
+        + "join fetch r.meetingInfo as m "
         + "where p.userId=:userId "
-        + "and r.status='FIX'")
+        + "and r.status='FIX' "
+        + "order by m.meetingTime desc ")
     List<Room> findMyFixRoom(@Param("userId") Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

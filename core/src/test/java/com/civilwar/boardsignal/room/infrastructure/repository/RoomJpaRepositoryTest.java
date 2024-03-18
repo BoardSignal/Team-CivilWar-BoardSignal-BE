@@ -123,6 +123,50 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     }
 
     @Test
+    @DisplayName("[자신이 참가한 모임 조회 시, 모임 확정일 기준 역순으로 정렬된다]")
+    void findMyFixRoomTest3() throws IOException {
+        //given
+        Long user1 = 1L;
+
+        LocalDateTime before = LocalDateTime.of(2024, 2, 21, 19, 0, 0);
+        LocalDateTime now = LocalDateTime.of(2024, 2, 23, 19, 0, 0);
+        LocalDateTime after = LocalDateTime.of(2024, 2, 25, 19, 0, 0);
+
+        LocalDateTime[] times = new LocalDateTime[] {
+            before, now, after
+        };
+
+        for (LocalDateTime time : times) {
+            //방 생성
+            Room room = RoomFixture.getRoom(Gender.UNION);
+            roomRepository.save(room);
+            Participant participant = Participant.of(user1, room.getId(), true);
+            participantJpaRepository.save(participant);
+            //모임 확정
+            MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(time);
+            meetingInfoJpaRepository.save(meetingInfo);
+            room.fixRoom(meetingInfo);
+            roomRepository.save(room);
+        }
+
+        //when
+        List<Room> fixGame = roomRepository.findMyFixRoom(user1);
+
+        Room room = fixGame.get(0);
+        LocalDateTime meetingTime1 = room.getMeetingInfo().getMeetingTime();
+        Room room1 = fixGame.get(1);
+        LocalDateTime meetingTime2 = room1.getMeetingInfo().getMeetingTime();
+        Room room2 = fixGame.get(2);
+        LocalDateTime meetingTime3 = room2.getMeetingInfo().getMeetingTime();
+
+        //then
+        assertThat(fixGame).hasSize(3);
+        assertThat(meetingTime1).isEqualTo(after);
+        assertThat(meetingTime2).isEqualTo(now);
+        assertThat(meetingTime3).isEqualTo(before);
+    }
+
+    @Test
     @DisplayName("[키워드 검색에 맞는 방을 갖고 온다.]")
     void findAllTest1() {
         //given
