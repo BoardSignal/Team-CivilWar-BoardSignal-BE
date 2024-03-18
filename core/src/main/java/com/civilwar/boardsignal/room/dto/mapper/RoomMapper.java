@@ -199,6 +199,7 @@ public final class RoomMapper {
             room.getMinParticipants(),
             room.getMaxParticipants(),
             categories,
+            room.getImageUrl(),
             room.getCreatedAt(),
             room.getHeadCount(),
             participants

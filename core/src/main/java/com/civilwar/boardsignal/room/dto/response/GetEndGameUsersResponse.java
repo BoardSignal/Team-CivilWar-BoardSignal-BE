@@ -19,6 +19,7 @@ public record GetEndGameUsersResponse(
     int minParticipant,
     int maxParticipant,
     List<String> categories,
+    String imageUrl,
     @JsonFormat(pattern = "MM-dd'T'HH:mm:ss")
     LocalDateTime createdAt,
     int headCount,
