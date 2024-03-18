@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.room.application;
 
+import static com.civilwar.boardsignal.room.exception.RoomErrorCode.INVALID_DATE;
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.INVALID_PARTICIPANT;
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.IS_NOT_LEADER;
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.NOT_FOUND_ROOM;
@@ -52,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RoomService {
 
+    private static final int LIMIT_DAY = 7;
     private final RoomRepository roomRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingInfoRepository meetingInfoRepository;
@@ -278,6 +280,13 @@ public class RoomService {
         Long roomId,
         FixRoomRequest request
     ) {
+        LocalDateTime today = now.get(); // 오늘
+        LocalDateTime fixDay = request.meetingTime(); // 모임 확정하려는 날짜
+        //오늘보다 이전 날짜거나 7일 이후를 확정시에 예외
+        if(fixDay.isBefore(today) || fixDay.isAfter(today.plusDays(LIMIT_DAY))){
+            throw new ValidationException(INVALID_DATE);
+        }
+
         //방에 존재하는 참가자 인 지 검증
         Participant participant = participantRepository.findByUserIdAndRoomId(user.getId(), roomId)
             .orElseThrow(() -> new NotFoundException(INVALID_PARTICIPANT));
