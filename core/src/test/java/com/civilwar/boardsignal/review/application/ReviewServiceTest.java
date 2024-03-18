@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.review.application;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -13,11 +14,14 @@ import com.civilwar.boardsignal.review.dto.request.ReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.response.ReviewSaveResponse;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +29,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private ReviewRepository reviewRepository;
@@ -37,7 +44,7 @@ class ReviewServiceTest {
         //given
         Long roomId = 2L;
         User loginUser = UserFixture.getUserFixture("providerId", "testUrl");
-        ReflectionTestUtils.setField(loginUser, "id", 3L);
+        ReflectionTestUtils.setField(loginUser, "id", 100L);
 
         List<ReviewSaveRequest> reviewSaveRequests = new ArrayList<>();
         for (long i = 0; i < 3; i++) {
@@ -62,6 +69,11 @@ class ReviewServiceTest {
                 reviewEvaluationDto3
             ));
             reviewSaveRequests.add(request);
+
+            User reviewee = UserFixture.getUserFixture2("providerId", "testURL");
+            ReflectionTestUtils.setField(reviewee, "id", i);
+
+            given(userRepository.findById(i)).willReturn(Optional.of(reviewee));
         }
 
         //when
