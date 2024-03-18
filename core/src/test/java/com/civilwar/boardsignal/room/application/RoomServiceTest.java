@@ -457,6 +457,8 @@ class RoomServiceTest {
             false);
         given(participantRepository.existsByUserIdAndRoomId(participantUserId2, roomId)).willReturn(
             false);
+        LocalDateTime now = LocalDateTime.of(2024, 3, 19, 20, 0, 0);
+        given(time.get()).willReturn(now);
 
         //when
         ParticipantRoomResponse participantRoomResponse = roomService.participateRoom(

@@ -14,7 +14,10 @@ public enum RoomErrorCode implements ErrorCode {
     IS_NOT_LEADER("방장이 아닙니다", "R_003"),
     NOT_FOUND_TIME_SLOT("시간대 값이 잘못 되었습니다.", "R_004"),
     NOT_FOUND_DAY_SLOT("날짜 값이 잘못 되었습니다.", "R_005"),
-    ALREADY_PARTICIPANT("이미 모임에 참여하였습니다", "R_006");
+    ALREADY_PARTICIPANT("이미 모임에 참여하였습니다", "R_006"),
+    INVALID_HEADCOUNT("인원이 초과되었습니다", "R_007"),
+    INVALID_GENDER("성별이 모임의 조건과 일치하지 않습니다", "R_008"),
+    INVALID_AGE("조건에 해당하는 연령만 입장 가능합니다", "R_009");
 
 
     private final String message;

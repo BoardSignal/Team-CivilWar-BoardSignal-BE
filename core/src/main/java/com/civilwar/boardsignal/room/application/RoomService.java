@@ -95,9 +95,27 @@ public class RoomService {
             throw new ValidationException(RoomErrorCode.ALREADY_PARTICIPANT);
         }
 
-        //참여 인원 수 증가
         Room findRoom = roomRepository.findByIdWithLock(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
+
+        //조건 1 . 참여 인원 수
+        if(findRoom.getHeadCount()>=findRoom.getMaxParticipants()) {
+            throw new ValidationException(RoomErrorCode.INVALID_HEADCOUNT);
+        }
+
+        //조건 2. 성별
+        Gender allowedGender = findRoom.getAllowedGender();
+        if  (!(allowedGender.equals(Gender.UNION) || allowedGender.equals(user.getGender()))) {
+            throw new ValidationException(RoomErrorCode.INVALID_GENDER);
+        }
+
+        //조건 3. 나이
+        int myAge = now.get().getYear() - user.getBirth() + 1;
+        if (!(findRoom.getMinAge()<=myAge && findRoom.getMaxAge()>=myAge)) {
+            throw new ValidationException(RoomErrorCode.INVALID_AGE);
+        }
+
+        //참여 인원 수 증가
         findRoom.increaseHeadCount();
 
         //참여 정보 저장
