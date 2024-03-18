@@ -92,7 +92,7 @@ public class RoomController {
     public ResponseEntity<RoomPageResponse<ChatRoomResponse>> getMyGame(
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         Pageable pageable
-    ){
+    ) {
         RoomPageResponse<ChatRoomResponse> myGame = roomFacade.findMyGame(user, pageable);
 
         return ResponseEntity.ok(myGame);
