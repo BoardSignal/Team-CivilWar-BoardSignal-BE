@@ -21,7 +21,7 @@ public class StompLogHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         StompCommand command = accessor.getCommand();
 
-        if (command!=null) {
+        if (command != null) {
             log.info(command.name());
         }
 

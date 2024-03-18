@@ -25,7 +25,8 @@ public class ChatMessageController {
         @PathVariable("roomId") Long roomId,
         Pageable pageable
     ) {
-        ChatPageResponse<GetChatMessageResponse> chatMessages = chatMessageService.findChatMessages(user,
+        ChatPageResponse<GetChatMessageResponse> chatMessages = chatMessageService.findChatMessages(
+            user,
             roomId, pageable);
         return ResponseEntity.ok(chatMessages);
     }

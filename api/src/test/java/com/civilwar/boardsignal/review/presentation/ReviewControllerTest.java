@@ -13,6 +13,9 @@ import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.review.dto.ApiReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.request.ReviewEvaluationDto;
 import com.civilwar.boardsignal.review.dto.request.ReviewSaveRequest;
+import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -26,15 +29,24 @@ class ReviewControllerTest extends ApiTestSupport {
 
     @Autowired
     private ReviewRepository reviewRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional
     @Test
     @DisplayName("[사용자는 같이 게임한 여러 유저에 대해 한번에 리뷰한다.]")
     void postReviews() throws Exception {
         //given
+        User user1 = UserFixture.getUserFixture("providerId", "URL");
+        userRepository.save(user1);
+        User user2 = UserFixture.getUserFixture("providerId", "URL");
+        userRepository.save(user2);
+        User user3 = UserFixture.getUserFixture("providerId", "URL");
+        userRepository.save(user3);
+
         Long roomId = 2L;
         List<ReviewSaveRequest> reviewSaveRequests = new ArrayList<>();
-        for (long i = 0; i < 3; i++) {
+        for (long i = 2; i < 5; i++) {
             //리뷰 평가 생성
             ReviewEvaluationDto reviewEvaluationDto1 = new ReviewEvaluationDto(
                 ReviewContent.GOOD_MANNER.getDescription(),
@@ -42,11 +54,11 @@ class ReviewControllerTest extends ApiTestSupport {
             );
             ReviewEvaluationDto reviewEvaluationDto2 = new ReviewEvaluationDto(
                 ReviewContent.FAST_RESPONSE.getDescription(),
-                ReviewRecommend.NON_REVIEW.getMessage()
+                ReviewRecommend.LIKE.getMessage()
             );
             ReviewEvaluationDto reviewEvaluationDto3 = new ReviewEvaluationDto(
                 ReviewContent.TIME_COMMITMENT.getDescription(),
-                ReviewRecommend.DISLIKE.getMessage()
+                ReviewRecommend.LIKE.getMessage()
             );
 
             //함께 참여한 유저들에 대한 리뷰
@@ -68,20 +80,24 @@ class ReviewControllerTest extends ApiTestSupport {
                 .content(toJson(apiReviewSaveRequest)))
             .andExpect(jsonPath("$.reviewIds.length()").value(3));
 
-        Review review1 = reviewRepository.findById(1L).get();
+        Review review1 = reviewRepository.findById(1L).orElseThrow();
         List<ReviewEvaluation> reviewEvaluations = review1.getReviewEvaluations();
         ReviewEvaluation reviewEvaluation1 = reviewEvaluations.get(0);
         ReviewEvaluation reviewEvaluation2 = reviewEvaluations.get(1);
         ReviewEvaluation reviewEvaluation3 = reviewEvaluations.get(2);
 
         assertThat(review1.getReviewerId()).isEqualTo(loginUser.getId());
-        assertThat(review1.getRevieweeId()).isZero();
+        assertThat(review1.getRevieweeId()).isEqualTo(user1.getId());
 
         assertThat(reviewEvaluation1.getContent()).isEqualTo(ReviewContent.GOOD_MANNER);
         assertThat(reviewEvaluation1.getRecommend()).isEqualTo(ReviewRecommend.LIKE);
         assertThat(reviewEvaluation2.getContent()).isEqualTo(ReviewContent.FAST_RESPONSE);
-        assertThat(reviewEvaluation2.getRecommend()).isEqualTo(ReviewRecommend.NON_REVIEW);
+        assertThat(reviewEvaluation2.getRecommend()).isEqualTo(ReviewRecommend.LIKE);
         assertThat(reviewEvaluation3.getContent()).isEqualTo(ReviewContent.TIME_COMMITMENT);
-        assertThat(reviewEvaluation3.getRecommend()).isEqualTo(ReviewRecommend.DISLIKE);
+        assertThat(reviewEvaluation3.getRecommend()).isEqualTo(ReviewRecommend.LIKE);
+
+        assertThat(user1.getMannerScore()).isEqualTo(37.5);
+        assertThat(user2.getMannerScore()).isEqualTo(37.5);
+        assertThat(user3.getMannerScore()).isEqualTo(37.5);
     }
 }

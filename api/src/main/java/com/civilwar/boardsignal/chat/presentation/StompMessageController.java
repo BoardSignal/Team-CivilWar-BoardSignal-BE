@@ -32,7 +32,7 @@ public class StompMessageController {
     private Long getUserId(String token) {
         String accessToken = token.split(" ")[1];
         TokenPayload payLoad = jwtTokenProvider.getPayLoad(accessToken);
-        return  payLoad.userId();
+        return payLoad.userId();
     }
 
     @MessageMapping("/chats/{roomId}")

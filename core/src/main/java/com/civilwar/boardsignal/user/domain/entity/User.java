@@ -24,7 +24,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -165,6 +164,10 @@ public class User implements UserDetails {
 
         //필요한 정보를 모두 등록했으므로, 회원가입 여부 참으로 변경
         this.isJoined = true;
+    }
+
+    public void updateMannerScore(double score) {
+        this.mannerScore += score;
     }
 
     @Override
