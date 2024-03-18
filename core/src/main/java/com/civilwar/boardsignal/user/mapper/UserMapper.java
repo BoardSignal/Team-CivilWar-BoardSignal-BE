@@ -60,7 +60,8 @@ public final class UserMapper {
             loginUser.getStation(),
             categories.stream()
                 .map(Category::getDescription)
-                .toList()
+                .toList(),
+            loginUser.getProfileImageUrl()
         );
     }
 

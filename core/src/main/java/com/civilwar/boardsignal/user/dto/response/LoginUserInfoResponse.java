@@ -14,7 +14,8 @@ public record LoginUserInfoResponse(
     Boolean isJoined,
     String subwayLine,
     String subwayStation,
-    List<String> categories
+    List<String> categories,
+    String profileImageUrl
 ) {
 
 }
