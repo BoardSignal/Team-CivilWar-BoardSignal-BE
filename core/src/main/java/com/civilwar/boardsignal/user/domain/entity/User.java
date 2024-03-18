@@ -167,6 +167,10 @@ public class User implements UserDetails {
         this.isJoined = true;
     }
 
+    public void updateMannerScore(double score) {
+        this.mannerScore += score;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role.getRole()));
