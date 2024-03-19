@@ -13,6 +13,10 @@ import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
+import com.civilwar.boardsignal.review.ReviewFixture;
+import com.civilwar.boardsignal.review.domain.entity.Review;
+import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
+import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
@@ -81,6 +85,9 @@ class RoomServiceTest {
     @Mock
     private ChatMessageRepository chatMessageRepository;
 
+    @Mock
+    private ReviewRepository reviewRepository;
+
     @InjectMocks
     private RoomService roomService;
 
@@ -134,6 +141,14 @@ class RoomServiceTest {
         }
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
+        //0번방, 1번방에 리뷰 남김
+        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
+        List<Review> reviews = List.of(
+            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
+            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
+        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
+
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
@@ -166,6 +181,14 @@ class RoomServiceTest {
         }
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
+        //0번방, 1번방에 리뷰 남김
+        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
+        List<Review> reviews = List.of(
+            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
+            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
+        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
+            List.of(), userId)).willReturn(reviews);
+
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
@@ -197,6 +220,14 @@ class RoomServiceTest {
         }
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
 
+        //0번방, 1번방에 리뷰 남김
+        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
+        List<Review> reviews = List.of(
+            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
+            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
+        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
+
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
             pageRequest);
@@ -227,6 +258,14 @@ class RoomServiceTest {
             testResult.add(room);
         }
         given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
+
+        //0번방, 1번방에 리뷰 남김
+        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
+        List<Review> reviews = List.of(
+            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
+            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
+        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
 
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,

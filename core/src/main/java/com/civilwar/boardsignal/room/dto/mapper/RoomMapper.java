@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.room.dto.mapper;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
@@ -18,6 +19,7 @@ import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +90,8 @@ public final class RoomMapper {
         );
     }
 
-    public static GetEndGameResponse toGetEndGameResponse(Room room) {
+    public static GetEndGameResponse toGetEndGameResponse(Room room,
+        List<Review> userReviews) {
         List<String> categories = room.getRoomCategories().stream()
             .map(roomCategory -> roomCategory.getCategory().getDescription())
             .toList();
@@ -98,6 +101,14 @@ public final class RoomMapper {
         log.info("{}", station);
 
         MeetingInfo fixMeetingInfo = room.getMeetingInfo();
+
+        // 유저가 완료한 리뷰의 방 id 리스트
+        List<Long> reviewRoomIds = userReviews.stream()
+            .map(Review::getRoomId).toList();
+
+        //현재 방이 리뷰 완료한 방인지 확인
+        boolean reviewCompleted= reviewRoomIds.stream()
+            .anyMatch(reviewRoomId -> Objects.equals(reviewRoomId, room.getId()));
 
         return new GetEndGameResponse(
             room.getId(),
@@ -117,7 +128,8 @@ public final class RoomMapper {
             room.getMeetingInfo().getMeetingTime(),
             fixMeetingInfo.getLine(),
             fixMeetingInfo.getStation(),
-            fixMeetingInfo.getMeetingPlace()
+            fixMeetingInfo.getMeetingPlace(),
+            reviewCompleted
         );
     }
 

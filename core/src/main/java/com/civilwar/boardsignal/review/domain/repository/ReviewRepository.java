@@ -13,4 +13,8 @@ public interface ReviewRepository {
     List<Review> findAll();
 
     List<Review> findReviewsByRevieweeId(Long userId);
+
+    List<Review> findReviewsByRoomIdsAndReviewer(List<Long> roomIds, Long reviewer);
+
+    boolean existsReviewByReviewerIdAndRoomId(Long reviewerId, Long roomId);
 }
