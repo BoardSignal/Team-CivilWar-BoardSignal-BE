@@ -59,4 +59,9 @@ public class UserRepositoryAdaptor implements UserRepository {
     public List<User> findByStation(String station) {
         return userJpaRepository.findByStation(station);
     }
+
+    @Override
+    public int updateSignal(Long userId, int signal) {
+        return userJpaRepository.updateSignal(userId, signal);
+    }
 }

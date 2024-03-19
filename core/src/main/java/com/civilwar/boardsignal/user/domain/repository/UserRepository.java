@@ -24,4 +24,6 @@ public interface UserRepository {
     Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined);
 
     List<User> findByStation(String station);
+
+    int updateSignal(Long userId, int signal);
 }
