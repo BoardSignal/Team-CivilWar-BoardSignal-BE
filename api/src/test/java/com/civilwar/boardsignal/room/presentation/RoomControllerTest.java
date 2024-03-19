@@ -30,7 +30,9 @@ import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.domain.entity.RoomBlackList;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
+import com.civilwar.boardsignal.room.domain.repository.RoomBlackListRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.ApiCreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.ApiFixRoomRequest;
@@ -83,6 +85,8 @@ class RoomControllerTest extends ApiTestSupport {
     private ChatMessageRepository chatMessageRepository;
     @Autowired
     private ReviewRepository reviewRepository;
+    @Autowired
+    private RoomBlackListRepository blackListRepository;
     @Autowired
     private TokenProvider tokenProvider;
     @MockBean
@@ -782,9 +786,9 @@ class RoomControllerTest extends ApiTestSupport {
             "provider",
             "providerId",
             "testURL",
-        1998,
-        AgeGroup.TWENTY,
-        Gender.MALE);
+            1998,
+            AgeGroup.TWENTY,
+            Gender.MALE);
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -834,6 +838,56 @@ class RoomControllerTest extends ApiTestSupport {
             AgeGroup.TWENTY,
             Gender.MALE);
         User savedUser = userRepository.save(user);
+
+        Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
+
+        LocalDateTime now = LocalDateTime.of(2024, 3, 19, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, "Bearer " + token.accessToken()))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("[한 번 강퇴당한 방은 다시 입장할 수 없다]")
+    void participantRoomTest5() throws Exception {
+        //given
+        Room room = Room.of(
+            title,
+            description,
+            3,
+            6,
+            "사당역 레드버튼",
+            "2호선",
+            station,
+            DaySlot.WEEKDAY,
+            TimeSlot.AM,
+            "20시 예정",
+            20,
+            29,
+            "imageUrl",
+            Gender.MALE,
+            categories
+        );
+        roomRepository.save(room);
+
+        User user = User.of("email",
+            "name",
+            "nickName",
+            "provider",
+            "providerId",
+            "testURL",
+            1998,
+            AgeGroup.TWENTY,
+            Gender.MALE);
+        User savedUser = userRepository.save(user);
+
+        blackListRepository.save(RoomBlackList.of(room.getId(), savedUser.getId()));
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
 
@@ -967,8 +1021,11 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(status().isOk());
 
         List<Participant> result = participantRepository.findAll();
+        boolean isBlackListExist = blackListRepository.existsByUserIdAndRoomId(notLeader.getId(),
+            room.getId());
 
         assertThat(result).hasSize(1);
+        assertThat(isBlackListExist).isTrue();
     }
 
     @Test
