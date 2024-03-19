@@ -15,8 +15,10 @@ import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.domain.entity.RoomBlackList;
 import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
+import com.civilwar.boardsignal.room.domain.repository.RoomBlackListRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.mapper.RoomMapper;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
@@ -62,6 +64,7 @@ public class RoomService {
     private final MeetingInfoRepository meetingInfoRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ImageRepository imageRepository;
+    private final RoomBlackListRepository blackListRepository;
     private final Supplier<LocalDateTime> now;
 
     private static String concat(String string1, String string2) {
@@ -119,6 +122,11 @@ public class RoomService {
         int myAge = now.get().getYear() - user.getBirth() + 1;
         if (!(findRoom.getMinAge()<=myAge && findRoom.getMaxAge()>=myAge)) {
             throw new ValidationException(RoomErrorCode.INVALID_AGE);
+        }
+
+        //블랙 리스트 여부 확인
+        if (blackListRepository.existsByUserIdAndRoomId(user.getId(), roomId)) {
+            throw new ValidationException(RoomErrorCode.CAN_NOT_PARTICIPANT);
         }
 
         //참여 인원 수 증가
@@ -397,6 +405,9 @@ public class RoomService {
         //채팅 내역 삭제
         chatMessageRepository.deleteByRoomId(roomId);
 
+        //블랙 리스트 내역 삭제
+        blackListRepository.deleteByRoomId(roomId);
+
         //모임 삭제
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM)); // 알림에서 필요한 삭제 전 Room 정보
@@ -426,6 +437,10 @@ public class RoomService {
 
         //추방
         participantRepository.deleteById(kickOutUser.getId());
+
+        //블랙리스트 추가
+        RoomBlackList blackListUser = RoomBlackList.of(roomId, kickOutUserRequest.userId());
+        blackListRepository.save(blackListUser);
 
         //참가자 수 감소
         Room room = roomRepository.findByIdWithLock(roomId)
