@@ -38,6 +38,7 @@ import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -722,6 +723,8 @@ class RoomControllerTest extends ApiTestSupport {
         //given
         Room room = RoomFixture.getRoom(Gender.MALE);
         roomRepository.save(room);
+        LocalDateTime now = LocalDateTime.of(2024, 3, 19, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
 
         //then
         mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
@@ -748,6 +751,102 @@ class RoomControllerTest extends ApiTestSupport {
                     ValidationException.class))
             .andExpect(status().is4xxClientError());
         assertThat(room.getHeadCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("[방 성별 조건과 다르다면 입장할 수 없다]")
+    void participantRoomTest3() throws Exception {
+        //given
+        Room room = Room.of(
+            title,
+            description,
+            3,
+            6,
+            "사당역 레드버튼",
+            "2호선",
+            station,
+            DaySlot.WEEKDAY,
+            TimeSlot.AM,
+            "20시 예정",
+            20,
+            29,
+            "imageUrl",
+            Gender.FEMALE,
+            categories
+        );
+        roomRepository.save(room);
+
+        User user = User.of("email",
+            "name",
+            "nickName",
+            "provider",
+            "providerId",
+            "testURL",
+        1998,
+        AgeGroup.TWENTY,
+        Gender.MALE);
+        User savedUser = userRepository.save(user);
+
+        Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
+
+        LocalDateTime now = LocalDateTime.of(2024, 3, 19, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, "Bearer " + token.accessToken()))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("[방 연령 조건과 다르다면 입장할 수 없다]")
+    void participantRoomTest4() throws Exception {
+        //given
+        Room room = Room.of(
+            title,
+            description,
+            3,
+            6,
+            "사당역 레드버튼",
+            "2호선",
+            station,
+            DaySlot.WEEKDAY,
+            TimeSlot.AM,
+            "20시 예정",
+            20,
+            29,
+            "imageUrl",
+            Gender.MALE,
+            categories
+        );
+        roomRepository.save(room);
+
+        User user = User.of("email",
+            "name",
+            "nickName",
+            "provider",
+            "providerId",
+            "testURL",
+            2020,
+            AgeGroup.TWENTY,
+            Gender.MALE);
+        User savedUser = userRepository.save(user);
+
+        Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
+
+        LocalDateTime now = LocalDateTime.of(2024, 3, 19, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //then
+        mockMvc.perform(post("/api/v1/rooms/in/" + room.getId())
+                .header(AUTHORIZATION, "Bearer " + token.accessToken()))
+            .andExpect(
+                (result) -> assertThat(result.getResolvedException()).getClass().isAssignableFrom(
+                    ValidationException.class))
+            .andExpect(status().is4xxClientError());
     }
 
     @Test
