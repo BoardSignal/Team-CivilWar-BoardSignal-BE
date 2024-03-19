@@ -104,13 +104,14 @@ public class RoomService {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //조건 1 . 참여 인원 수
-        if(findRoom.getHeadCount()>=findRoom.getMaxParticipants()) {
+        if(findRoom.getHeadCount() == findRoom.getMaxParticipants()) {
             throw new ValidationException(RoomErrorCode.INVALID_HEADCOUNT);
         }
 
         //조건 2. 성별
+        //방의 성별이 혼성이 아니고 유저 성별과 다르다면
         Gender allowedGender = findRoom.getAllowedGender();
-        if  (!(allowedGender.equals(Gender.UNION) || allowedGender.equals(user.getGender()))) {
+        if  (!allowedGender.equals(Gender.UNION) && !allowedGender.equals(user.getGender())) {
             throw new ValidationException(RoomErrorCode.INVALID_GENDER);
         }
 
