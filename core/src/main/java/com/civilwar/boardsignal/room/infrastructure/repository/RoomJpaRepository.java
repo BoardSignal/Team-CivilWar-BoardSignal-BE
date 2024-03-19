@@ -22,7 +22,8 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
         + "from Room as r "
         + "join Participant as p "
         + "on r.id = p.roomId "
-        + "where p.userId=:userId ")
+        + "where p.userId=:userId "
+        + "order by p.createdAt desc")
     List<Room> findMyGame(@Param("userId") Long userId);
 
     // 내가 참여한 fix room 조회 쿼리

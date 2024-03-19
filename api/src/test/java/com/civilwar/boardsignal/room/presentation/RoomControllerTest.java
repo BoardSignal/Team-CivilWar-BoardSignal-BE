@@ -252,9 +252,9 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(false))
             .andExpect(jsonPath("$.roomsInfos.length()").value(3))
-            .andExpect(jsonPath("$.roomsInfos.[0].id").value(room2.getId()))
+            .andExpect(jsonPath("$.roomsInfos.[0].id").value(room5.getId()))
             .andExpect(jsonPath("$.roomsInfos.[1].id").value(room3.getId()))
-            .andExpect(jsonPath("$.roomsInfos.[2].id").value(room5.getId()));
+            .andExpect(jsonPath("$.roomsInfos.[2].id").value(room2.getId()));
     }
 
     @Test
