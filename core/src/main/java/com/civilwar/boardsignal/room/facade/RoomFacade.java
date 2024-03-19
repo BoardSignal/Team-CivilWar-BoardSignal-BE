@@ -17,6 +17,8 @@ import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.KickOutFacadeResponse;
+import com.civilwar.boardsignal.room.dto.response.KickOutResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
@@ -155,8 +157,11 @@ public class RoomFacade {
         publisher.publishEvent(notificationRequest);
     }
 
-    public void kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
-        Room room = roomService.kickOutUser(leader, kickOutUserRequest);
+    public KickOutResponse kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
+        KickOutFacadeResponse kickOutFacadeResponse = roomService.kickOutUser(leader, kickOutUserRequest);
+
+        Room room = kickOutFacadeResponse.room();
+        String kickOutUserNickname = kickOutFacadeResponse.kickOutUserNickname();
 
         NotificationRequest notificationRequest = new NotificationRequest(
             NotificationContent.KICKED_FROM_ROOM.getTitle(),
@@ -167,6 +172,8 @@ public class RoomFacade {
         );
 
         publisher.publishEvent(notificationRequest);
+
+        return new KickOutResponse(kickOutUserNickname);
     }
 
 }

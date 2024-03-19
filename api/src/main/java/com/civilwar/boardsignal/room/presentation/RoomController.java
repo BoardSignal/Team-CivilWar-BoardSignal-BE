@@ -14,6 +14,7 @@ import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.KickOutResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
@@ -186,11 +187,13 @@ public class RoomController {
     @Operation(summary = "참가자 추방 API (방장용)")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping("/kick")
-    public void kickOut(
+    public ResponseEntity<KickOutResponse> kickOut(
         @Parameter(hidden = true)
         @AuthenticationPrincipal User user,
         @RequestBody KickOutUserRequest kickOutUserRequest
     ) {
-        roomFacade.kickOutUser(user, kickOutUserRequest);
+        KickOutResponse kickOutResponse = roomFacade.kickOutUser(user, kickOutUserRequest);
+
+        return ResponseEntity.ok(kickOutResponse);
     }
 }

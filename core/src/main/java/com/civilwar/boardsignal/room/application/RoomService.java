@@ -32,6 +32,7 @@ import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetAllRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
+import com.civilwar.boardsignal.room.dto.response.KickOutFacadeResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
@@ -40,6 +41,7 @@ import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ public class RoomService {
 
     private static final int LIMIT_DAY = 7;
     private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingInfoRepository meetingInfoRepository;
@@ -422,7 +425,7 @@ public class RoomService {
     }
 
     @Transactional
-    public Room kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
+    public KickOutFacadeResponse kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
         //방장 여부 확인
         Long roomId = kickOutUserRequest.roomId();
         Participant leaderInfo = participantRepository.findByUserIdAndRoomId(leader.getId(),
@@ -435,13 +438,16 @@ public class RoomService {
         }
 
         //추방자 정보
-        Participant kickOutUser = participantRepository.findByUserIdAndRoomId(
+        Participant kickOutParticipant = participantRepository.findByUserIdAndRoomId(
                 kickOutUserRequest.userId(),
                 kickOutUserRequest.roomId())
             .orElseThrow(() -> new ValidationException(INVALID_PARTICIPANT));
 
+        User kickOutUser = userRepository.findById(kickOutUserRequest.userId())
+            .orElseThrow(() -> new ValidationException(INVALID_PARTICIPANT));
+
         //추방
-        participantRepository.deleteById(kickOutUser.getId());
+        participantRepository.deleteById(kickOutParticipant.getId());
 
         //블랙리스트 추가
         RoomBlackList blackListUser = RoomBlackList.of(roomId, kickOutUserRequest.userId());
@@ -452,7 +458,7 @@ public class RoomService {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
         room.decreaseHeadCount();
 
-        return room;
+        return new KickOutFacadeResponse(room, kickOutUser.getNickname());
     }
 
     @Transactional(readOnly = true)
