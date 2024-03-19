@@ -207,16 +207,7 @@ public class RoomService {
     ) {
         boolean hasNext = false;
 
-        //1. 내가 참여한 모든 room
-        List<Room> myFixGame = roomRepository.findMyFixRoom(userId);
-
-        //2. (모임 확정 day) < 현재 day 인 room
-        List<Room> myEndGame = new ArrayList<>(
-            myFixGame.stream()
-                .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isBefore(now.get().toLocalDate())
-                ).toList()
-        );
+        List<Room> myEndGame = getMyEndGames(userId);
 
         //3. Slicing
         List<Room> resultList = new ArrayList<>();
@@ -248,6 +239,19 @@ public class RoomService {
             room -> RoomMapper.toGetEndGameResponse(room, myEndGameReview));
 
         return RoomMapper.toRoomPageResponse(resultMap);
+    }
+
+    public List<Room> getMyEndGames(Long userId) {
+        //1. 내가 참여한 모든 room
+        List<Room> myFixGame = roomRepository.findMyFixRoom(userId);
+
+        //2. (모임 확정 day) < 현재 day 인 room
+        return new ArrayList<>(
+            myFixGame.stream()
+                .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
+                    .isBefore(now.get().toLocalDate())
+                ).toList()
+        );
     }
 
     @Transactional(readOnly = true)
