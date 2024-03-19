@@ -22,8 +22,10 @@ import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.domain.entity.RoomBlackList;
 import com.civilwar.boardsignal.room.domain.repository.MeetingInfoRepository;
 import com.civilwar.boardsignal.room.domain.repository.ParticipantRepository;
+import com.civilwar.boardsignal.room.domain.repository.RoomBlackListRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
@@ -69,24 +71,20 @@ class RoomServiceTest {
 
     @Mock
     private RoomRepository roomRepository;
-
     @Mock
     private Supplier<LocalDateTime> time;
-
     @Mock
     private ImageRepository imageRepository;
-
     @Mock
     private ParticipantRepository participantRepository;
-
     @Mock
     private MeetingInfoRepository meetingInfoRepository;
-
     @Mock
     private ChatMessageRepository chatMessageRepository;
-
     @Mock
     private ReviewRepository reviewRepository;
+    @Mock
+    private RoomBlackListRepository blackListRepository;
 
     @InjectMocks
     private RoomService roomService;
@@ -659,6 +657,7 @@ class RoomServiceTest {
         roomService.kickOutUser(leader, kickOutUserRequest);
 
         //then
+        verify(blackListRepository, times(1)).save(any(RoomBlackList.class));
         verify(participantRepository, times(1)).deleteById(userInfoId);
     }
 
