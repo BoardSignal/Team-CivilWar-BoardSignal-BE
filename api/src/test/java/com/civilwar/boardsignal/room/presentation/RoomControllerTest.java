@@ -393,17 +393,25 @@ class RoomControllerTest extends ApiTestSupport {
         //방 생성
         Room room = RoomFixture.getRoom(Gender.UNION);
         roomRepository.save(room);
+        Room room2 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room2);
 
         //방 참가
-        Participant participant = Participant.of(loginUser.getId(), room.getId(), true);
-        participantRepository.save(participant);
-        Participant.of(anotherUser.getId(), room.getId(), false);
+        participantRepository.save(Participant.of(loginUser.getId(), room.getId(), true));
+        participantRepository.save(Participant.of(anotherUser.getId(), room.getId(), false));
+
+        participantRepository.save(Participant.of(loginUser.getId(), room2.getId(), true));
+        participantRepository.save(Participant.of(anotherUser.getId(), room2.getId(), false));
 
         //모임 확정
         MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(before);
         meetingInfoRepository.save(meetingInfo);
         room.fixRoom(meetingInfo);
         roomRepository.save(room);
+        MeetingInfo meetingInfo2 = MeetingInfoFixture.getMeetingInfo(before);
+        meetingInfoRepository.save(meetingInfo2);
+        room2.fixRoom(meetingInfo2);
+        roomRepository.save(room2);
 
         //리뷰 등록
         Review review = ReviewFixture.getReviewFixture(loginUser.getId(), anotherUser.getId(),
@@ -419,10 +427,11 @@ class RoomControllerTest extends ApiTestSupport {
                 .params(params))
             .andExpect(jsonPath("$.size").value(5))
             .andExpect(jsonPath("$.hasNext").value(false))
-            .andExpect(jsonPath("$.roomsInfos.length()").value(1))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(2))
             .andExpect(jsonPath("$.roomsInfos.[0].fixTime").value(
                 before.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
-            .andExpect(jsonPath("$.roomsInfos[0].reviewCompleted").value(true));
+            .andExpect(jsonPath("$.roomsInfos[0].reviewCompleted").value(true))
+            .andExpect(jsonPath("$.roomsInfos[1].reviewCompleted").value(false));
     }
 
     @Disabled
