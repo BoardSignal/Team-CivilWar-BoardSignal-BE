@@ -11,5 +11,7 @@ public enum MessageType {
     //모임 나가기
     EXIT,
     //일반 채팅
-    CHAT
+    CHAT,
+    //강제 퇴장
+    KICK
 }
