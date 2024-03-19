@@ -42,4 +42,16 @@ class UserRepositoryTest extends DataJpaTestSupport {
             () -> assertThat(users.get(1).getId()).isEqualTo(user2.getId())
         );
     }
+
+    @Test
+    @DisplayName("[유저의 signal을 업데이트 할 수 있다.]")
+    void updateSignal(){
+        User user = userRepository.findById(1L).orElseThrow();
+        int EndGameSize = 5;
+        userRepository.updateSignal(user.getId(), EndGameSize);
+
+        User findUser = userRepository.findById(1L).orElseThrow();
+
+        assertThat(findUser.getSignal()).isEqualTo(EndGameSize);
+    }
 }
