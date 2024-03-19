@@ -24,7 +24,8 @@ public record GetEndGameResponse(
     LocalDateTime fixTime,
     String fixLine,
     String fixStation,
-    String fixPlace
+    String fixPlace,
+    boolean reviewCompleted
 ) {
 
 }

@@ -9,6 +9,8 @@ import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
+import com.civilwar.boardsignal.review.domain.entity.Review;
+import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
@@ -55,6 +57,7 @@ public class RoomService {
 
     private static final int LIMIT_DAY = 7;
     private final RoomRepository roomRepository;
+    private final ReviewRepository reviewRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingInfoRepository meetingInfoRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -202,10 +205,20 @@ public class RoomService {
             resultList.remove(resultList.size() - 1);
         }
 
+        // 내가 참여한 종료된 모임의 id 리스트
+        List<Long> myEndGameIds = resultList.stream()
+            .map(Room::getId)
+            .toList();
+
+        // 자신이 참여한 종료된 모임들에 작성한 리뷰들
+        List<Review> myEndGameReview = reviewRepository.findReviewsByRoomIdsAndReviewer(
+            myEndGameIds, userId);
+
         //5. slice 변환
         Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
 
-        Slice<GetEndGameResponse> resultMap = result.map(RoomMapper::toGetEndGameResponse);
+        Slice<GetEndGameResponse> resultMap = result.map(
+            room -> RoomMapper.toGetEndGameResponse(room, myEndGameReview));
 
         return RoomMapper.toRoomPageResponse(resultMap);
     }

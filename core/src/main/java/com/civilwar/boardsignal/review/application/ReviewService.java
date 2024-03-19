@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.review.application;
 
 import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
 import com.civilwar.boardsignal.review.domain.constant.ReviewRecommend;
 import com.civilwar.boardsignal.review.domain.entity.Review;
@@ -9,6 +10,7 @@ import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.review.dto.request.ReviewEvaluationDto;
 import com.civilwar.boardsignal.review.dto.request.ReviewSaveRequest;
 import com.civilwar.boardsignal.review.dto.response.ReviewSaveResponse;
+import com.civilwar.boardsignal.review.exception.ReviewErrorCode;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.exception.UserErrorCode;
@@ -31,6 +33,11 @@ public class ReviewService {
         User loginUser,
         Long roomId
     ) {
+
+        if(reviewRepository.existsReviewByReviewerIdAndRoomId(loginUser.getId(), roomId)) {
+            throw new ValidationException(ReviewErrorCode.ALREADY_EXIST_REVIEW);
+        }
+
         //유저가 남긴 리뷰 id 저장
         List<Long> reviewIds = new ArrayList<>();
 
