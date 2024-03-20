@@ -44,6 +44,7 @@ import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -71,6 +72,8 @@ class RoomServiceTest {
 
     @Mock
     private RoomRepository roomRepository;
+    @Mock
+    private UserRepository userRepository;
     @Mock
     private Supplier<LocalDateTime> time;
     @Mock
@@ -650,6 +653,7 @@ class RoomServiceTest {
         given(participantRepository.findByUserIdAndRoomId(userId, roomId)).willReturn(
             Optional.of(userInfo));
         given(roomRepository.findByIdWithLock(roomId)).willReturn(Optional.of(room));
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
         KickOutUserRequest kickOutUserRequest = new KickOutUserRequest(roomId, userId);
 
