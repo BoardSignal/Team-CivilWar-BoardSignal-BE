@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class RoomFacade {
     private final RoomService roomService;
     private final ApplicationEventPublisher publisher;
 
+    @Transactional
     public CreateRoomResponse createRoom(
         User user,
         CreateRoomRequest request
@@ -102,6 +104,7 @@ public class RoomFacade {
         return roomService.findRoomInfo(user, roomId);
     }
 
+    @Transactional
     public FixRoomResponse fixRoom(
         User user,
         Long roomId,
@@ -135,6 +138,7 @@ public class RoomFacade {
         roomService.unFixRoom(user, roomId);
     }
 
+    @Transactional
     public void deleteRoom(User user, Long roomId) {
         DeleteRoomFacadeResponse response = roomService.deleteRoom(user, roomId);
 
@@ -157,6 +161,7 @@ public class RoomFacade {
         publisher.publishEvent(notificationRequest);
     }
 
+    @Transactional
     public KickOutResponse kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
         KickOutFacadeResponse kickOutFacadeResponse = roomService.kickOutUser(leader, kickOutUserRequest);
 
