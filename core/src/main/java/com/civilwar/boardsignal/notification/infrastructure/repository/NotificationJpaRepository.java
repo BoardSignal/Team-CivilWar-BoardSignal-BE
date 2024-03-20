@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationJpaRepository extends JpaRepository<Notification, Long> {
 
-    Slice<Notification> findAllByUser(User user, Pageable pageable);
+    Slice<Notification> findAllByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 }

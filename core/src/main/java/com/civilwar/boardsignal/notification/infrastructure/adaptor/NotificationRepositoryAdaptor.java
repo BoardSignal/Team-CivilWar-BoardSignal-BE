@@ -33,6 +33,6 @@ public class NotificationRepositoryAdaptor implements NotificationRepository {
 
     @Override
     public Slice<Notification> findAllByUser(User user, Pageable pageable) {
-        return notificationJpaRepository.findAllByUser(user, pageable);
+        return notificationJpaRepository.findAllByUserOrderByCreatedAtDesc(user, pageable);
     }
 }
