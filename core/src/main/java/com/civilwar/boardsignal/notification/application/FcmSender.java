@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
@@ -83,6 +84,7 @@ public class FcmSender {
         return new HttpEntity<>(requestBody, headers);
     }
 
+    @Async(value = "asyncTask")
     public void sendMessage(Notification notification) {
         User user = notification.getUser();
 
