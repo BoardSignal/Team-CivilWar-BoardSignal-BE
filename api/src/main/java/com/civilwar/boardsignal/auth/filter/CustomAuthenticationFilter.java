@@ -1,11 +1,11 @@
 package com.civilwar.boardsignal.auth.filter;
 
-import static com.civilwar.boardsignal.auth.exception.AuthErrorCode.AUTH_NOT_EXIST_USER;
+import static com.civilwar.boardsignal.auth.exception.AuthErrorCode.AUTH_TOKEN_MALFORMED;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.TokenPayload;
-import com.civilwar.boardsignal.common.exception.NotFoundException;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -43,7 +43,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             );
 
             User user = userRepository.findById(payLoad.userId())
-                .orElseThrow(() -> new NotFoundException(AUTH_NOT_EXIST_USER));
+                .orElseThrow(() -> new ValidationException(AUTH_TOKEN_MALFORMED));
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user,
