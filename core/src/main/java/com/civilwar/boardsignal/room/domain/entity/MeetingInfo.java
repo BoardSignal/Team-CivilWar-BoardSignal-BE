@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.room.domain.entity;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +18,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "MEETING_INFO_TABLE")
-public class MeetingInfo {
+public class MeetingInfo extends BaseEntity {
 
     private static final String MEETING_INFO = "meeting_info";
 

@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.user.domain.entity;
 
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,7 +23,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "USER_FCM_TOKEN_TABLE")
-public class UserFcmToken {
+public class UserFcmToken extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
