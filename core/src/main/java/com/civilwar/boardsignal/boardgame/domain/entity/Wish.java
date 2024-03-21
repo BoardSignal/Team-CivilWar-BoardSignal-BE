@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.boardgame.domain.entity;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +17,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "WISH_TABLE")
-public class Wish {
+public class Wish extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

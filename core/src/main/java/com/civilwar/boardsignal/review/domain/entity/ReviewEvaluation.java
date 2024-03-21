@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.review.domain.entity;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static jakarta.persistence.EnumType.STRING;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import com.civilwar.boardsignal.review.domain.constant.ReviewContent;
 import com.civilwar.boardsignal.review.domain.constant.ReviewRecommend;
 import jakarta.persistence.Column;
@@ -26,7 +27,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "REVIEW_EVALUATION_TABLE")
-public class ReviewEvaluation {
+public class ReviewEvaluation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

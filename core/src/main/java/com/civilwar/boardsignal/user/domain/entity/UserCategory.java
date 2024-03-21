@@ -4,6 +4,7 @@ import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -25,7 +26,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "USER_CATEGORY_TABLE")
-public class UserCategory {
+public class UserCategory extends BaseEntity {
 
     private static final String USER_CATEGORY = "user_category";
 

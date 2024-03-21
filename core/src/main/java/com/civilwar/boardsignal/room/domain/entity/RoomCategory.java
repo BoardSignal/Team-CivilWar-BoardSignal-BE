@@ -4,6 +4,7 @@ import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Table(name = "ROOM_CATEGORY_TABLE")
-public class RoomCategory {
+public class RoomCategory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

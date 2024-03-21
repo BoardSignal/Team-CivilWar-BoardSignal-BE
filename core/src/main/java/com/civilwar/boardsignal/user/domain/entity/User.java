@@ -5,6 +5,7 @@ import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.EnumType.STRING;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -33,7 +34,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @Getter
 @Table(name = "USER_TABLE")
-public class User implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
     private static final String USER = "user";
 

@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.review.domain.entity;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +23,7 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @Getter
 @Table(name = "REVIEW_TABLE")
-public class Review {
+public class Review extends BaseEntity {
 
     @OneToMany(mappedBy = "review", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     List<ReviewEvaluation> reviewEvaluations = new ArrayList<>();

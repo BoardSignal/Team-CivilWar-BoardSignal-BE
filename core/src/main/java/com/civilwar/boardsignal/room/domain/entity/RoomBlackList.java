@@ -1,5 +1,6 @@
 package com.civilwar.boardsignal.room.domain.entity;
 
+import com.civilwar.boardsignal.common.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Table(name = "ROOM_BLACK_LIST")
-public class RoomBlackList {
+public class RoomBlackList extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
