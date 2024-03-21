@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
@@ -83,37 +84,27 @@ public class FcmSender {
         return new HttpEntity<>(requestBody, headers);
     }
 
-    public void sendMessage(Notification notification) {
-        User user = notification.getUser();
-
-        //해당 user가 사용하는 기기들의 기기 토큰 모두 조회
-        List<String> tokens = user.getUserFcmTokens().stream()
-            .map(UserFcmToken::getToken)
-            .toList();
-
-        for (String token : tokens) {
-            //Request Body 생성
-            HttpEntity<String> requestEntity = null;
-            try {
-                requestEntity = getHttpEntity(
-                    token,
-                    notification.getTitle(),
-                    notification.getBody(),
-                    notification.getImageUrl()
-                );
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-            //Google Api로 알림 전송 요청
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.exchange(
-                GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
-                POST,
-                requestEntity,
-                String.class
+    @Async(value = "asyncTask")
+    public void sendMessage(String token, Notification notification) {
+        HttpEntity<String> requestEntity = null;
+        try {
+            requestEntity = getHttpEntity(
+                token,
+                notification.getTitle(),
+                notification.getBody(),
+                notification.getImageUrl()
             );
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
-
+        //Google Api로 알림 전송 요청
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.exchange(
+            GOOGLE_API_PREFIX + PROJECT_ID + GOOGLE_API_SUFFIX,
+            POST,
+            requestEntity,
+            String.class
+        );
     }
 
     //test용(개발단계에서만 있고 제거 예정)

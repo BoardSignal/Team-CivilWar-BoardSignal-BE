@@ -64,11 +64,11 @@ class NotificationControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpectAll(
                 status().isOk(),
-                jsonPath("$.notificationsInfos[0].notificationId").value(notificationFirst.getId()),
-                jsonPath("$.notificationsInfos[0].roomId").value(notificationFirst.getRoomID()),
+                jsonPath("$.notificationsInfos[0].notificationId").value(notificationSecond.getId()),
+                jsonPath("$.notificationsInfos[0].roomId").value(notificationSecond.getRoomID()),
                 jsonPath("$.notificationsInfos[1].notificationId").value(
-                    notificationSecond.getId()),
-                jsonPath("$.notificationsInfos[1].roomId").value(notificationSecond.getRoomID()),
+                    notificationFirst.getId()),
+                jsonPath("$.notificationsInfos[1].roomId").value(notificationFirst.getRoomID()),
                 jsonPath("$.size").value(10),
                 jsonPath("$.hasNext").value(false)
             );

@@ -1,10 +1,14 @@
 package com.civilwar.boardsignal.notification.event;
 
+import static com.civilwar.boardsignal.user.exception.UserErrorCode.NOT_FOUND_USER;
+
+import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.notification.application.FcmSender;
 import com.civilwar.boardsignal.notification.application.NotificationService;
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.dto.request.NotificationRequest;
 import com.civilwar.boardsignal.user.domain.entity.User;
+import com.civilwar.boardsignal.user.domain.entity.UserFcmToken;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +38,12 @@ public class NotificationEventHandler {
                 request.roomId()
             );
             Notification savedNotification = notificationService.saveNotification(notification);
-            fcmSender.sendMessage(savedNotification);
+            User findUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_USER));
+
+            findUser.getUserFcmTokens().stream()
+                .map(UserFcmToken::getToken)
+                .forEach(token -> fcmSender.sendMessage(token, savedNotification));
         }
     }
 }
