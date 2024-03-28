@@ -8,7 +8,11 @@ public interface TokenProvider {
 
     Token createToken(Long id, Role role);
 
+    String issueAccessToken(String refreshToken);
+
     TokenPayload getPayLoad(String token);
 
     void validateToken(String token);
+
+    Boolean deleteRefreshToken(String refreshTokenId);
 }

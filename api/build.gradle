@@ -1,11 +1,13 @@
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    //swagger
+    // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-    // Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // security
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     implementation project(':core')
     testImplementation(testFixtures(project(':core')))
+    implementation project(':scheduler')
 }

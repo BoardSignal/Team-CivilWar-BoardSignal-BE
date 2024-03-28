@@ -1,27 +1,23 @@
 package com.civilwar.boardsignal.auth.config;
 
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
+import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.auth.filter.CustomAuthenticationFilter;
+import com.civilwar.boardsignal.auth.filter.JwtExceptionHandlerFilter;
+import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -29,15 +25,28 @@ import org.springframework.web.cors.CorsConfiguration;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final ApplicationContext applicationContext;
     private final TokenProvider tokenProvider;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
+    private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
     private final UserRepository userRepository;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final String[] NEED_AUTHENTICATION = {
+        //알림
+        "/api/v1/notifications/token",
+        //인증
+        "/api/v1/auth", "/api/v1/auth/logout",
+        //유저
+        "/api/v1/users/**",
+        //보드게임
+        "/api/v1/board-games/like/**", "/api/v1/board-games/tip/**", "/api/v1/board-games/wish/**",
+        //리뷰
+        "/api/v1/reviews/**",
+        //방
+        "/api/v1/rooms/end-game/**", "/api/v1/rooms/fix/**", "/api/v1/rooms/unfix/**",
+        "/api/v1/rooms/in/**", "/api/v1/rooms/out/**", "/api/v1/rooms/kick", "/api/v1/rooms/my/**",
+        //채팅
+        "/api/v1/rooms/chats/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -47,30 +56,32 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .anonymous(AbstractHttpConfigurer::disable)
-            .cors(configurer -> configurer.configurationSource(request -> {
-                    CorsConfiguration cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of("http://localhost:8080"));
-                    cors.setAllowedMethods(Collections.singletonList("*"));
-                    cors.setAllowedHeaders(Collections.singletonList("*"));
-                    cors.setAllowCredentials(true);
-                    return cors;
-                }
-            ))
             .authorizeHttpRequests(registry -> registry
-                .requestMatchers("/api/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/rooms/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/rooms/**").authenticated()
+                .requestMatchers(NEED_AUTHENTICATION).authenticated()
                 .anyRequest().permitAll()
             )
+            //인증 안 된 사용자 접근 시 예외 처리
             .exceptionHandling(configurer -> configurer
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+                .authenticationEntryPoint(
+                    (request, response, exception)
+                        -> {
+                        throw new ValidationException(AuthErrorCode.AUTH_REQUIRED);
+                    }
+                )
+            )
+            //Jwt 관련 예외 처리
             .addFilterBefore(
+                jwtExceptionHandlerFilter,
+                UsernamePasswordAuthenticationFilter.class
+            ).addFilterBefore(
                 new CustomAuthenticationFilter(tokenProvider, userRepository),
                 UsernamePasswordAuthenticationFilter.class)
             .oauth2Login(customizer -> customizer.successHandler(authenticationSuccessHandler))
-            .oauth2Client(customizer -> customizer.authorizedClientRepository(
-                applicationContext.getBean(OAuth2AuthorizedClientRepository.class)
-            ))
             .build();
     }
 }

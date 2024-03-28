@@ -16,4 +16,14 @@ public interface UserRepository {
     List<User> findAll();
 
     Optional<User> findByProviderId(String providerId);
+
+    boolean existsUserByProviderId(String providerId);
+
+    List<User> findAllInIds(List<Long> ids);
+
+    Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined);
+
+    List<User> findByStation(String station);
+
+    int updateSignal(Long userId, int signal);
 }

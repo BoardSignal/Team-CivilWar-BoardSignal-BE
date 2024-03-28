@@ -2,14 +2,13 @@ name: CI with Gradle
 
 on:
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
 
 jobs:
-  # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
-  build-docker-image:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,29 +19,51 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: API 모듈 TEST YML 파일 생성
+        run: |
+          mkdir -p ./api/src/test/resources
+          echo "${{ secrets.APPLICATION_API_TEST_YML }}" > ./api/src/test/resources/application.yml
+
+      - name: CORE 모듈 YML 파일 생성
+        run: |
+          mkdir -p ./core/src/test/resources
+          echo "${{ secrets.APPLICATION_CORE_TEST_YML }}" > ./core/src/test/resources/application.yml
+
+      - name: FCM 시크릿키 생성
+        run: |
+          echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > ./core/src/test/resources/firebase.json
+
       # 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: api:build -x test
 
-      # 빌드
+      # 테스트
       - name: test CI
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean test
 
-      # 테스트 결과 PR 코멘트에 등록
-      - name: Register the test results as PR comments
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: '**/build/test-results/test/TEST-*.xml'
-
-      # 테스트 실패시 코드 라인에 대한 체크 추가
-      - name: If test fail, add check comment on failed code line
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.html'
+#      # 테스트 결과 PR 코멘트에 등록
+#      - name: Register the test results as PR comments
+#        uses: EnricoMi/publish-unit-test-result-action@v2
+#        if: always()
+#        with:
+#          files: |
+#            **/api/build/test-results/test/TEST-*.xml
+#            **/core/build/test-results/test/TEST-*.xml
+#
+#
+#      # 테스트 실패시 코드 라인에 대한 체크 추가
+#      - name: If test fail, add check comment on failed code line
+#        uses: mikepenz/action-junit-report@v3
+#        if: always()
+#        with:
+#          report_paths: |
+#            **/api/build/test-results/test/TEST-*.xml
+#            **/core/build/test-results/test/TEST-*.xml
 

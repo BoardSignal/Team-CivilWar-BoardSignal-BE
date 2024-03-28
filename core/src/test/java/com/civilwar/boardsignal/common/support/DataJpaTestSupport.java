@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.common.support;
 
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
+import com.civilwar.boardsignal.common.config.QueryDslConfig;
 import com.civilwar.boardsignal.common.config.TestAuditingConfig;
 import com.civilwar.boardsignal.support.DatabaseCleaner;
 import com.civilwar.boardsignal.support.DatabaseCleanerExtension;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 @DataJpaTest(includeFilters = @ComponentScan.Filter(Repository.class))
 @AutoConfigureTestDatabase(replace = NONE)
-@Import({TestAuditingConfig.class, DatabaseCleaner.class})
+@Import({TestAuditingConfig.class, DatabaseCleaner.class, QueryDslConfig.class})
 @ExtendWith(DatabaseCleanerExtension.class)
 public abstract class DataJpaTestSupport extends TestContainerSupport {
 

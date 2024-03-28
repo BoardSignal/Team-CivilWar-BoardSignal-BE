@@ -6,8 +6,13 @@ build/
 !**/src/test/**/build/
 
 .DS_Store
-core/src/main/resources/application.yml
-api/src/main/resources/application.yml
+core/src/main/resources/application-core.yml
+api/src/main/resources/application-api.yml
+core/src/main/resources/firebase.json
+core/src/main/generated
+api/src/main/generated
+core/src/test/resources/application.yml
+api/src/test/resources/application.yml
 
 ### STS ###
 .apt_generated

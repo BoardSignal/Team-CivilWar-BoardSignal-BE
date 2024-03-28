@@ -39,4 +39,29 @@ public class UserRepositoryAdaptor implements UserRepository {
     public Optional<User> findByProviderId(String providerId) {
         return userJpaRepository.findByProviderId(providerId);
     }
+
+    @Override
+    public boolean existsUserByProviderId(String providerId) {
+        return userJpaRepository.existsUserByProviderId(providerId);
+    }
+
+    @Override
+    public List<User> findAllInIds(List<Long> ids) {
+        return userJpaRepository.findAllInIds(ids);
+    }
+
+    @Override
+    public Optional<User> findByNicknameAndIsJoined(String nickname, Boolean isJoined) {
+        return userJpaRepository.findByNicknameAndIsJoined(nickname, isJoined);
+    }
+
+    @Override
+    public List<User> findByStation(String station) {
+        return userJpaRepository.findByStation(station);
+    }
+
+    @Override
+    public int updateSignal(Long userId, int signal) {
+        return userJpaRepository.updateSignal(userId, signal);
+    }
 }
