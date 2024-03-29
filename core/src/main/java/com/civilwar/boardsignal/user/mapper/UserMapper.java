@@ -22,7 +22,8 @@ public final class UserMapper {
         User user,
         List<UserReviewResponse> reviews,
         int wishCount,
-        Boolean isProfileManager
+        Boolean isProfileManager,
+        int endGameCount
     ) {
         return new UserProfileResponse(
             user.getId(),
@@ -37,7 +38,8 @@ public final class UserMapper {
             (double) Math.round(user.getMannerScore() * 10) / 10,
             reviews,
             wishCount,
-            isProfileManager
+            isProfileManager,
+            endGameCount
         );
     }
 

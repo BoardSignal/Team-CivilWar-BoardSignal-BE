@@ -13,7 +13,8 @@ public record UserProfileResponse(
     double signalTemperature,
     List<UserReviewResponse> reviews,
     int wishCount,
-    Boolean isProfileManager
+    Boolean isProfileManager,
+    int endGameCount
 ) {
 
 }
