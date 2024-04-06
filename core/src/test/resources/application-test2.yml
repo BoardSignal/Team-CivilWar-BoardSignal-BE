@@ -1,0 +1,17 @@
+spring:
+  config:
+    activate:
+      on-profile: test2
+  datasource:
+    url: jdbc:mysql://localhost:3307/BoardSignal?rewriteBatchedStatements=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 10

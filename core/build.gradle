@@ -12,6 +12,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     // Jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+    // Jdbc
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    // EasyRandom
+    implementation  'org.jeasy:easy-random-core:5.0.0'
 
     //테스트 픽쳐에서 사용할 의존성
     testFixturesImplementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
@@ -19,6 +23,7 @@ dependencies {
     testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
     testFixturesImplementation "org.testcontainers:testcontainers:1.19.3"
     testFixturesImplementation "org.testcontainers:mysql:1.19.3"
+    testFixturesImplementation  'org.jeasy:easy-random-core:5.0.0'
     testFixturesCompileOnly 'org.projectlombok:lombok'
     testFixturesCompileOnly 'org.springframework.boot:spring-boot-starter-security'
     testFixturesAnnotationProcessor 'org.projectlombok:lombok'
