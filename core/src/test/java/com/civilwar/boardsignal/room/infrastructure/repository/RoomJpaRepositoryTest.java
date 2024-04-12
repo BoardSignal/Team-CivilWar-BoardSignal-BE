@@ -14,8 +14,6 @@ import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceUnit;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,8 +31,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     private final DaySlot daySlot = DaySlot.WEEKDAY;
     private final TimeSlot timeSlot = TimeSlot.AM;
     private final List<Category> categories = List.of(Category.FAMILY, Category.PARTY);
-    @PersistenceUnit
-    EntityManagerFactory emf;
+
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
@@ -43,127 +40,142 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
     private MeetingInfoJpaRepository meetingInfoJpaRepository;
 
     @Test
-    @DisplayName("[유저는 자신이 참여한 모든 room을 조회하며, roomCategory와 meetingInfo를 fetch loading 한다.]")
-    void findMyFixRoomTest() throws IOException {
+    @DisplayName("[유저는 자신이 참여한 모임 중, 미확정이거나 확정 시간이 (오늘~미래)인 모임을 조회할 수 있다.]")
+    void findMyChattingRoomTest() throws IOException {
         //given
-        Long user1 = 1L;
-        Long user2 = 2L;
-        Room room = RoomFixture.getRoom(Gender.UNION);
-        Room room2 = RoomFixture.getRoom(Gender.UNION);
-        roomRepository.save(room);
-        roomRepository.save(room2);
+        Long user = 1L;
 
-        //user1 -> room1 참여
-        Participant participant = Participant.of(user1, room.getId(), true);
-        //user1 -> room2 참여
-        Participant participant2 = Participant.of(user1, room2.getId(), true);
-        //user2 -> room2 참여
-        Participant participant3 = Participant.of(user2, room2.getId(), false);
+        //유저가 참여하지 않은 방
+        Room notParticipant = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(notParticipant);
+        //미확정 방 -> 조회
+        Room nonFixRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(nonFixRoom);
+        //확정 시간이 어제인 방
+        Room pastRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(pastRoom);
+        //확정 시간이 오늘날짜인 방 -> 조회
+        Room todayRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(todayRoom);
+        //확정 시간이 내일인 방 -> 조회
+        Room futureRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(futureRoom);
+
+        //유저 참여
+        Participant participant = Participant.of(user, nonFixRoom.getId(), false);
         participantJpaRepository.save(participant);
+        Participant participant1 = Participant.of(user, pastRoom.getId(), false);
+        participantJpaRepository.save(participant1);
+        Participant participant2 = Participant.of(user, todayRoom.getId(), false);
         participantJpaRepository.save(participant2);
+        Participant participant3 = Participant.of(user, futureRoom.getId(), false);
         participantJpaRepository.save(participant3);
 
         //모임 확정
-        MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 2, 22, 19, 0, 0));
-        MeetingInfo meetingInfo2 = MeetingInfoFixture.getMeetingInfo(
-            LocalDateTime.of(2024, 2, 22, 19, 0, 0));
-        meetingInfoJpaRepository.save(meetingInfo);
-        meetingInfoJpaRepository.save(meetingInfo2);
-
-        room.fixRoom(meetingInfo);
-        room2.fixRoom(meetingInfo2);
-        roomRepository.save(room);
-        roomRepository.save(room2);
+        //어제
+        MeetingInfo yesterdayFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 10, 0, 0, 0));
+        meetingInfoJpaRepository.save(yesterdayFix);
+        pastRoom.fixRoom(yesterdayFix);
+        roomRepository.save(pastRoom);
+        //오늘
+        MeetingInfo todayFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 11, 19, 0, 0));
+        meetingInfoJpaRepository.save(todayFix);
+        todayRoom.fixRoom(todayFix);
+        roomRepository.save(todayRoom);
+        //내일
+        MeetingInfo tomorrowFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 12, 4, 0, 0));
+        meetingInfoJpaRepository.save(tomorrowFix);
+        futureRoom.fixRoom(tomorrowFix);
+        roomRepository.save(futureRoom);
 
         //when
-        List<Room> userGame1 = roomRepository.findMyFixRoom(user1);
-        List<Room> userGame2 = roomRepository.findMyFixRoom(user2);
+        LocalDateTime today = LocalDateTime.of(2024, 4, 11, 0, 0, 0);
+        PageRequest pageable = PageRequest.of(0, 5);
 
-        Room room1 = userGame1.get(0);
-        //fetch loading 확인
-        boolean loaded1 = emf.getPersistenceUnitUtil().isLoaded(room1.getRoomCategories().get(0));
-        boolean loaded2 = emf.getPersistenceUnitUtil().isLoaded(room1.getMeetingInfo());
+        Slice<Room> myChattingRoom = roomRepository.findMyChattingRoom(user, today, pageable);
+        List<Room> content = myChattingRoom.getContent();
 
         //then
-        assertThat(userGame1).hasSize(2);
-        assertThat(userGame2).hasSize(1);
-        assertThat(loaded1).isTrue();
-        assertThat(loaded2).isTrue();
+        assertThat(content).hasSize(3);
+        //최신 참여 순 정렬
+        assertThat(content.get(0).getId()).isEqualTo(futureRoom.getId());
+        assertThat(content.get(1).getId()).isEqualTo(todayRoom.getId());
+        assertThat(content.get(2).getId()).isEqualTo(nonFixRoom.getId());
     }
 
     @Test
-    @DisplayName("[자신이 참가한 30개의 room중, fix된 15개의 room만 갖고온다]")
-    void findMyFixRoomTest2() throws IOException {
+    @DisplayName("[유저는 자신이 어제까지 참여한 종료된 모임을 갖고온다]")
+    void findMyEndRoomPagingTest() throws IOException {
+        /*
+        room1 -> 미참여
+        room2 -> 참여, non-fix
+        room3 -> 참여, fix, 확정 시간 어제 -> 조회
+        room4 -> 참여, fix, 확정 시간 오늘
+        room5 -> 참여, fix, 확정 시간 내일
+         */
+
         //given
-        Long user1 = 1L;
+        Long user = 1L;
 
-        for (int i = 0; i < 30; i++) {
-            //방 생성
-            Room room = RoomFixture.getRoom(Gender.UNION);
-            roomRepository.save(room);
-            Participant participant = Participant.of(user1, room.getId(), true);
-            participantJpaRepository.save(participant);
+        //미참여방
+        Room notParticipant = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(notParticipant);
+        //미확정 방
+        Room nonFixRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(nonFixRoom);
+        //확정 시간이 어제인 방 -> 조회
+        Room pastRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(pastRoom);
+        //확정 시간이 오늘날짜인 방
+        Room todayRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(todayRoom);
+        //확정 시간이 내일인 방
+        Room futureRoom = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(futureRoom);
 
-            if (i % 2 == 0) {
-                //모임 확정
-                MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(
-                    LocalDateTime.of(2024, 2, 22, 19, 0, 0));
-                meetingInfoJpaRepository.save(meetingInfo);
-                room.fixRoom(meetingInfo);
-                roomRepository.save(room);
-            }
-        }
+        //유저 참여
+        Participant participant = Participant.of(user, nonFixRoom.getId(), false);
+        participantJpaRepository.save(participant);
+        Participant participant1 = Participant.of(user, pastRoom.getId(), false);
+        participantJpaRepository.save(participant1);
+        Participant participant2 = Participant.of(user, todayRoom.getId(), false);
+        participantJpaRepository.save(participant2);
+        Participant participant3 = Participant.of(user, futureRoom.getId(), false);
+        participantJpaRepository.save(participant3);
+
+        //모임 확정
+        //어제
+        MeetingInfo yesterdayFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 10, 0, 0, 0));
+        meetingInfoJpaRepository.save(yesterdayFix);
+        pastRoom.fixRoom(yesterdayFix);
+        roomRepository.save(pastRoom);
+        //오늘
+        MeetingInfo todayFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 11, 19, 0, 0));
+        meetingInfoJpaRepository.save(todayFix);
+        todayRoom.fixRoom(todayFix);
+        roomRepository.save(todayRoom);
+        //내일
+        MeetingInfo tomorrowFix = MeetingInfoFixture.getMeetingInfo(
+            LocalDateTime.of(2024, 4, 12, 4, 0, 0));
+        meetingInfoJpaRepository.save(tomorrowFix);
+        futureRoom.fixRoom(tomorrowFix);
+        roomRepository.save(futureRoom);
 
         //when
-        List<Room> userGame1 = roomRepository.findMyFixRoom(user1);
+        LocalDateTime today = LocalDateTime.of(2024, 4, 11, 0, 0, 0);
+        PageRequest pageable = PageRequest.of(0, 5);
+
+        Slice<Room> myChattingRoom = roomRepository.findMyEndRoomPaging(user, today, pageable);
+        List<Room> content = myChattingRoom.getContent();
 
         //then
-        assertThat(userGame1).hasSize(15);
-    }
-
-    @Test
-    @DisplayName("[자신이 참가한 모임 조회 시, 모임 확정일 기준 역순으로 정렬된다]")
-    void findMyFixRoomTest3() throws IOException {
-        //given
-        Long user1 = 1L;
-
-        LocalDateTime before = LocalDateTime.of(2024, 2, 21, 19, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2024, 2, 23, 19, 0, 0);
-        LocalDateTime after = LocalDateTime.of(2024, 2, 25, 19, 0, 0);
-
-        LocalDateTime[] times = new LocalDateTime[] {
-            before, now, after
-        };
-
-        for (LocalDateTime time : times) {
-            //방 생성
-            Room room = RoomFixture.getRoom(Gender.UNION);
-            roomRepository.save(room);
-            Participant participant = Participant.of(user1, room.getId(), true);
-            participantJpaRepository.save(participant);
-            //모임 확정
-            MeetingInfo meetingInfo = MeetingInfoFixture.getMeetingInfo(time);
-            meetingInfoJpaRepository.save(meetingInfo);
-            room.fixRoom(meetingInfo);
-            roomRepository.save(room);
-        }
-
-        //when
-        List<Room> fixGame = roomRepository.findMyFixRoom(user1);
-
-        Room room = fixGame.get(0);
-        LocalDateTime meetingTime1 = room.getMeetingInfo().getMeetingTime();
-        Room room1 = fixGame.get(1);
-        LocalDateTime meetingTime2 = room1.getMeetingInfo().getMeetingTime();
-        Room room2 = fixGame.get(2);
-        LocalDateTime meetingTime3 = room2.getMeetingInfo().getMeetingTime();
-
-        //then
-        assertThat(fixGame).hasSize(3);
-        assertThat(meetingTime1).isEqualTo(after);
-        assertThat(meetingTime2).isEqualTo(now);
-        assertThat(meetingTime3).isEqualTo(before);
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).getId()).isEqualTo(pastRoom.getId());
     }
 
     @Test

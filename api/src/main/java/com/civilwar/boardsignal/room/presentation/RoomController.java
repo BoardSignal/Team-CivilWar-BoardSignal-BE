@@ -87,19 +87,19 @@ public class RoomController {
         return ResponseEntity.ok(exitRoomResponse);
     }
 
-    @Operation(summary = "내가 현재 참여하고 있는 모임 조회 API (채팅 목록용)")
+    @Operation(summary = "채팅방 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/my/games")
-    public ResponseEntity<RoomPageResponse<ChatRoomResponse>> getMyGame(
+    public ResponseEntity<RoomPageResponse<ChatRoomResponse>> getMyChattingRoom(
         @Parameter(hidden = true) @AuthenticationPrincipal User user,
         Pageable pageable
     ) {
-        RoomPageResponse<ChatRoomResponse> myGame = roomFacade.findMyGame(user, pageable);
+        RoomPageResponse<ChatRoomResponse> myGame = roomFacade.findMyChattingRoom(user, pageable);
 
         return ResponseEntity.ok(myGame);
     }
 
-    @Operation(summary = "내가 이전에 참여한 모임 조회 API")
+    @Operation(summary = "내가 어제까지 참여한 모임 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/my/end-games")
     public ResponseEntity<RoomPageResponse<GetEndGameResponse>> getMyEndGame(

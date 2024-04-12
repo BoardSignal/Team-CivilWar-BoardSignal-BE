@@ -2,8 +2,8 @@ package com.civilwar.boardsignal.room.domain.repository;
 
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -16,9 +16,11 @@ public interface RoomRepository {
 
     Optional<Room> findById(Long id);
 
-    List<Room> findMyGame(Long userId);
+    Slice<Room> findMyChattingRoom(Long userId, LocalDateTime today, Pageable pageable);
 
-    List<Room> findMyFixRoom(Long userId);
+    Slice<Room> findMyEndRoomPaging(Long userId, LocalDateTime today, Pageable pageable);
+
+    int countByMyEndRoom(Long userId, LocalDateTime today);
 
     Slice<Room> findAll(RoomSearchCondition roomSearchCondition, Pageable pageable);
 

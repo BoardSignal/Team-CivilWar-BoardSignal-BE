@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
+import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.entity.UserCategory;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
     private final WishRepository wishRepository;
     private final ImageRepository imageRepository;
     private final UserReviewFacade userReviewFacade;
@@ -71,8 +73,16 @@ public class UserService {
         //프로필 방문 유저가 해당 프로필 주인인지 확인
         Boolean isProfileManager = profileUserId.equals(loginUser.getId());
 
+        //내가 어제까지 참여한 모임 갯수
+        LocalDateTime today = now.get()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
+        int endRoomCount = roomRepository.countByMyEndRoom(loginUser.getId(), today);
+
         return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount,
-            isProfileManager);
+            isProfileManager, endRoomCount);
     }
 
     @Transactional(readOnly = true)

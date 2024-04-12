@@ -44,14 +44,12 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,20 +109,20 @@ public class RoomService {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ROOM));
 
         //조건 1 . 참여 인원 수
-        if(findRoom.getHeadCount() == findRoom.getMaxParticipants()) {
+        if (findRoom.getHeadCount() == findRoom.getMaxParticipants()) {
             throw new ValidationException(RoomErrorCode.INVALID_HEADCOUNT);
         }
 
         //조건 2. 성별
         //방의 성별이 혼성이 아니고 유저 성별과 다르다면
         Gender allowedGender = findRoom.getAllowedGender();
-        if  (!allowedGender.equals(Gender.UNION) && !allowedGender.equals(user.getGender())) {
+        if (!allowedGender.equals(Gender.UNION) && !allowedGender.equals(user.getGender())) {
             throw new ValidationException(RoomErrorCode.INVALID_GENDER);
         }
 
         //조건 3. 나이
         int myAge = now.get().getYear() - user.getBirth() + 1;
-        if (!(findRoom.getMinAge()<=myAge && findRoom.getMaxAge()>=myAge)) {
+        if (!(findRoom.getMinAge() <= myAge && findRoom.getMaxAge() >= myAge)) {
             throw new ValidationException(RoomErrorCode.INVALID_AGE);
         }
 
@@ -164,44 +162,27 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public RoomPageResponse<ChatRoomResponse> findMyGame(
+    public RoomPageResponse<ChatRoomResponse> findMyChattingRoom(
         User user,
         Pageable pageable
     ) {
-        boolean hasNext = false;
+        //모임 시간이 (오늘~미래)인 모임
+        //ex) 4.11 20:00:48 -> 4.11 00:00:00 변환
+        LocalDateTime today = now.get()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
 
-        //1. 내가 지금까지 참가한 모든 room 조회
-        List<Room> myGame = roomRepository.findMyGame(user.getId());
+        //오늘 이미 참여했거나, 앞으로 참여할 모임
+        Slice<Room> myChattingRoom = roomRepository.findMyChattingRoom(user.getId(), today,
+            pageable);
 
-        //2. 모임 미확정인 방 & 확정이어도 시간이 지나지 않은 방
-        List<Room> myCurrentGame = new ArrayList<>(
-            myGame.stream()
-                .filter(room -> room.getStatus().equals(RoomStatus.NON_FIX)
-                    || room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isAfter(now.get().toLocalDate().minusDays(1))
-                ).toList()
-        );
+        //매핑
+        Slice<ChatRoomResponse> myChattingRoomResult = myChattingRoom.map(
+            RoomMapper::toChatRoomResponse);
 
-        //3. Slicing
-        List<Room> resultList = new ArrayList<>();
-
-        myCurrentGame.stream()
-            .skip(pageable.getOffset())
-            .limit(pageable.getPageSize() + 1L)
-            .forEach(resultList::add);
-
-        //4.
-        if (resultList.size() > pageable.getPageSize()) {
-            hasNext = true;
-            resultList.remove(resultList.size() - 1);
-        }
-
-        //5. slice 반환
-        Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
-
-        Slice<ChatRoomResponse> resultMap = result.map(RoomMapper::toChatRoomResponse);
-
-        return RoomMapper.toRoomPageResponse(resultMap);
+        return RoomMapper.toRoomPageResponse(myChattingRoomResult);
     }
 
     @Transactional(readOnly = true)
@@ -209,53 +190,31 @@ public class RoomService {
         Long userId,
         Pageable pageable
     ) {
-        boolean hasNext = false;
+        //오늘 날짜
+        LocalDateTime today = now.get()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
 
-        List<Room> myEndGame = getMyEndGames(userId);
+        // 내가 어제까지 참여한 종료된 모임 리스트
+        Slice<Room> myEndGames = roomRepository.findMyEndRoomPaging(userId, today, pageable);
 
-        //3. Slicing
-        List<Room> resultList = new ArrayList<>();
-
-        myEndGame.stream()
-            .skip(pageable.getOffset())
-            .limit(pageable.getPageSize() + 1L)
-            .forEach(resultList::add);
-
-        //4.
-        if (resultList.size() > pageable.getPageSize()) {
-            hasNext = true;
-            resultList.remove(resultList.size() - 1);
-        }
-
-        // 내가 참여한 종료된 모임의 id 리스트
-        List<Long> myEndGameIds = resultList.stream()
+        // 모임의 id 리스트
+        List<Long> myEndGameIds = myEndGames.getContent()
+            .stream()
             .map(Room::getId)
             .toList();
 
-        // 자신이 참여한 종료된 모임들에 작성한 리뷰들
+        // 모임들에 작성한 리뷰들
         List<Review> myEndGameReview = reviewRepository.findReviewsByRoomIdsAndReviewer(
             myEndGameIds, userId);
 
-        //5. slice 변환
-        Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
-
-        Slice<GetEndGameResponse> resultMap = result.map(
+        // 매핑
+        Slice<GetEndGameResponse> resultMap = myEndGames.map(
             room -> RoomMapper.toGetEndGameResponse(room, myEndGameReview));
 
         return RoomMapper.toRoomPageResponse(resultMap);
-    }
-
-    public List<Room> getMyEndGames(Long userId) {
-        //1. 내가 참여한 모든 room
-        List<Room> myFixGame = roomRepository.findMyFixRoom(userId);
-
-        //2. (모임 확정 day) < 현재 day 인 room
-        return new ArrayList<>(
-            myFixGame.stream()
-                .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isBefore(now.get().toLocalDate())
-                ).toList()
-        );
     }
 
     @Transactional(readOnly = true)
@@ -331,7 +290,7 @@ public class RoomService {
         LocalDateTime today = now.get(); // 오늘
         LocalDateTime fixDay = request.meetingTime(); // 모임 확정하려는 날짜
         //오늘보다 이전 날짜거나 7일 이후를 확정시에 예외
-        if(fixDay.isBefore(today) || fixDay.isAfter(today.plusDays(LIMIT_DAY))){
+        if (fixDay.isBefore(today) || fixDay.isAfter(today.plusDays(LIMIT_DAY))) {
             throw new ValidationException(INVALID_DATE);
         }
 

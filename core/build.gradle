@@ -58,6 +58,9 @@ dependencies {
     implementation 'com.google.http-client:google-http-client-gson:1.44.1'
     implementation 'com.google.http-client:google-http-client:1.44.1'
 
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
 }
 

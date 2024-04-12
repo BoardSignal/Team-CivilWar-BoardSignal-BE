@@ -16,6 +16,7 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -109,13 +110,18 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
-    public List<Room> findMyGame(Long userId) {
-        return roomJpaRepository.findMyGame(userId);
+    public Slice<Room> findMyChattingRoom(Long userId, LocalDateTime today, Pageable pageable) {
+        return roomJpaRepository.findMyChattingRoom(userId, today, pageable);
     }
 
     @Override
-    public List<Room> findMyFixRoom(Long userId) {
-        return roomJpaRepository.findMyFixRoom(userId);
+    public Slice<Room> findMyEndRoomPaging(Long userId, LocalDateTime today, Pageable pageable) {
+        return roomJpaRepository.findMyEndRoomPaging(userId, today, pageable);
+    }
+
+    @Override
+    public int countByMyEndRoom(Long userId, LocalDateTime today) {
+        return roomJpaRepository.countByMyEndRoom(userId, today);
     }
 
     @Override
