@@ -148,7 +148,8 @@ class RoomServiceTest {
             ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
             ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
         given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
+            userId)).willReturn(reviews);
 
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -227,7 +228,8 @@ class RoomServiceTest {
             ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
             ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
         given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
+            userId)).willReturn(reviews);
 
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -266,7 +268,8 @@ class RoomServiceTest {
             ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
             ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
         given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(), userId)).willReturn(reviews);
+            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
+            userId)).willReturn(reviews);
 
         //when
         RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
@@ -378,7 +381,6 @@ class RoomServiceTest {
         given(meetingInfoRepository.save(any(MeetingInfo.class)))
             .willReturn(meetingInfo);
         given(time.get()).willReturn(request.meetingTime().minusDays(1));
-
 
         //when
         Room response = roomService.fixRoom(user, room.getId(), request);
@@ -722,7 +724,7 @@ class RoomServiceTest {
 
     @Test
     @DisplayName("[모임 확정 시, 확정 시점보다 이전으로 확정하려 할 시 예외가 발생한다.]")
-    void fixRoomBeforeDate(){
+    void fixRoomBeforeDate() {
         //given
         User user = UserFixture.getUserFixture("rprp", "https");
         FixRoomRequest request = RoomFixture.getFixRoomRequest();
@@ -740,7 +742,7 @@ class RoomServiceTest {
 
     @Test
     @DisplayName("[모임 확정 시, 확정 시점 7일 이후에 대한 요청이 오면 예외가 발생한다.]")
-    void fixRoomAfterSevenDays(){
+    void fixRoomAfterSevenDays() {
         //given
         User user = UserFixture.getUserFixture("rprp", "https");
         FixRoomRequest request = RoomFixture.getFixRoomRequest();

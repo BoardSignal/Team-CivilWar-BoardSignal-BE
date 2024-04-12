@@ -199,7 +199,7 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         LocalDateTime now = LocalDateTime.of(2024, 2, 23, 19, 0, 0);
         LocalDateTime after = LocalDateTime.of(2024, 2, 25, 19, 0, 0);
 
-        LocalDateTime[] times = new LocalDateTime[] {
+        LocalDateTime[] times = new LocalDateTime[]{
             before, now, after
         };
 

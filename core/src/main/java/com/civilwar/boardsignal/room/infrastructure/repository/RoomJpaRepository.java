@@ -30,7 +30,8 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
         + "where p.userId=:userId "
         + "and (m.meetingTime>=:today or m.meetingTime is null) "
         + "order by p.createdAt desc")
-    Slice<Room> findMyChattingRoom(@Param("userId") Long userId, @Param("today") LocalDateTime today, Pageable pageable);
+    Slice<Room> findMyChattingRoom(@Param("userId") Long userId,
+        @Param("today") LocalDateTime today, Pageable pageable);
 
     // 내가 참여한 fix room 조회 쿼리
     @Query("select r "

@@ -34,7 +34,7 @@ public class ReviewService {
         Long roomId
     ) {
 
-        if(reviewRepository.existsReviewByReviewerIdAndRoomId(loginUser.getId(), roomId)) {
+        if (reviewRepository.existsReviewByReviewerIdAndRoomId(loginUser.getId(), roomId)) {
             throw new ValidationException(ReviewErrorCode.ALREADY_EXIST_REVIEW);
         }
 
