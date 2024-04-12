@@ -43,7 +43,8 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
         + "and r.status='FIX' "
         + "and m.meetingTime<:today "
         + "order by m.meetingTime desc ")
-    Slice<Room> findMyEndRoomPaging(@Param("userId") Long userId, @Param("today") LocalDateTime today, Pageable pageable);
+    Slice<Room> findMyEndRoomPaging(@Param("userId") Long userId,
+        @Param("today") LocalDateTime today, Pageable pageable);
 
     // 내가 어제까지 참여한 종료된 모임 갯수
     @Query("select count(r) "
