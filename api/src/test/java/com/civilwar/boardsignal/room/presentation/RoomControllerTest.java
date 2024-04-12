@@ -190,7 +190,7 @@ class RoomControllerTest extends ApiTestSupport {
 
     @Test
     @DisplayName("[사용자는 자신이 참여중인 채팅방을 조회할 수 있다, 이 때 fix 되고 시간이 지난방은 조회되지 않는다]")
-    void getMyGameTest() throws Exception {
+    void getMyChattingRoomTest() throws Exception {
         /**
          * room1 -> 참가, fix, 시간이 지난 모임,
          * room2 -> 참가, fix, 시간이 지나지 않은 모임 -> o
