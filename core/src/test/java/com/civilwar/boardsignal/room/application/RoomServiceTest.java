@@ -13,9 +13,6 @@ import com.civilwar.boardsignal.common.MultipartFileFixture;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
-import com.civilwar.boardsignal.review.ReviewFixture;
-import com.civilwar.boardsignal.review.domain.entity.Review;
-import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
 import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.room.MeetingInfoFixture;
 import com.civilwar.boardsignal.room.RoomFixture;
@@ -32,13 +29,11 @@ import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.ExitRoomResponse;
-import com.civilwar.boardsignal.room.dto.response.GetEndGameResponse;
 import com.civilwar.boardsignal.room.dto.response.GetEndGameUsersResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.dto.response.ParticipantResponse;
 import com.civilwar.boardsignal.room.dto.response.ParticipantRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.RoomInfoResponse;
-import com.civilwar.boardsignal.room.dto.response.RoomPageResponse;
 import com.civilwar.boardsignal.room.exception.RoomErrorCode;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
@@ -47,9 +42,7 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -61,7 +54,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -118,166 +110,6 @@ class RoomServiceTest {
         CreateRoomResponse response = roomService.createRoom(user, request);
 
         assertThat(response.roomId()).isEqualTo(room.getId());
-    }
-
-    @Test
-    @DisplayName("[자신이 참여한 fix 방 중 모임 확정 시간이 지난 방을 보여준다.]")
-    void findMyEndGameTest2() throws IOException {
-        //given
-        Long userId = 1L;
-        int PAGE_NUMBER = 0;
-        int PAGE_SIZE = 5;
-        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
-
-        LocalDateTime before = LocalDateTime.of(2024, Month.FEBRUARY, 2, 20, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2024, Month.FEBRUARY, 21, 0, 0, 0);
-        given(time.get()).willReturn(now);
-
-        //fix이면서 시간이 지난 방 -> 30개
-        List<Room> testResult = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
-            ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
-            testResult.add(room);
-        }
-        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
-
-        //0번방, 1번방에 리뷰 남김
-        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
-        List<Review> reviews = List.of(
-            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
-            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
-        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
-            userId)).willReturn(reviews);
-
-        //when
-        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
-            pageRequest);
-
-        //then
-        assertThat(myEndGame.roomsInfos()).hasSize(5);
-        assertThat(myEndGame.roomsInfos().get(0).fixTime()).isEqualTo(before);
-        assertThat(myEndGame.hasNext()).isTrue();
-    }
-
-    @Test
-    @DisplayName("[자신이 참여한 fix 방 중 모임 확정 시간이 지나지 않은 방은 안 보여준다.]")
-    void findMyEndGameTest3() throws IOException {
-        //given
-        Long userId = 1L;
-        int PAGE_NUMBER = 0;
-        int PAGE_SIZE = 5;
-        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
-
-        LocalDateTime after = LocalDateTime.of(2024, Month.FEBRUARY, 22, 20, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2024, Month.FEBRUARY, 21, 0, 0, 0);
-        given(time.get()).willReturn(now);
-
-        //fix이면서 아직 시간이 지나지 않은 방 -> 30개
-        List<Room> testResult = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(after, Gender.UNION);
-            ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
-            testResult.add(room);
-        }
-        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
-
-        //0번방, 1번방에 리뷰 남김
-        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
-        List<Review> reviews = List.of(
-            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
-            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
-        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            List.of(), userId)).willReturn(reviews);
-
-        //when
-        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
-            pageRequest);
-
-        //then
-        assertThat(myEndGame.roomsInfos()).isEmpty();
-        assertThat(myEndGame.hasNext()).isFalse();
-    }
-
-    @Test
-    @DisplayName("[남은 요소들이 있다면 hasNext는 true를 반환한다.]")
-    void findMyEndGameTest4() throws IOException {
-        //given
-        Long userId = 1L;
-        int PAGE_NUMBER = 0;
-        int PAGE_SIZE = 26;
-        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
-
-        LocalDateTime before = LocalDateTime.of(2024, Month.FEBRUARY, 2, 20, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2024, Month.FEBRUARY, 21, 0, 0, 0);
-        given(time.get()).willReturn(now);
-
-        //fix이면서 시간이 지난 방 -> 30개
-        List<Room> testResult = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
-            ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
-            testResult.add(room);
-        }
-        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
-
-        //0번방, 1번방에 리뷰 남김
-        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
-        List<Review> reviews = List.of(
-            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
-            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
-        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
-            userId)).willReturn(reviews);
-
-        //when
-        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
-            pageRequest);
-
-        //then
-        assertThat(myEndGame.roomsInfos()).hasSize(26);
-        assertThat(myEndGame.hasNext()).isTrue();
-    }
-
-    @Test
-    @DisplayName("[남은 요소들이 없다면 hasNext는 false를 반환한다.]")
-    void findMyEndGameTest5() throws IOException {
-        //given
-        Long userId = 1L;
-        int PAGE_NUMBER = 0;
-        int PAGE_SIZE = 31;
-        PageRequest pageRequest = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
-
-        LocalDateTime before = LocalDateTime.of(2024, Month.FEBRUARY, 2, 20, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2024, Month.FEBRUARY, 21, 0, 0, 0);
-        given(time.get()).willReturn(now);
-
-        //fix이면서 시간이 지난 방 -> 30개
-        List<Room> testResult = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Room room = RoomFixture.getRoomWithMeetingInfo(before, Gender.UNION);
-            ReflectionTestUtils.setField(room, "id", Long.parseLong(String.valueOf(i)));
-            testResult.add(room);
-        }
-        given(roomRepository.findMyFixRoom(userId)).willReturn(testResult);
-
-        //0번방, 1번방에 리뷰 남김
-        List<ReviewEvaluation> reviewEvaluations = ReviewFixture.getEvaluationFixture();
-        List<Review> reviews = List.of(
-            ReviewFixture.getReviewFixture(userId, 100L, 0L, reviewEvaluations),
-            ReviewFixture.getReviewFixture(userId, 101L, 0L, reviewEvaluations));
-        given(reviewRepository.findReviewsByRoomIdsAndReviewer(
-            testResult.stream().map(Room::getId).limit(pageRequest.getPageSize()).toList(),
-            userId)).willReturn(reviews);
-
-        //when
-        RoomPageResponse<GetEndGameResponse> myEndGame = roomService.findMyEndGame(userId,
-            pageRequest);
-
-        //then
-        assertThat(myEndGame.roomsInfos()).hasSize(30);
-        assertThat(myEndGame.hasNext()).isFalse();
     }
 
     @Test

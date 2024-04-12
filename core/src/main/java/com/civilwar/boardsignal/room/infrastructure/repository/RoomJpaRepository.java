@@ -3,7 +3,6 @@ package com.civilwar.boardsignal.room.infrastructure.repository;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -33,16 +32,33 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
     Slice<Room> findMyChattingRoom(@Param("userId") Long userId,
         @Param("today") LocalDateTime today, Pageable pageable);
 
-    // 내가 참여한 fix room 조회 쿼리
+    // 내가 어제까지 참여한 종료된 모임 (페이징 버전)
     @Query("select r "
         + "from Room as r "
+        + "left join MeetingInfo as m "
+        + "on m.id = r.meetingInfo.id "
         + "join Participant as p "
         + "on r.id = p.roomId "
-        + "join fetch r.meetingInfo as m "
         + "where p.userId=:userId "
         + "and r.status='FIX' "
+        + "and m.meetingTime<:today "
         + "order by m.meetingTime desc ")
-    List<Room> findMyFixRoom(@Param("userId") Long userId);
+    Slice<Room> findMyEndRoomPaging(@Param("userId") Long userId,
+        @Param("today") LocalDateTime today, Pageable pageable);
+
+    // 내가 어제까지 참여한 종료된 모임 갯수
+    @Query("select count(r) "
+        + "from Room as r "
+        + "left join MeetingInfo as m "
+        + "on m.id = r.meetingInfo.id "
+        + "join Participant as p "
+        + "on r.id = p.roomId "
+        + "where p.userId=:userId "
+        + "and r.status='FIX' "
+        + "and m.meetingTime<:today "
+        + "order by m.meetingTime desc ")
+    int countByMyEndRoom(@Param("userId") Long userId, @Param("today") LocalDateTime today);
+
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Room r where r.id = :id")

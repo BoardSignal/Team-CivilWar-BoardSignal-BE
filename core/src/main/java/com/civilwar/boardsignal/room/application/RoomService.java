@@ -44,14 +44,12 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,53 +190,31 @@ public class RoomService {
         Long userId,
         Pageable pageable
     ) {
-        boolean hasNext = false;
+        //오늘 날짜
+        LocalDateTime today = now.get()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
 
-        List<Room> myEndGame = getMyEndGames(userId);
+        // 내가 어제까지 참여한 종료된 모임 리스트
+        Slice<Room> myEndGames = roomRepository.findMyEndRoomPaging(userId, today, pageable);
 
-        //3. Slicing
-        List<Room> resultList = new ArrayList<>();
-
-        myEndGame.stream()
-            .skip(pageable.getOffset())
-            .limit(pageable.getPageSize() + 1L)
-            .forEach(resultList::add);
-
-        //4.
-        if (resultList.size() > pageable.getPageSize()) {
-            hasNext = true;
-            resultList.remove(resultList.size() - 1);
-        }
-
-        // 내가 참여한 종료된 모임의 id 리스트
-        List<Long> myEndGameIds = resultList.stream()
+        // 모임의 id 리스트
+        List<Long> myEndGameIds = myEndGames.getContent()
+            .stream()
             .map(Room::getId)
             .toList();
 
-        // 자신이 참여한 종료된 모임들에 작성한 리뷰들
+        // 모임들에 작성한 리뷰들
         List<Review> myEndGameReview = reviewRepository.findReviewsByRoomIdsAndReviewer(
             myEndGameIds, userId);
 
-        //5. slice 변환
-        Slice<Room> result = new SliceImpl<>(resultList, pageable, hasNext);
-
-        Slice<GetEndGameResponse> resultMap = result.map(
+        // 매핑
+        Slice<GetEndGameResponse> resultMap = myEndGames.map(
             room -> RoomMapper.toGetEndGameResponse(room, myEndGameReview));
 
         return RoomMapper.toRoomPageResponse(resultMap);
-    }
-
-    public List<Room> getMyEndGames(Long userId) {
-        //1. 내가 참여한 모든 room
-        List<Room> myFixGame = roomRepository.findMyFixRoom(userId);
-
-        //2. (모임 확정 day) < 현재 day 인 room
-        return new ArrayList<>(
-            myFixGame.stream()
-                .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
-                    .isBefore(now.get().toLocalDate())
-                ).toList()
-        );
     }
 
     @Transactional(readOnly = true)
