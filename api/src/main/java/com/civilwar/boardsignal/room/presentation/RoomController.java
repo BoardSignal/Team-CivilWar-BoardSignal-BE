@@ -99,7 +99,7 @@ public class RoomController {
         return ResponseEntity.ok(myGame);
     }
 
-    @Operation(summary = "내가 이전에 참여한 모임 조회 API")
+    @Operation(summary = "내가 어제까지 참여한 모임 조회 API")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/my/end-games")
     public ResponseEntity<RoomPageResponse<GetEndGameResponse>> getMyEndGame(
