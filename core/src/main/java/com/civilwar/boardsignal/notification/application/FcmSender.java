@@ -6,8 +6,6 @@ import static org.springframework.http.HttpMethod.POST;
 
 import com.civilwar.boardsignal.notification.domain.entity.Notification;
 import com.civilwar.boardsignal.notification.dto.request.NotificationTestRequest;
-import com.civilwar.boardsignal.user.domain.entity.User;
-import com.civilwar.boardsignal.user.domain.entity.UserFcmToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.LinkedHashMap;

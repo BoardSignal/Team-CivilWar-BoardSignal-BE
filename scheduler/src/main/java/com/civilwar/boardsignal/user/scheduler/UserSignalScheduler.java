@@ -21,12 +21,12 @@ public class UserSignalScheduler {
 
     @Async(value = "schedulerTask")
     @Scheduled(cron = "0 0 0 * * *")
-    public void updateSignal(){
+    public void updateSignal() {
         List<User> users = userRepository.findAll();
 
-        for(User user : users) {
+        for (User user : users) {
             List<Room> myEndGames = roomService.getMyEndGames(user.getId());
-            if(user.getSignal() != myEndGames.size()){
+            if (user.getSignal() != myEndGames.size()) {
                 // 종료된 게임이 늘어난 경우에만 업데이트
                 userRepository.updateSignal(user.getId(), myEndGames.size());
             }

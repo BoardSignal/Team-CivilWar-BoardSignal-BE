@@ -64,7 +64,8 @@ class NotificationControllerTest extends ApiTestSupport {
                 .header(AUTHORIZATION, accessToken))
             .andExpectAll(
                 status().isOk(),
-                jsonPath("$.notificationsInfos[0].notificationId").value(notificationSecond.getId()),
+                jsonPath("$.notificationsInfos[0].notificationId").value(
+                    notificationSecond.getId()),
                 jsonPath("$.notificationsInfos[0].roomId").value(notificationSecond.getRoomID()),
                 jsonPath("$.notificationsInfos[1].notificationId").value(
                     notificationFirst.getId()),

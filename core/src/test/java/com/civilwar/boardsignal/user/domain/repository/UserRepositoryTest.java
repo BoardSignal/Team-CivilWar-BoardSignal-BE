@@ -45,7 +45,7 @@ class UserRepositoryTest extends DataJpaTestSupport {
 
     @Test
     @DisplayName("[유저의 signal을 업데이트 할 수 있다.]")
-    void updateSignal(){
+    void updateSignal() {
         User user = userRepository.findById(1L).orElseThrow();
         int EndGameSize = 5;
         userRepository.updateSignal(user.getId(), EndGameSize);

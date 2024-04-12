@@ -79,11 +79,11 @@ public class RoomFacade {
         return roomService.exitRoom(user, roomId);
     }
 
-    public RoomPageResponse<ChatRoomResponse> findMyGame(
+    public RoomPageResponse<ChatRoomResponse> findMyChattingRoom(
         User user,
         Pageable pageable
     ) {
-        return roomService.findMyGame(user, pageable);
+        return roomService.findMyChattingRoom(user, pageable);
     }
 
     public RoomPageResponse<GetEndGameResponse> findMyEndGame(
@@ -163,7 +163,8 @@ public class RoomFacade {
 
     @Transactional
     public KickOutResponse kickOutUser(User leader, KickOutUserRequest kickOutUserRequest) {
-        KickOutFacadeResponse kickOutFacadeResponse = roomService.kickOutUser(leader, kickOutUserRequest);
+        KickOutFacadeResponse kickOutFacadeResponse = roomService.kickOutUser(leader,
+            kickOutUserRequest);
 
         Room room = kickOutFacadeResponse.room();
         String kickOutUserNickname = kickOutFacadeResponse.kickOutUserNickname();

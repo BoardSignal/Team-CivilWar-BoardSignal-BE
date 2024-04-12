@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ApiApplication {
 
     public static void main(String[] args) {
-        System.setProperty("spring.config.name", "application, application-api, application-core, application-scheduler");
+        System.setProperty("spring.config.name",
+            "application, application-api, application-core, application-scheduler");
         SpringApplication.run(ApiApplication.class, args);
     }
 }

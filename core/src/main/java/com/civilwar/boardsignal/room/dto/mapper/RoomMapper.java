@@ -107,7 +107,7 @@ public final class RoomMapper {
             .map(Review::getRoomId).toList();
 
         //현재 방이 리뷰 완료한 방인지 확인
-        boolean reviewCompleted= reviewRoomIds.stream()
+        boolean reviewCompleted = reviewRoomIds.stream()
             .anyMatch(reviewRoomId -> Objects.equals(reviewRoomId, room.getId()));
 
         return new GetEndGameResponse(
