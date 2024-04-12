@@ -115,8 +115,13 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
-    public List<Room> findMyFixRoom(Long userId) {
-        return roomJpaRepository.findMyFixRoom(userId);
+    public Slice<Room> findMyEndRoomPaging(Long userId, LocalDateTime today, Pageable pageable) {
+        return roomJpaRepository.findMyEndRoomPaging(userId, today, pageable);
+    }
+
+    @Override
+    public int countByMyEndRoom(Long userId, LocalDateTime today) {
+        return roomJpaRepository.countByMyEndRoom(userId, today);
     }
 
     @Override
