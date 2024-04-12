@@ -4,7 +4,6 @@ import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
-import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.entity.UserCategory;
@@ -74,17 +73,16 @@ public class UserService {
         //프로필 방문 유저가 해당 프로필 주인인지 확인
         Boolean isProfileManager = profileUserId.equals(loginUser.getId());
 
-        //내가 참여한 모든 fixRoom
-        List<Room> myFixGame = roomRepository.findMyFixRoom(loginUser.getId());
-
-        //내가 이전에 참여한 모임 조회 갯수
-        long endGameCount = myFixGame.stream()
-            .filter(room -> room.getMeetingInfo().getMeetingTime().toLocalDate()
-                .isBefore(now.get().toLocalDate())
-            ).count();
+        //내가 어제까지 참여한 모임 갯수
+        LocalDateTime today = now.get()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
+        int endRoomCount = roomRepository.countByMyEndRoom(loginUser.getId(), today);
 
         return UserMapper.toUserProfileResponse(profileUser, userReviews, wishCount,
-            isProfileManager, (int) endGameCount);
+            isProfileManager, endRoomCount);
     }
 
     @Transactional(readOnly = true)
