@@ -79,11 +79,11 @@ public class RoomFacade {
         return roomService.exitRoom(user, roomId);
     }
 
-    public RoomPageResponse<ChatRoomResponse> findMyGame(
+    public RoomPageResponse<ChatRoomResponse> findMyChattingRoom(
         User user,
         Pageable pageable
     ) {
-        return roomService.findMyGame(user, pageable);
+        return roomService.findMyChattingRoom(user, pageable);
     }
 
     public RoomPageResponse<GetEndGameResponse> findMyEndGame(
