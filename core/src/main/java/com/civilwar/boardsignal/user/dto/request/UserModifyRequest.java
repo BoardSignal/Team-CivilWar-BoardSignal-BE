@@ -9,6 +9,8 @@ public record UserModifyRequest(
     Long id,
     String nickName,
     List<Category> categories,
+    String gender,
+    int birth,
     String line,
     String station,
     MultipartFile image

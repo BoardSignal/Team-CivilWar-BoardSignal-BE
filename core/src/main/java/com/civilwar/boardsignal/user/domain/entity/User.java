@@ -142,11 +142,17 @@ public class User extends BaseEntity implements UserDetails {
     public void updateUser(
         String nickname,
         List<Category> categories,
+        Gender gender,
+        int birth,
+        AgeGroup ageGroup,
         String line,
         String station,
         String profileImageUrl
     ) {
         this.nickname = nickname;
+        this.gender = gender;
+        this.birth = birth;
+        this.ageGroup = ageGroup;
         this.line = line;
         this.station = station;
         this.userCategories.clear();
