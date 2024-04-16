@@ -1,6 +1,5 @@
 package com.civilwar.boardsignal.auth.presentation;
 
-import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.auth.exception.AuthErrorCode;
 import com.civilwar.boardsignal.auth.infrastructure.JwtTokenProvider;
-import com.civilwar.boardsignal.boardgame.domain.constant.Category;
 import com.civilwar.boardsignal.common.support.ApiTestSupport;
 import com.civilwar.boardsignal.user.UserFixture;
 import com.civilwar.boardsignal.user.domain.constants.Role;
@@ -18,13 +16,11 @@ import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
 
 @DisplayName("[AuthApiController 테스트]")
 class AuthApiControllerTest extends ApiTestSupport {

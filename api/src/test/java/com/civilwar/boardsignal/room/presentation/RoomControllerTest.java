@@ -40,7 +40,6 @@ import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
-import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;

@@ -18,7 +18,7 @@ public enum AgeGroup {
     TEENAGER("14~19", "14-19", "청소년", 19),
     TWENTY("20~29", "20-29", "20대", 29),
     THIRTY("30~39", "30-39", "30대", 39),
-    FORTY("40~49", "40-49", "40대",49),
+    FORTY("40~49", "40-49", "40대", 49),
     FIFTY("50~59", "50-59", "50대", 59),
     SIXTY("60~69", "60-69", "60대", 69),
     SEVENTY("70~79", "70-79", "70대", 79),
@@ -37,25 +37,25 @@ public enum AgeGroup {
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_AGE_GROUP));
     }
 
+    public static AgeGroup convert(int birthYear, LocalDateTime now) {
+        AgeGroup userAgeGroup = UNKNOWN;
+        int age = now.getYear() - birthYear + 1;
+
+        for (AgeGroup a : values()) {
+            //현재 연령대의 사용자의 나이가 포함된다면
+            if (a.getMaxAge() >= age) {
+                userAgeGroup = a;
+            }
+        }
+        return userAgeGroup;
+
+    }
+
     private boolean isEqual(String input, String provider) {
         if (provider.equals(OAuthProvider.KAKAO.getType())) {
             return input.equalsIgnoreCase(this.kakaoType);
         } else {
             return input.equalsIgnoreCase(this.naverType);
         }
-    }
-
-    public static AgeGroup convert(int birthYear, LocalDateTime now) {
-        AgeGroup userAgeGroup = UNKNOWN;
-        int age = now.getYear()-birthYear+1;
-
-        for (AgeGroup a : values()) {
-            //현재 연령대의 사용자의 나이가 포함된다면
-            if (a.getMaxAge()>=age) {
-                userAgeGroup = a;
-            }
-        }
-        return userAgeGroup;
-
     }
 }

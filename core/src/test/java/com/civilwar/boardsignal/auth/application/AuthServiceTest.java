@@ -12,8 +12,6 @@ import com.civilwar.boardsignal.auth.dto.request.UserLoginRequest;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
 import com.civilwar.boardsignal.user.UserFixture;
-import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
-import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.OAuthProvider;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;

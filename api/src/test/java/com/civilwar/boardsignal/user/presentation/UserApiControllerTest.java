@@ -206,7 +206,8 @@ class UserApiControllerTest extends ApiTestSupport {
     void validNicknameTest2() throws Exception {
         //given
         String existName = loginUser.getName();
-        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000, AgeGroup.TWENTY, "2호선", "사당역", "testURL");
+        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000,
+            AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
         ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
 
@@ -244,7 +245,8 @@ class UserApiControllerTest extends ApiTestSupport {
         User anotherUser = UserFixture.getUserFixture("providerId", "testURL");
         String existName = anotherUser.getName();
         userRepository.save(anotherUser);
-        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000, AgeGroup.TWENTY, "2호선", "사당역", "testURL");
+        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000,
+            AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
 
         ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
