@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -30,10 +31,14 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -49,12 +54,16 @@ class UserApiControllerTest extends ApiTestSupport {
     private TokenProvider tokenProvider;
     @Autowired
     private WishRepository wishRepository;
+    @MockBean
+    private Supplier<LocalDateTime> now;
 
     @Test
     @DisplayName("[회원은 정보를 수정 할 수 있다]")
     void joinUserTest() throws Exception {
 
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         User userFixture = UserFixture.getUserFixture(OAuthProvider.KAKAO.getType(), "testURL");
         userRepository.save(userFixture);
 
@@ -64,7 +73,7 @@ class UserApiControllerTest extends ApiTestSupport {
         ApiUserModifyRequest apiUserModifyRequest = new ApiUserModifyRequest(
             "injuning",
             Gender.MALE.getDescription(),
-            2000,
+            1970,
             "2호선",
             "사당역",
             List.of("가족게임", "파티게임")
@@ -103,6 +112,7 @@ class UserApiControllerTest extends ApiTestSupport {
         assertThat(findUser.getNickname()).isEqualTo(apiUserModifyRequest.nickName());
         assertThat(findUser.getLine()).isEqualTo(apiUserModifyRequest.line());
         assertThat(findUser.getStation()).isEqualTo(apiUserModifyRequest.station());
+        assertThat(findUser.getAgeGroup()).isEqualTo(AgeGroup.FIFTY);
     }
 
 
