@@ -96,17 +96,17 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "USER_SIGNAL")
     private int signal;
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder(access = AccessLevel.PUBLIC)
     private User(
         @NonNull String email,
-        @NonNull String name,
+        String name,
         @NonNull String nickname,
         @NonNull String provider,
         @NonNull String providerId,
         @NonNull String profileImageUrl,
-        @NonNull int birth,
-        @NonNull AgeGroup ageGroup,
-        @NonNull Gender gender
+        int birth,
+        AgeGroup ageGroup,
+        Gender gender
     ) {
         this.email = email;
         this.name = name;
@@ -125,25 +125,17 @@ public class User extends BaseEntity implements UserDetails {
 
     public static User of(
         String email,
-        String name,
         String nickname,
         String provider,
         String providerId,
-        String profileImageUrl,
-        int birth,
-        AgeGroup ageGroup,
-        Gender gender
+        String profileImageUrl
     ) {
         return User.builder()
             .email(email)
-            .name(name)
             .nickname(nickname)
             .provider(provider)
             .providerId(providerId)
             .profileImageUrl(profileImageUrl)
-            .birth(birth)
-            .ageGroup(ageGroup)
-            .gender(gender)
             .build();
     }
 
