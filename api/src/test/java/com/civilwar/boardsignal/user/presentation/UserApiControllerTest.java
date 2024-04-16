@@ -20,6 +20,8 @@ import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
 import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.OAuthProvider;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -61,6 +63,8 @@ class UserApiControllerTest extends ApiTestSupport {
 
         ApiUserModifyRequest apiUserModifyRequest = new ApiUserModifyRequest(
             "injuning",
+            Gender.MALE.getDescription(),
+            2000,
             "2호선",
             "사당역",
             List.of("가족게임", "파티게임")
@@ -202,7 +206,7 @@ class UserApiControllerTest extends ApiTestSupport {
     void validNicknameTest2() throws Exception {
         //given
         String existName = loginUser.getName();
-        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000, AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
         ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
 
@@ -240,7 +244,7 @@ class UserApiControllerTest extends ApiTestSupport {
         User anotherUser = UserFixture.getUserFixture("providerId", "testURL");
         String existName = anotherUser.getName();
         userRepository.save(anotherUser);
-        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000, AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
 
         ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);

@@ -781,14 +781,10 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
-            "testURL",
-            1998,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            "testURL");
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -829,14 +825,10 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
-            "testURL",
-            2020,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            "testURL");
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -877,14 +869,10 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
-            "testURL",
-            1998,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            "testURL");
         User savedUser = userRepository.save(user);
 
         blackListRepository.save(RoomBlackList.of(room.getId(), savedUser.getId()));

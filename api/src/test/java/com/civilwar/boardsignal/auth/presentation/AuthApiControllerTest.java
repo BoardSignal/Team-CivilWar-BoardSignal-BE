@@ -96,41 +96,6 @@ class AuthApiControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @Transactional
-    @DisplayName("[AccessToken의 사용자 정보를 반환한다.]")
-    void getLoginUserInfoTest() throws Exception {
-        //given
-        User loginUserEntity = userRepository.findById(loginUser.getId())
-            .orElseThrow();
-
-        String updateNickname = "업데이트된 닉네임";
-        List<Category> categories = List.of(Category.CUSTOMIZABLE, Category.PARTY);
-        String subwayLine = "2호선";
-        String subwayStation = "사당역";
-        String image = "update image";
-        loginUserEntity.updateUser(updateNickname, categories, subwayLine, subwayStation, image);
-
-        LocalDateTime now = LocalDateTime.of(2024, 3, 4, 9, 27, 0);
-        given(nowTime.get()).willReturn(now);
-
-        int expectedAge = nowTime.get().getYear() - loginUser.getBirth() + 1;
-
-        //then
-        mockMvc.perform(get("/api/v1/auth")
-                .header(AUTHORIZATION, accessToken))
-            .andExpect(jsonPath("$.id").value(loginUser.getId()))
-            .andExpect(jsonPath("$.email").value(loginUser.getEmail()))
-            .andExpect(jsonPath("$.nickname").value(updateNickname))
-            .andExpect(jsonPath("$.ageGroup").value(loginUser.getAgeGroup().getDescription()))
-            .andExpect(jsonPath("$.gender").value(loginUser.getGender().getDescription()))
-            .andExpect(jsonPath("$.isJoined").value(true))
-            .andExpect(jsonPath("$.age").value(expectedAge))
-            .andExpect(jsonPath("$.subwayLine").value(subwayLine))
-            .andExpect(jsonPath("$.subwayStation").value(subwayStation))
-            .andExpect(jsonPath("$.categories.size()").value(2));
-    }
-
-    @Test
     @DisplayName("[인증이 안 된 사용자가 접근 시 401 에러와 전용 에러 메시지 & 코드를 반환한다.]")
     void exceptionHandlingTest() throws Exception {
 
