@@ -119,6 +119,8 @@ class UserApiControllerTest extends ApiTestSupport {
     @DisplayName("유저의 자신의 프로필을 조회할 수 있다.")
     void getUserProfileTest() throws Exception {
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
         Review review = ReviewFixture.getReviewFixture(100L, loginUser.getId(), 1L,
             evaluationFixture);
@@ -158,6 +160,8 @@ class UserApiControllerTest extends ApiTestSupport {
     @DisplayName("타인의 프로필을 조회할 수 있다.")
     void getUserProfileTest2() throws Exception {
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         User anotherUser = UserFixture.getUserFixture2("providerId", "testUrl");
         userRepository.save(anotherUser);
         List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
