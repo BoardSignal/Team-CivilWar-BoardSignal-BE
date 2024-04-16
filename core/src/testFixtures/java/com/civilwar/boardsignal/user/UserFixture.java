@@ -14,7 +14,7 @@ public class UserFixture {
     public static User getUserFixture(String providerId, String imageUrl) {
 
         String provider = OAuthProvider.KAKAO.getType();
-        return new User(
+        return User.of(
             "abc1234@gmail.com",
             "최인준",
             "injuning",
@@ -30,7 +30,7 @@ public class UserFixture {
     public static User getUserFixture2(String providerId, String imageUrl) {
 
         String provider = OAuthProvider.KAKAO.getType();
-        return new User(
+        return User.of(
             "abc12345678@naver.com",
             "김강훈",
             "macbook",

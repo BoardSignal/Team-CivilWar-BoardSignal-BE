@@ -97,7 +97,7 @@ public class User extends BaseEntity implements UserDetails {
     private int signal;
 
     @Builder(access = AccessLevel.PUBLIC)
-    public User(
+    private User(
         @NonNull String email,
         String name,
         @NonNull String nickname,
@@ -136,6 +136,30 @@ public class User extends BaseEntity implements UserDetails {
             .provider(provider)
             .providerId(providerId)
             .profileImageUrl(profileImageUrl)
+            .build();
+    }
+
+    public static User of(
+        String email,
+        String name,
+        String nickname,
+        String provider,
+        String providerId,
+        String profileImageUrl,
+        int birth,
+        AgeGroup ageGroup,
+        Gender gender
+    ) {
+        return User.builder()
+            .email(email)
+            .name(name)
+            .nickname(nickname)
+            .provider(provider)
+            .providerId(providerId)
+            .profileImageUrl(profileImageUrl)
+            .birth(birth)
+            .ageGroup(ageGroup)
+            .gender(gender)
             .build();
     }
 
