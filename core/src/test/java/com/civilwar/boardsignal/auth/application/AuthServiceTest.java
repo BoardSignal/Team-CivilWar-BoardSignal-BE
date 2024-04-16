@@ -48,11 +48,7 @@ class AuthServiceTest {
         UserLoginRequest userLoginRequest = new UserLoginRequest(
             "abc1234@gmail.com",
             "최인준",
-            "injuning",
             "testURL",
-            String.valueOf(2000),
-            AgeGroup.TWENTY.getKakaoType(),
-            Gender.MALE.getKakaoType(),
             OAuthProvider.KAKAO.getType(),
             providerId
         );
@@ -84,10 +80,6 @@ class AuthServiceTest {
             "abc1234@gmail.com",
             "최인준",
             "injuning",
-            "testURL",
-            String.valueOf(2000),
-            AgeGroup.TWENTY.getKakaoType(),
-            Gender.MALE.getKakaoType(),
             OAuthProvider.KAKAO.getType(),
             providerId
         );
