@@ -97,7 +97,7 @@ public class User extends BaseEntity implements UserDetails {
     private int signal;
 
     @Builder(access = AccessLevel.PUBLIC)
-    private User(
+    public User(
         @NonNull String email,
         String name,
         @NonNull String nickname,
