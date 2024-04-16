@@ -62,7 +62,7 @@ class UserServiceTest {
         User userFixture = UserFixture.getUserFixture(providerId, testUrl);
         Boolean isJoined = userFixture.getIsJoined();
 
-        when(now.get()).thenReturn(LocalDateTime.of(2024,11,20,0,0,0));
+        when(now.get()).thenReturn(LocalDateTime.of(2024, 11, 20, 0, 0, 0));
         when(imageRepository.save(imageFixture)).thenReturn(testUrl);
         when(userRepository.findById(id)).thenReturn(Optional.of(userFixture));
         ReflectionTestUtils.setField(userFixture, "id", id);
