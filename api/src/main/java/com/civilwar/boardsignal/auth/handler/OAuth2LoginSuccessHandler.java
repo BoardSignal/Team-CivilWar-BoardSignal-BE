@@ -25,7 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final String DOMAIN = "localhost:5173";
+    private final String DOMAIN = "http://localhost:5173";
 //        "https://team-civilwar-boardsignal-fe.pages.dev";
     private final String REFRESHTOKEN_NAME = "RefreshToken_Id";
 
