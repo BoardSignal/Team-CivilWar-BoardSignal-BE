@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AgeGroup {
 
-    UNKNOWN("0", "0", "알 ㅅ 없음", 0),
+    UNKNOWN("0", "0", "알 수 없음", 0),
     UNDER_CHILDREN("1~9", "1-9", "미취학 아동", 9),
     CHILDREN("10~14", "10-14", "어린이", 14),
     TEENAGER("14~19", "14-19", "청소년", 19),
@@ -39,12 +39,14 @@ public enum AgeGroup {
 
     public static AgeGroup convert(int birthYear, LocalDateTime now) {
         AgeGroup userAgeGroup = UNKNOWN;
-        int age = now.getYear() - birthYear + 1;
+        //사용자 나이
+        int userAge = now.getYear() - birthYear + 1;
 
         for (AgeGroup a : values()) {
-            //현재 연령대의 사용자의 나이가 포함된다면
-            if (a.getMaxAge() >= age) {
+            //현재 연령대에 사용자의 나이가 포함된다면
+            if (a.getMaxAge() >= userAge) {
                 userAgeGroup = a;
+                break;
             }
         }
         return userAgeGroup;
