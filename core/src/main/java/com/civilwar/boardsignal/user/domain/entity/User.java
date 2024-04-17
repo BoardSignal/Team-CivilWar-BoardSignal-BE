@@ -96,11 +96,11 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "USER_SIGNAL")
     private int signal;
 
-    @Builder(access = AccessLevel.PUBLIC)
+    @Builder(access = AccessLevel.PRIVATE)
     private User(
         @NonNull String email,
-        String name,
-        @NonNull String nickname,
+        @NonNull String name,
+        String nickname,
         @NonNull String provider,
         @NonNull String providerId,
         @NonNull String profileImageUrl,
@@ -132,7 +132,7 @@ public class User extends BaseEntity implements UserDetails {
     ) {
         return User.builder()
             .email(email)
-            .nickname(nickname)
+            .name(nickname)
             .provider(provider)
             .providerId(providerId)
             .profileImageUrl(profileImageUrl)
