@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.chat.infrastructure.repository;
 
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,18 @@ public interface ChatMessageJpaRepository extends JpaRepository<ChatMessage, Lon
             + "order by c.createdAt desc ")
     Slice<ChatMessageDto> findChatAllByRoomId(@Param("roomId") Long roomId, Pageable pageable);
 
-
     @Modifying(clearAutomatically = true)
     void deleteChatMessagesByRoomId(Long roomId);
 
+    //채팅 메시지 생성시간이 참여자 채팅방 확인 시간 이후인 메시지 갯수 (Participant.lastExit < ChatMessage.createdAt)
+    @Query("select new com.civilwar.boardsignal.chat.dto.response.ChatCountDto(c.roomId, count(c)) "
+        + "from ChatMessage as c "
+        + "join Participant as p "
+        + "on p.roomId = c.roomId "
+        + "where p.userId = :userId "
+        + "and c.roomId in :roomIds "
+        + "and c.createdAt>p.lastExit "
+        + "group by c.roomId")
+    List<ChatCountDto> countsByRoomIds(@Param("userId") Long userId,
+        @Param("roomIds") List<Long> roomIds);
 }

@@ -2,6 +2,7 @@ package com.civilwar.boardsignal.chat.infrastructure.adaptor;
 
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
 import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
 import com.civilwar.boardsignal.chat.infrastructure.repository.ChatMessageJpaRepository;
 import java.util.List;
@@ -34,5 +35,10 @@ public class ChatMessageRepositoryAdaptor implements ChatMessageRepository {
     @Override
     public void deleteByRoomId(Long roomId) {
         chatMessageJpaRepository.deleteChatMessagesByRoomId(roomId);
+    }
+
+    @Override
+    public List<ChatCountDto> countsByRoomIds(Long userId, List<Long> roomIds) {
+        return chatMessageJpaRepository.countsByRoomIds(userId, roomIds);
     }
 }

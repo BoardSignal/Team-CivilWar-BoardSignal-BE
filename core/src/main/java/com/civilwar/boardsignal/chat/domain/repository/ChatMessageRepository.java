@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.chat.domain.repository;
 
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,6 @@ public interface ChatMessageRepository {
     Slice<ChatMessageDto> findChatAllByRoomId(Long roomId, Pageable pageable);
 
     void deleteByRoomId(Long roomId);
+
+    List<ChatCountDto> countsByRoomIds(Long userId, List<Long> roomIds);
 }
