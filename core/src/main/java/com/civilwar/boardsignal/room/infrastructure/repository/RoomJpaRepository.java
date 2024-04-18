@@ -21,15 +21,16 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
 
     // 내가 현재 참여한 채팅방 조회
     // 미확정 모임 또는 모임 시간이 (오늘~미래)인 모임
-    @Query("select new com.civilwar.boardsignal.room.dto.response.ChatRoomDto(r.id, r.title, r.imageUrl, r.headCount)"
-        + "from Room as r "
-        + "left join MeetingInfo as m "
-        + "on m.id = r.meetingInfo.id "
-        + "join Participant as p "
-        + "on r.id = p.roomId "
-        + "where p.userId=:userId "
-        + "and (m.meetingTime>=:today or m.meetingTime is null) "
-        + "order by p.createdAt desc")
+    @Query(
+        "select new com.civilwar.boardsignal.room.dto.response.ChatRoomDto(r.id, r.title, r.imageUrl, r.headCount)"
+            + "from Room as r "
+            + "left join MeetingInfo as m "
+            + "on m.id = r.meetingInfo.id "
+            + "join Participant as p "
+            + "on r.id = p.roomId "
+            + "where p.userId=:userId "
+            + "and (m.meetingTime>=:today or m.meetingTime is null) "
+            + "order by p.createdAt desc")
     Slice<ChatRoomDto> findMyChattingRoom(@Param("userId") Long userId,
         @Param("today") LocalDateTime today, Pageable pageable);
 

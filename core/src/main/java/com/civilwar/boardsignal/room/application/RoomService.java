@@ -197,7 +197,8 @@ public class RoomService {
             roomIdList);
 
         //매핑
-        Slice<ChatRoomResponse> myChattingRoomResult = myChattingRoom.map(room -> RoomMapper.toChatRoomResponse(room, unreadChatCounts, lastChatMessages));
+        Slice<ChatRoomResponse> myChattingRoomResult = myChattingRoom.map(
+            room -> RoomMapper.toChatRoomResponse(room, unreadChatCounts, lastChatMessages));
 
         return RoomMapper.toRoomPageResponse(myChattingRoomResult);
     }

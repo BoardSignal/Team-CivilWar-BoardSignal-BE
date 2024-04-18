@@ -1,7 +1,7 @@
 package com.civilwar.boardsignal.chat.infrastructure.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
 
 import com.civilwar.boardsignal.chat.domain.constant.MessageType;
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
@@ -193,7 +192,8 @@ class ChatMessageJpaRepositoryTest extends DataJpaTestSupport {
             chatMessageRepository.save(chatMessage);
         }
 
-        List<LastChatMessageDto> lastChatMessages = chatMessageRepository.findLastChatMessage(List.of(room2.getId(),
+        List<LastChatMessageDto> lastChatMessages = chatMessageRepository.findLastChatMessage(
+            List.of(room2.getId(),
                 room3.getId()));
 
         assertThat(lastChatMessages).hasSize(2);

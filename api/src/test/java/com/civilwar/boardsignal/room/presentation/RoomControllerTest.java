@@ -45,9 +45,7 @@ import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
-import jakarta.validation.constraints.Null;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -285,7 +283,8 @@ class RoomControllerTest extends ApiTestSupport {
         //1번방 채팅 추가 x
         //2번방 채팅 추가
         for (int i = 0; i < 3; i++) {
-            ChatMessage chatMessage = ChatMessage.of(room2.getId(), 100L, "테스트 " + i, MessageType.CHAT);
+            ChatMessage chatMessage = ChatMessage.of(room2.getId(), 100L, "테스트 " + i,
+                MessageType.CHAT);
             chatMessageRepository.save(chatMessage);
         }
 

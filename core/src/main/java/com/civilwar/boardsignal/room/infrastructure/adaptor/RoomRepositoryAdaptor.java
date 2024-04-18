@@ -111,7 +111,8 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
-    public Slice<ChatRoomDto> findMyChattingRoom(Long userId, LocalDateTime today, Pageable pageable) {
+    public Slice<ChatRoomDto> findMyChattingRoom(Long userId, LocalDateTime today,
+        Pageable pageable) {
         return roomJpaRepository.findMyChattingRoom(userId, today, pageable);
     }
 

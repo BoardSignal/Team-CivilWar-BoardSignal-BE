@@ -96,7 +96,8 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         LocalDateTime today = LocalDateTime.of(2024, 4, 11, 0, 0, 0);
         PageRequest pageable = PageRequest.of(0, 5);
 
-        Slice<ChatRoomDto> myChattingRoom = roomRepository.findMyChattingRoom(user, today, pageable);
+        Slice<ChatRoomDto> myChattingRoom = roomRepository.findMyChattingRoom(user, today,
+            pageable);
         List<ChatRoomDto> content = myChattingRoom.getContent();
 
         //then

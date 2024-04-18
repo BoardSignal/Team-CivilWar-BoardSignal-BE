@@ -252,6 +252,6 @@ public final class RoomMapper {
             room.headCount(),
             Integer.parseInt(String.valueOf(unreadChatCount)),
             lastChatMessage
-            );
+        );
     }
 }
