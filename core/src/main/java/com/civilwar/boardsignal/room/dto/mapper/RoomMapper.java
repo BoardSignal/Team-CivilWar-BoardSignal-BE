@@ -1,6 +1,8 @@
 package com.civilwar.boardsignal.room.dto.mapper;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
@@ -223,11 +225,32 @@ public final class RoomMapper {
         );
     }
 
-    public static ChatRoomResponse toChatRoomResponse(Room room) {
+    public static ChatRoomResponse toChatRoomResponse(
+        Room room,
+        List<ChatCountDto> unreadChatCounts,
+        List<LastChatMessageDto> lastChatMessages
+    ) {
+        Long unreadChatCount = unreadChatCounts
+            .stream()
+            .filter(chatCountDto -> chatCountDto.roomId().equals(room.getId()))
+            .findFirst()
+            .map(ChatCountDto::uncheckedMessage)
+            .orElse(0L);
+
+        String lastChatMessage = lastChatMessages
+            .stream()
+            .filter(lastChatMessageDto -> lastChatMessageDto.roomId().equals(room.getId()))
+            .findFirst()
+            .map(LastChatMessageDto::content)
+            .orElse(null);
+
         return new ChatRoomResponse(
             room.getId(),
             room.getTitle(),
             room.getImageUrl(),
-            room.getHeadCount());
+            room.getHeadCount(),
+            Integer.parseInt(String.valueOf(unreadChatCount)),
+            lastChatMessage
+            );
     }
 }

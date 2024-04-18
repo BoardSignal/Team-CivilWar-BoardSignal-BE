@@ -4,7 +4,9 @@ public record ChatRoomResponse(
     Long id,
     String title,
     String imageUrl,
-    int headCount
+    int headCount,
+    int unreadChatCount,
+    String lastChatMessage
 ) {
 
 }

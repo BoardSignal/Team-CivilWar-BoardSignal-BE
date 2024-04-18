@@ -6,6 +6,8 @@ import static com.civilwar.boardsignal.room.exception.RoomErrorCode.IS_NOT_LEADE
 import static com.civilwar.boardsignal.room.exception.RoomErrorCode.NOT_FOUND_ROOM;
 
 import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.common.exception.ValidationException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
@@ -174,13 +176,27 @@ public class RoomService {
             .withSecond(0)
             .withNano(0);
 
-        //오늘 이미 참여했거나, 앞으로 참여할 모임
+        //1. 내가 참여한 채팅방
         Slice<Room> myChattingRoom = roomRepository.findMyChattingRoom(user.getId(), today,
             pageable);
 
+        //2. 채팅방 별 내가 읽지 않은 메시지 갯수
+        //1) 내가 참여한 채팅방 id 리스트
+        List<Long> roomIdList = myChattingRoom.getContent()
+            .stream()
+            .map(Room::getId)
+            .toList();
+
+        //2) 채팅방 별 내가 읽지 않은 채팅 메시지 갯수 조회
+        List<ChatCountDto> unreadChatCounts = chatMessageRepository.countsByRoomIds(user.getId(),
+            roomIdList);
+
+        //3. 채팅방 별 마지막 채팅
+        List<LastChatMessageDto> lastChatMessages = chatMessageRepository.findLastChatMessage(
+            roomIdList);
+
         //매핑
-        Slice<ChatRoomResponse> myChattingRoomResult = myChattingRoom.map(
-            RoomMapper::toChatRoomResponse);
+        Slice<ChatRoomResponse> myChattingRoomResult = myChattingRoom.map(room -> RoomMapper.toChatRoomResponse(room, unreadChatCounts, lastChatMessages));
 
         return RoomMapper.toRoomPageResponse(myChattingRoomResult);
     }
