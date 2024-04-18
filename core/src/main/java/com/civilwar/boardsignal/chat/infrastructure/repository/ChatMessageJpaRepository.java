@@ -3,6 +3,7 @@ package com.civilwar.boardsignal.chat.infrastructure.repository;
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
 import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -38,4 +39,11 @@ public interface ChatMessageJpaRepository extends JpaRepository<ChatMessage, Lon
         + "group by c.roomId")
     List<ChatCountDto> countsByRoomIds(@Param("userId") Long userId,
         @Param("roomIds") List<Long> roomIds);
+
+    //채팅방 별 마지막 메시지 조회
+    @Query("select new com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto(c.roomId, c.content) "
+            + "from ChatMessage as c "
+            + "where c.roomId in :roomIds "
+            + "and c.createdAt in (select max(c.createdAt) from ChatMessage as c group by c.roomId) ")
+    List<LastChatMessageDto> findLastChatMessage(@Param("roomIds") List<Long> roomIds);
 }

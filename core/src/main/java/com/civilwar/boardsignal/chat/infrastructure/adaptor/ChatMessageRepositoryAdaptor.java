@@ -4,6 +4,7 @@ import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
 import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import com.civilwar.boardsignal.chat.infrastructure.repository.ChatMessageJpaRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +41,10 @@ public class ChatMessageRepositoryAdaptor implements ChatMessageRepository {
     @Override
     public List<ChatCountDto> countsByRoomIds(Long userId, List<Long> roomIds) {
         return chatMessageJpaRepository.countsByRoomIds(userId, roomIds);
+    }
+
+    @Override
+    public List<LastChatMessageDto> findLastChatMessage(List<Long> roomIds) {
+        return chatMessageJpaRepository.findLastChatMessage(roomIds);
     }
 }

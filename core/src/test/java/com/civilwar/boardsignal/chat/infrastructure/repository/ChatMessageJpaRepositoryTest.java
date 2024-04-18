@@ -8,6 +8,7 @@ import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
 import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
 import com.civilwar.boardsignal.chat.dto.response.ChatMessageDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import com.civilwar.boardsignal.common.support.DataJpaTestSupport;
 import com.civilwar.boardsignal.room.RoomFixture;
 import com.civilwar.boardsignal.room.domain.entity.Participant;
@@ -162,5 +163,44 @@ class ChatMessageJpaRepositoryTest extends DataJpaTestSupport {
         assertThat(chatCountDtos.get(0).uncheckedMessage()).isEqualTo(1);
         assertThat(chatCountDtos.get(1).roomId()).isEqualTo(room3.getId());
         assertThat(chatCountDtos.get(1).uncheckedMessage()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("채팅방 별 마지막 메시지를 조회한다.")
+    void findLastChatMessageTest() throws IOException {
+        //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 18, 0, 0, 0));
+
+        //2개의 모임 셋팅
+        Room room2 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room2);
+        Room room3 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room3);
+
+        //2번 모임의 2개 채팅 셋팅
+        for (int i = 0; i < 2; i++) {
+            Long userId = user.getId();
+            ChatMessage chatMessage = ChatMessage.of(room2.getId(), userId, "테스트 " + i,
+                MessageType.CHAT);
+            chatMessageRepository.save(chatMessage);
+        }
+
+        //3번 모임의 3개 채팅 셋팅
+        for (int i = 0; i < 3; i++) {
+            Long userId = user.getId();
+            ChatMessage chatMessage = ChatMessage.of(room3.getId(), userId, "테스트 " + i,
+                MessageType.CHAT);
+            chatMessageRepository.save(chatMessage);
+        }
+
+        List<LastChatMessageDto> lastChatMessages = chatMessageRepository.findLastChatMessage(List.of(room2.getId(),
+                room3.getId()));
+
+        assertThat(lastChatMessages).hasSize(2);
+
+        assertThat(lastChatMessages.get(0).roomId()).isEqualTo(room2.getId());
+        assertThat(lastChatMessages.get(0).content()).isEqualTo("테스트 1");
+        assertThat(lastChatMessages.get(1).roomId()).isEqualTo(room3.getId());
+        assertThat(lastChatMessages.get(1).content()).isEqualTo("테스트 2");
     }
 }
