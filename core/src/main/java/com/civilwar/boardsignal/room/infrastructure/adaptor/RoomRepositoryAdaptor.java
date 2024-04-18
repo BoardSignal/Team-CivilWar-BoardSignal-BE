@@ -11,6 +11,7 @@ import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.RoomJpaRepository;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -110,7 +111,7 @@ public class RoomRepositoryAdaptor implements RoomRepository {
     }
 
     @Override
-    public Slice<Room> findMyChattingRoom(Long userId, LocalDateTime today, Pageable pageable) {
+    public Slice<ChatRoomDto> findMyChattingRoom(Long userId, LocalDateTime today, Pageable pageable) {
         return roomJpaRepository.findMyChattingRoom(userId, today, pageable);
     }
 
