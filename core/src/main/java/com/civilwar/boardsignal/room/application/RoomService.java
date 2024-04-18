@@ -27,6 +27,7 @@ import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.FixRoomRequest;
 import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomDto;
 import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.DeleteRoomFacadeResponse;
@@ -177,14 +178,14 @@ public class RoomService {
             .withNano(0);
 
         //1. 내가 참여한 채팅방
-        Slice<Room> myChattingRoom = roomRepository.findMyChattingRoom(user.getId(), today,
+        Slice<ChatRoomDto> myChattingRoom = roomRepository.findMyChattingRoom(user.getId(), today,
             pageable);
 
         //2. 채팅방 별 내가 읽지 않은 메시지 갯수
         //1) 내가 참여한 채팅방 id 리스트
         List<Long> roomIdList = myChattingRoom.getContent()
             .stream()
-            .map(Room::getId)
+            .map(ChatRoomDto::id)
             .toList();
 
         //2) 채팅방 별 내가 읽지 않은 채팅 메시지 갯수 조회

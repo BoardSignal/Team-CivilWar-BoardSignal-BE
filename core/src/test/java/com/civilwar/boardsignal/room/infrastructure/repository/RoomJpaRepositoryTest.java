@@ -13,6 +13,7 @@ import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
 import com.civilwar.boardsignal.room.dto.request.RoomSearchCondition;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomDto;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -95,15 +96,15 @@ class RoomJpaRepositoryTest extends DataJpaTestSupport {
         LocalDateTime today = LocalDateTime.of(2024, 4, 11, 0, 0, 0);
         PageRequest pageable = PageRequest.of(0, 5);
 
-        Slice<Room> myChattingRoom = roomRepository.findMyChattingRoom(user, today, pageable);
-        List<Room> content = myChattingRoom.getContent();
+        Slice<ChatRoomDto> myChattingRoom = roomRepository.findMyChattingRoom(user, today, pageable);
+        List<ChatRoomDto> content = myChattingRoom.getContent();
 
         //then
         assertThat(content).hasSize(3);
         //최신 참여 순 정렬
-        assertThat(content.get(0).getId()).isEqualTo(futureRoom.getId());
-        assertThat(content.get(1).getId()).isEqualTo(todayRoom.getId());
-        assertThat(content.get(2).getId()).isEqualTo(nonFixRoom.getId());
+        assertThat(content.get(0).id()).isEqualTo(futureRoom.getId());
+        assertThat(content.get(1).id()).isEqualTo(todayRoom.getId());
+        assertThat(content.get(2).id()).isEqualTo(nonFixRoom.getId());
     }
 
     @Test
