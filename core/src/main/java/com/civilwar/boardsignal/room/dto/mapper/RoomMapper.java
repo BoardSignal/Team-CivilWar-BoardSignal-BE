@@ -1,12 +1,15 @@
 package com.civilwar.boardsignal.room.dto.mapper;
 
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.chat.dto.response.ChatCountDto;
+import com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto;
 import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.room.domain.constants.DaySlot;
 import com.civilwar.boardsignal.room.domain.constants.TimeSlot;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.dto.request.CreateRoomRequest;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomDto;
 import com.civilwar.boardsignal.room.dto.response.ChatRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.CreateRoomResponse;
 import com.civilwar.boardsignal.room.dto.response.FixRoomResponse;
@@ -223,11 +226,32 @@ public final class RoomMapper {
         );
     }
 
-    public static ChatRoomResponse toChatRoomResponse(Room room) {
+    public static ChatRoomResponse toChatRoomResponse(
+        ChatRoomDto room,
+        List<ChatCountDto> unreadChatCounts,
+        List<LastChatMessageDto> lastChatMessages
+    ) {
+        Long unreadChatCount = unreadChatCounts
+            .stream()
+            .filter(chatCountDto -> chatCountDto.roomId().equals(room.id()))
+            .findFirst()
+            .map(ChatCountDto::uncheckedMessage)
+            .orElse(0L);
+
+        String lastChatMessage = lastChatMessages
+            .stream()
+            .filter(lastChatMessageDto -> lastChatMessageDto.roomId().equals(room.id()))
+            .findFirst()
+            .map(LastChatMessageDto::content)
+            .orElse(null);
+
         return new ChatRoomResponse(
-            room.getId(),
-            room.getTitle(),
-            room.getImageUrl(),
-            room.getHeadCount());
+            room.id(),
+            room.title(),
+            room.imageUrl(),
+            room.headCount(),
+            Integer.parseInt(String.valueOf(unreadChatCount)),
+            lastChatMessage
+        );
     }
 }

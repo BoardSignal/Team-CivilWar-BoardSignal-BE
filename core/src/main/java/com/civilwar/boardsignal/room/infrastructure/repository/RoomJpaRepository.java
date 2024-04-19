@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.room.infrastructure.repository;
 
 import com.civilwar.boardsignal.room.domain.entity.Room;
+import com.civilwar.boardsignal.room.dto.response.ChatRoomDto;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,16 +21,17 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
 
     // 내가 현재 참여한 채팅방 조회
     // 미확정 모임 또는 모임 시간이 (오늘~미래)인 모임
-    @Query("select r "
-        + "from Room as r "
-        + "left join MeetingInfo as m "
-        + "on m.id = r.meetingInfo.id "
-        + "join Participant as p "
-        + "on r.id = p.roomId "
-        + "where p.userId=:userId "
-        + "and (m.meetingTime>=:today or m.meetingTime is null) "
-        + "order by p.createdAt desc")
-    Slice<Room> findMyChattingRoom(@Param("userId") Long userId,
+    @Query(
+        "select new com.civilwar.boardsignal.room.dto.response.ChatRoomDto(r.id, r.title, r.imageUrl, r.headCount)"
+            + "from Room as r "
+            + "left join MeetingInfo as m "
+            + "on m.id = r.meetingInfo.id "
+            + "join Participant as p "
+            + "on r.id = p.roomId "
+            + "where p.userId=:userId "
+            + "and (m.meetingTime>=:today or m.meetingTime is null) "
+            + "order by p.createdAt desc")
+    Slice<ChatRoomDto> findMyChattingRoom(@Param("userId") Long userId,
         @Param("today") LocalDateTime today, Pageable pageable);
 
     // 내가 어제까지 참여한 종료된 모임 (페이징 버전)
