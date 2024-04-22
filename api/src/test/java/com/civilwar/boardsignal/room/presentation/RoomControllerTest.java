@@ -41,6 +41,7 @@ import com.civilwar.boardsignal.room.dto.request.KickOutUserRequest;
 import com.civilwar.boardsignal.room.dto.response.ParticipantJpaDto;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJpaRepository;
 import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
 import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -834,7 +835,9 @@ class RoomControllerTest extends ApiTestSupport {
             "nickName",
             "provider",
             "providerId",
-            "testURL");
+            "testURL",
+            Gender.MALE,
+            AgeGroup.TWENTY);
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -878,7 +881,10 @@ class RoomControllerTest extends ApiTestSupport {
             "nickName",
             "provider",
             "providerId",
-            "testURL");
+            "testURL",
+            Gender.MALE,
+            AgeGroup.THIRTY
+        );
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -922,7 +928,10 @@ class RoomControllerTest extends ApiTestSupport {
             "nickName",
             "provider",
             "providerId",
-            "testURL");
+            "testURL",
+            Gender.MALE,
+            AgeGroup.TWENTY
+        );
         User savedUser = userRepository.save(user);
 
         blackListRepository.save(RoomBlackList.of(room.getId(), savedUser.getId()));
