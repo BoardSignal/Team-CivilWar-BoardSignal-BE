@@ -7,6 +7,8 @@ import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLogoutResponse;
 import com.civilwar.boardsignal.auth.mapper.AuthMapper;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,9 @@ public class AuthService {
                     userLoginRequest.nickname(),
                     userLoginRequest.provider(),
                     userLoginRequest.providerId(),
-                    userLoginRequest.imageUrl()
+                    userLoginRequest.imageUrl(),
+                    Gender.UNKNOWN,
+                    AgeGroup.UNKNOWN
                 )
             );
         }
