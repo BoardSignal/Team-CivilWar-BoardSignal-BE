@@ -30,16 +30,15 @@ public class RoomJdbcRepository {
             + " values"
             + " (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        SqlParameterSource[] params = rooms
-            .stream()
-            .map(BeanPropertySqlParameterSource::new)
-            .toArray(SqlParameterSource[]::new);
-
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Room room = rooms.get(i);
+
+                Long meetingInfoId = null;
+                if (i%10==9) meetingInfoId = i/10L+1L;
+
                 ps.setObject(1, room.getAllowedGender().toString());
                 ps.setObject(2, LocalDateTime.now());
                 ps.setObject(3, room.getDaySlot().toString());
@@ -48,7 +47,12 @@ public class RoomJdbcRepository {
                 ps.setObject(6, room.getImageUrl());
                 ps.setObject(7, room.getMaxAge());
                 ps.setObject(8, room.getMaxParticipants());
-                ps.setNull(9, SqlTypeValue.TYPE_UNKNOWN);
+                if(meetingInfoId==null) {
+                    ps.setNull(9, SqlTypeValue.TYPE_UNKNOWN);
+                }
+                else{
+                    ps.setLong(9, meetingInfoId);
+                }
                 ps.setObject(10,room.getMinAge());
                 ps.setObject(11,room.getMinParticipants());
                 ps.setObject(12,room.getPlaceName());
