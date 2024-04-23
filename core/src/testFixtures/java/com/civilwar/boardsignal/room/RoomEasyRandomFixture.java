@@ -8,7 +8,6 @@ import com.civilwar.boardsignal.room.domain.constants.RoomStatus;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.function.Predicate;
 import lombok.AccessLevel;
