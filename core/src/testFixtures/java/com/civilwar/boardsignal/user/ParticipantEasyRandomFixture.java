@@ -32,8 +32,8 @@ public class ParticipantEasyRandomFixture {
 
         EasyRandomParameters parameters = new EasyRandomParameters()
             .excludeField(id)
-            .randomize(userId, () -> new Random().nextLong(1, 1000000))
-            .randomize(roomId, () -> new Random().nextLong(1, 1000000));
+            .randomize(userId, () -> new Random().nextLong(1, 2500000))
+            .randomize(roomId, () -> new Random().nextLong(1, 1042794));
 
         return new EasyRandom(parameters);
 

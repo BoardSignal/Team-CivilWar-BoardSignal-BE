@@ -26,9 +26,8 @@ public class ParticipantJdbcRepository {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Participant participant = participants.get(i);
-                Long userId = (i/2)+1L;
 
-                ps.setLong(1, userId);
+                ps.setLong(1, participant.getUserId());
                 ps.setLong(2, participant.getRoomId());
                 ps.setNull(3, SqlTypeValue.TYPE_UNKNOWN);
                 ps.setNull(4, SqlTypeValue.TYPE_UNKNOWN);
