@@ -34,8 +34,10 @@ public class RoomJdbcRepository {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Room room = rooms.get(i);
 
+                //나눠서 벌크 쿼리 날릴 때, 모임 id 세팅해주기
+                Long roomId = 0L+i;
                 Long meetingInfoId = null;
-                if (i%10==9) meetingInfoId = i/10L+1L;
+                if (i%10==9) meetingInfoId = roomId/10L+1L;
 
                 ps.setObject(1, room.getAllowedGender().toString());
                 ps.setObject(2, LocalDateTime.now());
