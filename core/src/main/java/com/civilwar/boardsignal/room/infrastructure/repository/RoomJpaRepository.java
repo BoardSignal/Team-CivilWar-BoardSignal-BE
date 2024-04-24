@@ -37,12 +37,11 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
     // 내가 어제까지 참여한 종료된 모임 (페이징 버전)
     @Query("select r "
         + "from Room as r "
-        + "left join MeetingInfo as m "
+        + "join MeetingInfo as m "
         + "on m.id = r.meetingInfo.id "
         + "join Participant as p "
         + "on r.id = p.roomId "
         + "where p.userId=:userId "
-        + "and r.status='FIX' "
         + "and m.meetingTime<:today "
         + "order by m.meetingTime desc ")
     Slice<Room> findMyEndRoomPaging(@Param("userId") Long userId,
@@ -51,12 +50,11 @@ public interface RoomJpaRepository extends JpaRepository<Room, Long> {
     // 내가 어제까지 참여한 종료된 모임 갯수
     @Query("select count(r) "
         + "from Room as r "
-        + "left join MeetingInfo as m "
+        + "join MeetingInfo as m "
         + "on m.id = r.meetingInfo.id "
         + "join Participant as p "
         + "on r.id = p.roomId "
         + "where p.userId=:userId "
-        + "and r.status='FIX' "
         + "and m.meetingTime<:today "
         + "order by m.meetingTime desc ")
     int countByMyEndRoom(@Param("userId") Long userId, @Param("today") LocalDateTime today);
