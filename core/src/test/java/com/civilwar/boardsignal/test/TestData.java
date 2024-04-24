@@ -3,9 +3,12 @@ package com.civilwar.boardsignal.test;
 import com.civilwar.boardsignal.room.MeetingInfoEasyRandomFixture;
 import com.civilwar.boardsignal.room.RoomEasyRandomFixture;
 import com.civilwar.boardsignal.room.domain.entity.MeetingInfo;
+import com.civilwar.boardsignal.room.domain.entity.Participant;
 import com.civilwar.boardsignal.room.domain.entity.Room;
 import com.civilwar.boardsignal.room.infrastructure.repository.MeetingInfoJdbcRepository;
+import com.civilwar.boardsignal.room.infrastructure.repository.ParticipantJdbcRepository;
 import com.civilwar.boardsignal.room.infrastructure.repository.RoomJdbcRepository;
+import com.civilwar.boardsignal.user.ParticipantEasyRandomFixture;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,9 @@ public class TestData {
 
     @Autowired
     private MeetingInfoJdbcRepository meetingInfoJdbcRepository;
+
+    @Autowired
+    private ParticipantJdbcRepository participantJdbcRepository;
 
     @Test
     @Rollback(value = false)
@@ -73,6 +79,25 @@ public class TestData {
             });
 
         meetingInfoJdbcRepository.batchInsert(meetingInfos);
+    }
+
+    @Test
+    @Rollback(value = false)
+    void setParticipantData() {
+
+        int dataCount = 500000;
+
+        EasyRandom participants = ParticipantEasyRandomFixture.getParticipants();
+
+        List<Participant> participantList = new ArrayList<>();
+        IntStream.range(0, dataCount)
+            .parallel()
+            .forEach(i -> {
+                Participant p = participants.nextObject(Participant.class);
+                participantList.add(p);
+            });
+
+        participantJdbcRepository.batchInsert(participantList);
     }
 
 }
