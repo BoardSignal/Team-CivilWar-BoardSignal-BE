@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Gender {
 
+    UNKNOWN(null, null, "알 수 없음"),
     MALE("male", "M", "남성"),
     FEMALE("female", "F", "여성"),
     UNION(null, null, "혼성");

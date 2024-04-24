@@ -41,6 +41,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @DisplayName("[UserController 테스트]")
 class UserApiControllerTest extends ApiTestSupport {
@@ -204,13 +206,15 @@ class UserApiControllerTest extends ApiTestSupport {
     void validNicknameTest1() throws Exception {
         //given
         String notExistName = "절대 중복된 이름 아님";
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(notExistName);
 
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", notExistName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -222,13 +226,15 @@ class UserApiControllerTest extends ApiTestSupport {
         loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000,
             AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
 
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -241,13 +247,14 @@ class UserApiControllerTest extends ApiTestSupport {
 
         String existName = anotherUser.getName();
 
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
-
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -262,13 +269,13 @@ class UserApiControllerTest extends ApiTestSupport {
             AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
 
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
-
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 }

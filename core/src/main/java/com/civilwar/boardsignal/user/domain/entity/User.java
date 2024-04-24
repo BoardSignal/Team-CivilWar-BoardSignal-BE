@@ -105,8 +105,8 @@ public class User extends BaseEntity implements UserDetails {
         @NonNull String providerId,
         @NonNull String profileImageUrl,
         int birth,
-        AgeGroup ageGroup,
-        Gender gender
+        @NonNull AgeGroup ageGroup,
+        @NonNull Gender gender
     ) {
         this.email = email;
         this.name = name;
@@ -128,7 +128,9 @@ public class User extends BaseEntity implements UserDetails {
         String nickname,
         String provider,
         String providerId,
-        String profileImageUrl
+        String profileImageUrl,
+        Gender gender,
+        AgeGroup ageGroup
     ) {
         return User.builder()
             .email(email)
@@ -136,6 +138,8 @@ public class User extends BaseEntity implements UserDetails {
             .provider(provider)
             .providerId(providerId)
             .profileImageUrl(profileImageUrl)
+            .gender(gender)
+            .ageGroup(ageGroup)
             .build();
     }
 
