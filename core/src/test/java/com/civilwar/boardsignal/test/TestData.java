@@ -37,7 +37,7 @@ public class TestData {
     @Rollback(value = false)
     void setRoomData() {
 
-        int dataCount = 200000;
+        int dataCount = 350000;
 
         EasyRandom nonFixRoom = RoomEasyRandomFixture.getNonFix();
         EasyRandom fixRoom = RoomEasyRandomFixture.getFix();
