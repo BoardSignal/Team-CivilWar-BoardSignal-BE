@@ -66,10 +66,10 @@ public class UserApiController {
 
     @Operation(summary = "닉네임 중복 체크 API")
     @ApiResponse(useReturnTypeSchema = true)
-    @PostMapping("/valid")
+    @GetMapping("/valid")
     public ResponseEntity<ValidNicknameResponse> validNickname(
         @Parameter(hidden = true) @AuthenticationPrincipal User loginUser,
-        @RequestBody ValidNicknameRequest validNicknameRequest
+        ValidNicknameRequest validNicknameRequest
     ) {
         ValidNicknameResponse response = userService.isExistNickname(validNicknameRequest,
             loginUser);

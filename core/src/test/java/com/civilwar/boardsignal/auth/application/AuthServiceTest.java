@@ -12,8 +12,6 @@ import com.civilwar.boardsignal.auth.dto.request.UserLoginRequest;
 import com.civilwar.boardsignal.auth.dto.response.IssueTokenResponse;
 import com.civilwar.boardsignal.auth.dto.response.UserLoginResponse;
 import com.civilwar.boardsignal.user.UserFixture;
-import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
-import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.OAuthProvider;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -48,11 +46,7 @@ class AuthServiceTest {
         UserLoginRequest userLoginRequest = new UserLoginRequest(
             "abc1234@gmail.com",
             "최인준",
-            "injuning",
             "testURL",
-            String.valueOf(2000),
-            AgeGroup.TWENTY.getKakaoType(),
-            Gender.MALE.getKakaoType(),
             OAuthProvider.KAKAO.getType(),
             providerId
         );
@@ -84,10 +78,6 @@ class AuthServiceTest {
             "abc1234@gmail.com",
             "최인준",
             "injuning",
-            "testURL",
-            String.valueOf(2000),
-            AgeGroup.TWENTY.getKakaoType(),
-            Gender.MALE.getKakaoType(),
             OAuthProvider.KAKAO.getType(),
             providerId
         );

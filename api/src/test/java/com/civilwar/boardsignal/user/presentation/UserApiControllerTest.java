@@ -1,6 +1,7 @@
 package com.civilwar.boardsignal.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -20,6 +21,8 @@ import com.civilwar.boardsignal.review.domain.entity.Review;
 import com.civilwar.boardsignal.review.domain.entity.ReviewEvaluation;
 import com.civilwar.boardsignal.review.domain.repository.ReviewRepository;
 import com.civilwar.boardsignal.user.UserFixture;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.constants.OAuthProvider;
 import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
@@ -28,13 +31,18 @@ import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
 import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @DisplayName("[UserController 테스트]")
 class UserApiControllerTest extends ApiTestSupport {
@@ -47,12 +55,16 @@ class UserApiControllerTest extends ApiTestSupport {
     private TokenProvider tokenProvider;
     @Autowired
     private WishRepository wishRepository;
+    @MockBean
+    private Supplier<LocalDateTime> now;
 
     @Test
     @DisplayName("[회원은 정보를 수정 할 수 있다]")
     void joinUserTest() throws Exception {
 
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         User userFixture = UserFixture.getUserFixture(OAuthProvider.KAKAO.getType(), "testURL");
         userRepository.save(userFixture);
 
@@ -61,6 +73,8 @@ class UserApiControllerTest extends ApiTestSupport {
 
         ApiUserModifyRequest apiUserModifyRequest = new ApiUserModifyRequest(
             "injuning",
+            Gender.MALE.getDescription(),
+            1970,
             "2호선",
             "사당역",
             List.of("가족게임", "파티게임")
@@ -99,6 +113,7 @@ class UserApiControllerTest extends ApiTestSupport {
         assertThat(findUser.getNickname()).isEqualTo(apiUserModifyRequest.nickName());
         assertThat(findUser.getLine()).isEqualTo(apiUserModifyRequest.line());
         assertThat(findUser.getStation()).isEqualTo(apiUserModifyRequest.station());
+        assertThat(findUser.getAgeGroup()).isEqualTo(AgeGroup.FIFTY);
     }
 
 
@@ -106,6 +121,8 @@ class UserApiControllerTest extends ApiTestSupport {
     @DisplayName("유저의 자신의 프로필을 조회할 수 있다.")
     void getUserProfileTest() throws Exception {
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
         Review review = ReviewFixture.getReviewFixture(100L, loginUser.getId(), 1L,
             evaluationFixture);
@@ -145,6 +162,8 @@ class UserApiControllerTest extends ApiTestSupport {
     @DisplayName("타인의 프로필을 조회할 수 있다.")
     void getUserProfileTest2() throws Exception {
         //given
+        given(now.get()).willReturn(LocalDateTime.of(2024, 4, 16, 0, 0, 0));
+
         User anotherUser = UserFixture.getUserFixture2("providerId", "testUrl");
         userRepository.save(anotherUser);
         List<ReviewEvaluation> evaluationFixture = ReviewFixture.getEvaluationFixture();
@@ -187,13 +206,15 @@ class UserApiControllerTest extends ApiTestSupport {
     void validNicknameTest1() throws Exception {
         //given
         String notExistName = "절대 중복된 이름 아님";
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(notExistName);
 
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", notExistName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -202,15 +223,18 @@ class UserApiControllerTest extends ApiTestSupport {
     void validNicknameTest2() throws Exception {
         //given
         String existName = loginUser.getName();
-        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        loginUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000,
+            AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
 
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -223,13 +247,14 @@ class UserApiControllerTest extends ApiTestSupport {
 
         String existName = anotherUser.getName();
 
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
-
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 
@@ -240,16 +265,17 @@ class UserApiControllerTest extends ApiTestSupport {
         User anotherUser = UserFixture.getUserFixture("providerId", "testURL");
         String existName = anotherUser.getName();
         userRepository.save(anotherUser);
-        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), "2호선", "사당역", "testURL");
+        anotherUser.updateUser(existName, List.of(Category.CUSTOMIZABLE), Gender.MALE, 2000,
+            AgeGroup.TWENTY, "2호선", "사당역", "testURL");
         userRepository.save(loginUser);
 
-        ValidNicknameRequest validNicknameRequest = new ValidNicknameRequest(existName);
-
         //then
-        mockMvc.perform(post("/api/v1/users/valid")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("nickname", existName);
+        mockMvc.perform(get("/api/v1/users/valid")
                 .header(AUTHORIZATION, accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(validNicknameRequest)))
+                .params(params))
             .andExpect(jsonPath("$.isNotValid").value(true));
     }
 }

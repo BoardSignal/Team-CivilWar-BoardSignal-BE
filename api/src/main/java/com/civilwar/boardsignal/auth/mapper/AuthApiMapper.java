@@ -14,12 +14,8 @@ public final class AuthApiMapper {
     public static UserLoginRequest toUserLoginRequest(OAuthUserInfo oAuthUserInfo) {
         return new UserLoginRequest(
             oAuthUserInfo.email(),
-            oAuthUserInfo.name(),
             oAuthUserInfo.nickname(),
             oAuthUserInfo.imageUrl(),
-            oAuthUserInfo.birthYear(),
-            oAuthUserInfo.ageRange(),
-            oAuthUserInfo.gender(),
             oAuthUserInfo.provider(),
             oAuthUserInfo.providerId()
         );

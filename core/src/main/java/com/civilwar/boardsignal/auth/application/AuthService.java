@@ -33,14 +33,12 @@ public class AuthService {
             user = userRepository.save(
                 User.of(
                     userLoginRequest.email(),
-                    userLoginRequest.name(),
                     userLoginRequest.nickname(),
                     userLoginRequest.provider(),
                     userLoginRequest.providerId(),
                     userLoginRequest.imageUrl(),
-                    Integer.parseInt(userLoginRequest.birthYear()),
-                    AgeGroup.of(userLoginRequest.ageRange(), userLoginRequest.provider()),
-                    Gender.of(userLoginRequest.gender(), userLoginRequest.provider())
+                    Gender.UNKNOWN,
+                    AgeGroup.UNKNOWN
                 )
             );
         }

@@ -25,6 +25,8 @@ public class UserApiMapper {
             userId,
             apiUserModifyRequest.nickName(),
             userCategories,
+            apiUserModifyRequest.gender(),
+            apiUserModifyRequest.birth(),
             apiUserModifyRequest.line(),
             apiUserModifyRequest.station(),
             image

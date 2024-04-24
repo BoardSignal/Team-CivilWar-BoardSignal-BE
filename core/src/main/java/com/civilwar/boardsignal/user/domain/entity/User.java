@@ -100,11 +100,11 @@ public class User extends BaseEntity implements UserDetails {
     private User(
         @NonNull String email,
         @NonNull String name,
-        @NonNull String nickname,
+        String nickname,
         @NonNull String provider,
         @NonNull String providerId,
         @NonNull String profileImageUrl,
-        @NonNull int birth,
+        int birth,
         @NonNull AgeGroup ageGroup,
         @NonNull Gender gender
     ) {
@@ -121,6 +121,26 @@ public class User extends BaseEntity implements UserDetails {
         this.mannerScore = 36.5;
         this.isJoined = Boolean.FALSE;
         this.signal = 0;
+    }
+
+    public static User of(
+        String email,
+        String nickname,
+        String provider,
+        String providerId,
+        String profileImageUrl,
+        Gender gender,
+        AgeGroup ageGroup
+    ) {
+        return User.builder()
+            .email(email)
+            .name(nickname)
+            .provider(provider)
+            .providerId(providerId)
+            .profileImageUrl(profileImageUrl)
+            .gender(gender)
+            .ageGroup(ageGroup)
+            .build();
     }
 
     public static User of(
@@ -150,11 +170,17 @@ public class User extends BaseEntity implements UserDetails {
     public void updateUser(
         String nickname,
         List<Category> categories,
+        Gender gender,
+        int birth,
+        AgeGroup ageGroup,
         String line,
         String station,
         String profileImageUrl
     ) {
         this.nickname = nickname;
+        this.gender = gender;
+        this.birth = birth;
+        this.ageGroup = ageGroup;
         this.line = line;
         this.station = station;
         this.userCategories.clear();

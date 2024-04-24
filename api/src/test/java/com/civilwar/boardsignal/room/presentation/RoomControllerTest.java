@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.civilwar.boardsignal.auth.domain.TokenProvider;
 import com.civilwar.boardsignal.auth.domain.model.Token;
 import com.civilwar.boardsignal.boardgame.domain.constant.Category;
+import com.civilwar.boardsignal.chat.domain.constant.MessageType;
 import com.civilwar.boardsignal.chat.domain.entity.ChatMessage;
 import com.civilwar.boardsignal.chat.domain.repository.ChatMessageRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
@@ -255,6 +256,56 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.roomsInfos.[0].id").value(room5.getId()))
             .andExpect(jsonPath("$.roomsInfos.[1].id").value(room3.getId()))
             .andExpect(jsonPath("$.roomsInfos.[2].id").value(room2.getId()));
+    }
+
+    @Test
+    @DisplayName("사용자는 자신이 참여중인 채팅방을 조회할 때, 채팅방 별 읽지 않은 메시지 갯수와 마지막 메시지를 함께 반환한다.")
+    void getMyChattingRoomTest2() throws Exception {
+        //given
+        LocalDateTime now = LocalDateTime.of(2024, 2, 21, 20, 0, 0);
+        given(nowTime.get()).willReturn(now);
+
+        //읽지 않은 채팅이 없는 방
+        Room room1 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room1);
+        //읽지 않은 채팅이 있는 방
+        Room room2 = RoomFixture.getRoom(Gender.UNION);
+        roomRepository.save(room2);
+
+        //참가
+        Participant participant = Participant.of(loginUser.getId(), room1.getId(), true);
+        participant.updateLastExit(nowTime.get());
+        participantRepository.save(participant);
+        Participant participant2 = Participant.of(loginUser.getId(), room2.getId(), true);
+        participant2.updateLastExit(nowTime.get());
+        participantRepository.save(participant2);
+
+        //채팅 추가
+        //1번방 채팅 추가 x
+        //2번방 채팅 추가
+        for (int i = 0; i < 3; i++) {
+            ChatMessage chatMessage = ChatMessage.of(room2.getId(), 100L, "테스트 " + i,
+                MessageType.CHAT);
+            chatMessageRepository.save(chatMessage);
+        }
+
+        //then
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("page", "0");
+        params.add("size", "5");
+        mockMvc.perform(get("/api/v1/rooms/my/games")
+                .header(AUTHORIZATION, accessToken)
+                .params(params))
+            .andExpect(jsonPath("$.currentPageNumber").value(0))
+            .andExpect(jsonPath("$.size").value(5))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.roomsInfos.length()").value(2))
+            .andExpect(jsonPath("$.roomsInfos.[0].id").value(room2.getId()))
+            .andExpect(jsonPath("$.roomsInfos.[0].unreadChatCount").value(3))
+            .andExpect(jsonPath("$.roomsInfos.[0].lastChatMessage").value("테스트 2"))
+            .andExpect(jsonPath("$.roomsInfos.[1].id").value(room1.getId()))
+            .andExpect(jsonPath("$.roomsInfos.[1].unreadChatCount").value(0))
+            .andExpect(jsonPath("$.roomsInfos.[1].lastChatMessage").doesNotExist());
     }
 
     @Test
@@ -781,14 +832,12 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
             "testURL",
-            1998,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            Gender.MALE,
+            AgeGroup.TWENTY);
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -829,14 +878,13 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
             "testURL",
-            2020,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            Gender.MALE,
+            AgeGroup.THIRTY
+        );
         User savedUser = userRepository.save(user);
 
         Token token = tokenProvider.createToken(savedUser.getId(), Role.USER);
@@ -877,14 +925,13 @@ class RoomControllerTest extends ApiTestSupport {
         roomRepository.save(room);
 
         User user = User.of("email",
-            "name",
             "nickName",
             "provider",
             "providerId",
             "testURL",
-            1998,
-            AgeGroup.TWENTY,
-            Gender.MALE);
+            Gender.MALE,
+            AgeGroup.TWENTY
+        );
         User savedUser = userRepository.save(user);
 
         blackListRepository.save(RoomBlackList.of(room.getId(), savedUser.getId()));

@@ -5,6 +5,8 @@ import com.civilwar.boardsignal.boardgame.domain.repository.WishRepository;
 import com.civilwar.boardsignal.common.exception.NotFoundException;
 import com.civilwar.boardsignal.image.domain.ImageRepository;
 import com.civilwar.boardsignal.room.domain.repository.RoomRepository;
+import com.civilwar.boardsignal.user.domain.constants.AgeGroup;
+import com.civilwar.boardsignal.user.domain.constants.Gender;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.entity.UserCategory;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
@@ -50,6 +52,9 @@ public class UserService {
         findUser.updateUser(
             userModifyRequest.nickName(),
             userModifyRequest.categories(),
+            Gender.toGender(userModifyRequest.gender()),
+            userModifyRequest.birth(),
+            AgeGroup.convert(userModifyRequest.birth(), now.get()),
             userModifyRequest.line(),
             userModifyRequest.station(),
             profileImageUrl
