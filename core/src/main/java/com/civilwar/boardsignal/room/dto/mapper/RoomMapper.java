@@ -238,11 +238,10 @@ public final class RoomMapper {
             .map(ChatCountDto::uncheckedMessage)
             .orElse(0L);
 
-        String lastChatMessage = lastChatMessages
+        LastChatMessageDto lastChatMessage = lastChatMessages
             .stream()
             .filter(lastChatMessageDto -> lastChatMessageDto.roomId().equals(room.id()))
             .findFirst()
-            .map(LastChatMessageDto::content)
             .orElse(null);
 
         return new ChatRoomResponse(
