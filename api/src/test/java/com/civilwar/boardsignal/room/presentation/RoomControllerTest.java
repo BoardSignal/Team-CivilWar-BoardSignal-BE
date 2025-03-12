@@ -302,7 +302,7 @@ class RoomControllerTest extends ApiTestSupport {
             .andExpect(jsonPath("$.roomsInfos.length()").value(2))
             .andExpect(jsonPath("$.roomsInfos.[0].id").value(room2.getId()))
             .andExpect(jsonPath("$.roomsInfos.[0].unreadChatCount").value(3))
-            .andExpect(jsonPath("$.roomsInfos.[0].lastChatMessage").value("테스트 2"))
+            .andExpect(jsonPath("$.roomsInfos.[0].lastChatMessage.content").value("테스트 2"))
             .andExpect(jsonPath("$.roomsInfos.[1].id").value(room1.getId()))
             .andExpect(jsonPath("$.roomsInfos.[1].unreadChatCount").value(0))
             .andExpect(jsonPath("$.roomsInfos.[1].lastChatMessage").doesNotExist());

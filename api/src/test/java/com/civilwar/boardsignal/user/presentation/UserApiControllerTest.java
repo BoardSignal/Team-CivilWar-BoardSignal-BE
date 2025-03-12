@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,7 +27,6 @@ import com.civilwar.boardsignal.user.domain.constants.Role;
 import com.civilwar.boardsignal.user.domain.entity.User;
 import com.civilwar.boardsignal.user.domain.repository.UserRepository;
 import com.civilwar.boardsignal.user.dto.request.ApiUserModifyRequest;
-import com.civilwar.boardsignal.user.dto.request.ValidNicknameRequest;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;

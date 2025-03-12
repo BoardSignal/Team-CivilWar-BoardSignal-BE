@@ -42,7 +42,7 @@ public interface ChatMessageJpaRepository extends JpaRepository<ChatMessage, Lon
 
     //채팅방 별 마지막 메시지 조회
     @Query(
-        "select new com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto(c.roomId, c.content) "
+        "select new com.civilwar.boardsignal.chat.dto.response.LastChatMessageDto(c.roomId, c.content, c.messageType, c.createdAt) "
             + "from ChatMessage as c "
             + "where c.roomId in :roomIds "
             + "and c.createdAt in (select max(c.createdAt) from ChatMessage as c group by c.roomId) ")
